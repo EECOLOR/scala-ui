@@ -3,20 +3,13 @@ import ee.uiFramework.skins.Skin
 import ee.uiFramework.skins.Skinnable
 import ee.uiFramework.State
 import ee.uiFramework.skins.SkinElement
-import ee.uiFramework.Constraints
 import ee.uiFramework.shapes.Rect
 import ee.uiFramework.shapes.Color
+import ee.uiFramework.traits.Constraints
 
-class Button extends Skinnable[ButtonSkinContract] {
-	val defaultSkin = new ButtonSkin
-			
-}
+class Button extends Component with Skinnable[ButtonSkinContract] {
+	val skin:ButtonSkinContract = new ButtonSkin
 
-class LabelButton extends Button with Skinnable[LabelButtonSkinContract] {
-	val defaultSkin = new LabelButtonSkin
-	
-	def label = skin.label.text
-	def label_=(label:String) = skin.label.text = label
 }
 
 trait ButtonSkinContract extends Skin {
@@ -25,15 +18,23 @@ trait ButtonSkinContract extends Skin {
 	val down = state
 }
 
-trait LabelButtonSkinContract extends ButtonSkinContract {
-	val label = skinElement[Label]
-}
-
 class ButtonSkin(implicit theme:Theme) extends ButtonSkinContract {
 
     children(
     	theme.backgroundRect
     )
+}
+
+class LabelButton extends Button with Skinnable[LabelButtonSkinContract] {
+	override val skin:LabelButtonSkinContract = new LabelButtonSkin
+	
+	def label = skin.label.text
+	def label_=(label:String) = skin.label.text = label
+	
+}
+
+trait LabelButtonSkinContract extends ButtonSkinContract {
+	val label = skinElement[Label]
 }
 
 class LabelButtonSkin(implicit theme:Theme) extends LabelButtonSkinContract {

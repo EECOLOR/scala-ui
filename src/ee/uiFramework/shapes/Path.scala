@@ -1,5 +1,8 @@
 package ee.uiFramework.shapes
 
-class Path extends Shape {
-	val path:List[DrawCommands]
+abstract class Path extends Shape {
+    import ee.uiFramework.Environment.Graphics._
+    
+	val path:List[DrawCommand]
+    
 }

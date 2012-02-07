@@ -4,23 +4,25 @@ import ee.uiFramework.skins.Skin
 import ee.uiFramework.traits.DataList
 import scala.{List => ScalaList}
 
-class List[T] extends Skinnable[ListSkinContract[T]] with DataList[T] {
-	val defaultSkin = new ListSkin[T]
-	
+class List[T] extends Component with Skinnable[ListSkinContract[T]] {
+	val skin = new ListSkin[T]
+
 	def processDataList(dataList:ScalaList[T]) = 
-	    dataList.foreach(skin.itemRenderer andThen skin.container.addChild)
+    dataList.foreach(skin.itemRenderer andThen skin.container.addChild)
 }
 
 trait ListSkinContract[T] extends Skin {
-    val container:Container
+    val container = skinElement[Container]
     val itemRenderer:(T => Component)
 }
 
 class ListSkin[T] extends ListSkinContract[T] {
     
-    val container = new Container {
-        layout = VerticalLayout
-    }
+    children(
+    	container -> new Container {
+    		layout = VerticalLayout
+    	}
+    )
     
     val itemRenderer = { item: T => new ListItem[T](item) }
 
@@ -30,8 +32,8 @@ class ListSkin[T] extends ListSkinContract[T] {
 	}
 }
 
-class ListItem[T <% String](item:T) extends Skinnable[ListItemSkinContract] {
-	val defaultSkin = new ListItemSkin
+class ListItem[T <% String](item:T) extends Component with Skinnable[ListItemSkinContract] {
+	val skin = new ListItemSkin
 	
 	skin.text.text = item
 }

@@ -1,4 +1,4 @@
-package ee.uiFramework
+package ee.uiFramework.traits
 import ee.uiFramework.components.Component
 
 trait Constraints {self:Component =>

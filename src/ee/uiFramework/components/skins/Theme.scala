@@ -14,11 +14,13 @@ object DefaultTheme extends Theme {
     
 	val themeColor = Color(0xCCCCCC, .5)
 	
-    def backgroundRect = 
-        new Rect {
+    lazy val backgroundRect = {
+	    new Rect {
 			percentWidth = 100
 			percentHeight = 100
 			fillColor = themeColor
 			cornerRadius = 2
 		}
+	} 
+        
 }

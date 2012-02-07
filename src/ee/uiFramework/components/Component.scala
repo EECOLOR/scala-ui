@@ -10,5 +10,5 @@ trait Component {
 	var percentWidth:Long = 0
 	var percentHeight:Long = 0
 	
-	var visible:Boolean
+	var visible:Boolean = true
 }

@@ -7,15 +7,9 @@ import ee.uiFramework.shapes.Rect
 import ee.uiFramework.shapes.Color
 import ee.uiFramework.components.Theme
 
-trait Skinnable[+T <: Skin] extends Component {
-    val defaultSkin:T
+trait Skinnable[+T <: Skin] {
     
-    skin = defaultSkin
-    
-    private var _skin:T = _
-    
-    def skin:T = _skin
-    def skin_=(skin:T) = _skin = skin
+    val skin:T
     
     implicit def skinElementToContent[T <: Component](skinElement:SkinElement[T]):T =  
 		skinElement.content match {
@@ -26,7 +20,7 @@ Make sure you use the a syntax like this when assigning children: label -> new L
 An example:
 
 class SomeSkin implements SomeSkinContract {
-	val label = new SkinElement[Label](this)
+	val label = new SkinElement[Label]
 		    	        
 	children(
 		label -> new Label
