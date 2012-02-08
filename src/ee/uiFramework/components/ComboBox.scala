@@ -38,7 +38,7 @@ class ComboBoxSkin[T](implicit theme:Theme) extends ComboBoxSkinContract[T] {
 						        new Path {
 						            x = 5
 						            y = 5
-						            val path = List[DrawCommand]()
+						            val path = ""
 						        },
 						        label -> new Label
 						    )
