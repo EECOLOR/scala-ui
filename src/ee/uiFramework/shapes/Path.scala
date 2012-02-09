@@ -9,27 +9,49 @@ abstract class Path extends Shape {
 }
 
 object Path {
-    sealed abstract class Relative {
+    sealed abstract class Relative(x:Long, y:Long) {
+        
         type Positional = {val x:Long; val y:Long}
 
-        def toAbsolute[A <: DrawCommand](previous:A):DrawCommand
-    }
-    case class RelativeMoveTo(x:Long, y:Long) extends Relative {
-
+        val constructor:(Long, Long) => DrawCommand
+        
         def toAbsolute[A <: DrawCommand](previous:A) = {
-        	val p = previous.asInstanceOf[Positional]
-   			MoveTo(p.x + x, p.y + y)
+        		val p = previous.asInstanceOf[Positional]
+        		constructor(p.x + x, p.y + y)
         }
-            
+    }
+    case class RelativeMoveTo(x:Long, y:Long) extends Relative(x, y) {
+            val constructor = MoveTo
+    }
+    case class RelativeLineTo(x:Long, y:Long) extends Relative(x, y) {
+    	val constructor = LineTo
+    }
+    case class RelativeCurveTo(x:Long, y:Long, anchorX:Long, anchorY:Long) extends Relative(x, y) {
+    	val constructor = (x:Long, y:Long) => CurveTo(x, y, x - this.x + anchorX, y - this.y + anchorY)
     }
     
     object pathParsers extends JavaTokenParsers {
-        def path = rep(moveTo)
+        def path = rep(command)
         
-        def moveTo = ("m"|"M") ~ floatingPointNumber ~ floatingPointNumber ^^ {
-            case "m" ~ x ~ y => MoveTo(x.toLong, y.toLong)
-            case "M" ~ x ~ y => RelativeMoveTo(x.toLong, y.toLong)
+        def command = xyCommand | yxabCommand
+        
+        def xyCommands = m | mr | l | lr
+        def xyabCommands = c | cr
+        
+        def xyCommand = xyCommands ~ floatingPointNumber ~ floatingPointNumber ^^ {
+            case xyCommands ~ x ~ y => xyCommands(x.toLong, y.toLong)
         }
+
+        def yxabCommand = xyabCommands ~ floatingPointNumber ~ floatingPointNumber ~ floatingPointNumber ~ floatingPointNumber ^^ {
+        	case xyabCommands ~ x ~ y ~ a ~ b => xyabCommands(x.toLong, y.toLong, a.toLong, b.toLong)
+        }
+
+        def m = "M" ^^ {_ => MoveTo}
+        def mr = "m" ^^ {_ => RelativeMoveTo}
+        def l = "L" ^^ {_ => LineTo}
+        def lr = "l" ^^ {_ => RelativeLineTo}
+        def c = "C" ^^ {_ => CurveTo}
+        def cr = "c" ^^ {_ => RelativeCurveTo}
     }
 
     
