@@ -3,6 +3,7 @@ import ee.uiFramework.skins.Skinnable
 import ee.uiFramework.skins.Skin
 import ee.uiFramework.traits.DataList
 import scala.{List => ScalaList}
+import ee.uiFramework.layouts.VerticalLayout
 
 class List[T] extends Component with Skinnable[ListSkinContract[T]] {
 	val skin = new ListSkin[T]

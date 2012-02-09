@@ -1,4 +1,5 @@
-package ee.uiFramework
+package ee.uiFramework.skins
+
 import ee.scala.plugin.implicitMetadata.Metadata
 import scala.collection.mutable.ListBuffer
 

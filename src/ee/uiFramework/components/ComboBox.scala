@@ -1,19 +1,18 @@
 package ee.uiFramework.components
-import ee.uiFramework.skins.SkinElement
 import ee.uiFramework.skins.Skinnable
 import ee.uiFramework.skins.Skin
-import ee.uiFramework.State
 import ee.uiFramework.shapes.Rect
 import ee.uiFramework.shapes.Color
 import ee.uiFramework.shapes.Path
+import ee.uiFramework.layouts.VerticalLayout
 
 class ComboBox[T] extends Component with Skinnable[ComboBoxSkinContract[T]] {
     val skin = new ComboBoxSkin[T]
 }
 
 trait ComboBoxSkinContract[T] extends Skin {
-    val open:State = state()
-    val closed:State = state()
+    val open = state()
+    val closed = state()
     
     val text = skinElement[Text]
     val button = skinElement[Button]
@@ -30,20 +29,8 @@ class ComboBoxSkin[T](implicit theme:Theme) extends ComboBoxSkinContract[T] {
               layout = HorizontalLayout
               children(
             		text -> new Text,
-            		button -> new LabelButton {
-            		    override val skin = new LabelButtonSkinContract {
-						    children(
-						        theme.backgroundRect,
-						        //triangle
-						        new Path {
-						            x = 5
-						            y = 5
-						            val path = ""
-						        },
-						        label -> new Label
-						    )
-            		        
-            		    }
+            		button -> new Button {
+            		    override val skin = theme.buttonDownSkin 
             		}
               )
             },

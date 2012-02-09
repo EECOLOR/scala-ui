@@ -1,6 +1,7 @@
 package ee.uiFramework.components
 import ee.uiFramework.layouts.Layout
 import ee.uiFramework.layouts.NoLayout
+import ee.uiFramework.layouts.SimpleLayout
 
 trait Container extends Component {
     var layout:Layout = NoLayout

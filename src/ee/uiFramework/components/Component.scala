@@ -7,8 +7,5 @@ trait Component {
 	var width:Long = 0
 	var height:Long = 0
 	
-	var percentWidth:Long = 0
-	var percentHeight:Long = 0
-	
 	var visible:Boolean = true
 }

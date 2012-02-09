@@ -33,4 +33,6 @@ object Color {
 	implicit def longToColor(color:Int) = new Color(color)
 }
 
-object NoColor extends Color(0x00000000) {}
+object NoColor extends Color(0, 0) {}
+object Black extends Color(0) {}
+object White extends Color(0xFFFFFF) {}

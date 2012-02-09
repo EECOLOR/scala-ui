@@ -1,4 +1,4 @@
-package ee.uiFramework.traits
+package ee.uiFramework.layouts
 import ee.uiFramework.components.Component
 
 trait LayoutClient {self:Component =>

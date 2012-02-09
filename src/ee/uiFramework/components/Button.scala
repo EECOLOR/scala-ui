@@ -1,11 +1,9 @@
 package ee.uiFramework.components
 import ee.uiFramework.skins.Skin
 import ee.uiFramework.skins.Skinnable
-import ee.uiFramework.State
-import ee.uiFramework.skins.SkinElement
 import ee.uiFramework.shapes.Rect
 import ee.uiFramework.shapes.Color
-import ee.uiFramework.traits.Constraints
+import ee.uiFramework.layouts.LayoutClient
 
 class Button extends Component with Skinnable[ButtonSkinContract] {
 	val skin:ButtonSkinContract = new ButtonSkin
@@ -42,7 +40,7 @@ class LabelButtonSkin(implicit theme:Theme) extends LabelButtonSkinContract {
 	children (
 		theme.backgroundRect,
 				
-		label -> new Label with Constraints {
+		label -> new Label with LayoutClient {
 			left::up > 2
 			top::up > 2
 					
