@@ -1,17 +1,24 @@
 package ee.ui.application
 
+import ee.ui.impl.Managers
+import ee.ui.impl.NativeManager
+import ee.ui.impl.NativeImplementation
+
 trait Dependencies {
     def launcher:Launcher
     def application:Application
-    def stage:Boolean => Stage
+    
+    def windowManager:NativeManager[Window, _ <: NativeImplementation] 
+	def stageManager:NativeManager[Stage, _ <: NativeImplementation] 
 }
 
 trait ImplicitDependencies {
     import ImplicitDependencies.di
     
-    implicit val stage:Boolean => Stage = di.stage
-    implicit val application:() => Application = () => di.application
-    implicit val launcher:Launcher = di.launcher
+    implicit def windowManager:NativeManager[Window, _ <: NativeImplementation] = di.windowManager 
+	implicit def stageManager:NativeManager[Stage, _ <: NativeImplementation] = di.stageManager
+    implicit val implicitApplication:() => Application = () => di.application
+    implicit val implicitLauncher:Launcher = di.launcher
 }
 
 object ImplicitDependencies {

@@ -5,3 +5,4 @@ import scala.collection.mutable.ArrayBuffer
 
 class ObservableArrayBuffer[T] extends ObservableCollectionProperty[T, ObservableBuffer[T]](
         default = new ArrayBuffer[T]() with ObservableBuffer[T] )
+        

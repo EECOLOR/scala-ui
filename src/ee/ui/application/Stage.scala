@@ -1,30 +1,33 @@
 package ee.ui.application
 
-import ee.ui.properties.ObservableArrayBuffer
 import ee.ui.primitives.Image
-import ee.ui.properties.Property
+import ee.ui.properties.ReadOnlyProperty.propertyToValue
 import ee.ui.properties.ObservableArrayBuffer
+import ee.ui.properties.Property
+import ee.ui.impl.NativeElement
+import ee.ui.impl.NativeElement
+import ee.ui.impl.NativeManager
 
-trait Stage extends Window {
-    def primary: Boolean
-    def defaultStyle: StageStyle
-
-    def show(): Unit = writableShowing set true
-
+class Stage(val primary: Boolean,val defaultStyle: StageStyle = StageStyle.DECORATED) extends Window with NativeElement[Stage] {
+    
+    override def nativeElement = createNativeElement
+    
     private var hasBeenVisible: Boolean = false
-
-    override def showWindow = {
-        super.showWindow
-        hasBeenVisible = true
+    
+    def show(): Unit = {
+        writableShowing set true
+        if (!hasBeenVisible) {
+            hasBeenVisible = true
+            Stage.stages += this
+        }
     }
 
     /*
 	 * OWNER
 	 */
-    type WindowType <: Window
 
-    val owner = new Property[Option[WindowType]](None)
-    def owner_=(value: WindowType) = owner.value = Some(value)
+    val owner = new Property[Option[Window]](None)
+    def owner_=(value: Window) = owner.value = Some(value)
     owner forNewValue { n =>
         if (hasBeenVisible) throw new IllegalStateException("Cannot set owner once stage has been set visible")
         if (primary) throw new IllegalStateException("Cannot set owner for the primary stage")
@@ -88,14 +91,14 @@ trait Stage extends Window {
     maxWidth forNewValue { n =>
         if (n < width) width = n
     }
-    
+
     val _maxHeight = new Property(Double.MaxValue)
     def maxHeight = _maxHeight
     def maxHeight_=(value: Double) = maxHeight.value = value
     maxHeight forNewValue { n =>
         if (n < height) height = n
     }
-    
+
     val icons = new ObservableArrayBuffer[Image]
 }
 

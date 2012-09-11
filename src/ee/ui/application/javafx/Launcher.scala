@@ -57,7 +57,7 @@ object Launcher extends ee.ui.application.Launcher with ImplicitDependencies {
 	}
     
     private def launchApplication(args:Array[String])
-    	(implicit createApplication:() => Application, createStage: Boolean => ee.ui.application.Stage) = {
+    	(implicit createApplication:() => Application) = {
         
         val startupLatch = new CountDownLatch(1)
         
@@ -144,7 +144,7 @@ object Launcher extends ee.ui.application.Launcher with ImplicitDependencies {
                             isStartCalled set true
 
                             // Create primary stage and call application start method
-                            val primaryStage = createStage(true)
+                            val primaryStage = new ee.ui.application.Stage(true)
                             theApp start primaryStage
                         } catch {
                     case ct:ControlThrowable => throw ct

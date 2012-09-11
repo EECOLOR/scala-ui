@@ -2,8 +2,16 @@ package ee.ui.application
 
 import ee.ui.properties.Property
 import ee.ui.properties.ReadOnlyProperty
+import ee.ui.impl.NativeElement
+import ee.ui.impl.NativeManager
+import ee.ui.impl.Managers
+import ee.ui.impl.NativeImplementation
+import ee.ui.impl.NativeManager
 
-trait Window {
+class Window extends NativeElement[Window] {
+    
+    def nativeElement = createNativeElement
+    
 	protected val writableShowing = new Property(false)
 	lazy val showing:ReadOnlyProperty[Boolean] = writableShowing
 	
