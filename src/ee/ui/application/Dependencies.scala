@@ -1,8 +1,9 @@
 package ee.ui.application
 
-import ee.ui.impl.Managers
-import ee.ui.impl.NativeManager
-import ee.ui.impl.NativeImplementation
+import ee.ui.nativeElements.Window
+import ee.ui.nativeElements.Stage
+import ee.ui.nativeImplementation.NativeManager
+import ee.ui.nativeImplementation.NativeImplementation
 
 trait Dependencies {
     def launcher:Launcher
@@ -12,22 +13,3 @@ trait Dependencies {
 	def stageManager:NativeManager[Stage, _ <: NativeImplementation] 
 }
 
-trait ImplicitDependencies {
-    import ImplicitDependencies.di
-    
-    implicit def windowManager:NativeManager[Window, _ <: NativeImplementation] = di.windowManager 
-	implicit def stageManager:NativeManager[Stage, _ <: NativeImplementation] = di.stageManager
-    implicit val implicitApplication:() => Application = () => di.application
-    implicit val implicitLauncher:Launcher = di.launcher
-}
-
-object ImplicitDependencies {
-    var _di:Option[Dependencies] = None
-    
-	def set(di:Dependencies) =  _di = Some(di)
-	
-	def di:Dependencies = _di getOrElse {
-        throw new Exception("Please call DependencyInjection.initialize before accessing properties")
-    }
-    
-}

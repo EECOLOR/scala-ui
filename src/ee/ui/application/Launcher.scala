@@ -1,5 +1,5 @@
 package ee.ui.application
 
-trait Launcher extends ImplicitDependencies {
+trait Launcher extends ImplicitApplicationDependencies {
 	def launch(args:Array[String]):Unit
 }

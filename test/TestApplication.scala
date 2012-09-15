@@ -1,8 +1,7 @@
 import ee.ui.application.Application
 import ee.ui.application.ImplicitDependencies
-import ee.ui.application.javafx.JavaFxDependencies
-import ee.ui.application.Stage
-import ee.ui.application.javafx.JavaFxApplicationLauncher
+import ee.ui.dummy.application.DummyApplicationLauncher
+import ee.ui.nativeElements.Stage
 
 class TestApplication extends Application {
     def start(stage:Stage) = {
@@ -10,6 +9,6 @@ class TestApplication extends Application {
     }
 }
 
-object TestApplication extends JavaFxApplicationLauncher {
+object TestApplication extends DummyApplicationLauncher {
 	def createApplication = new TestApplication
 }
