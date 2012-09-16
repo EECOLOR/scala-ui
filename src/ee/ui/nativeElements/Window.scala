@@ -2,27 +2,22 @@ package ee.ui.nativeElements
 
 import ee.ui.properties.Property
 import ee.ui.properties.ReadOnlyProperty
+import ee.ui.traits.Size
+import ee.ui.traits.Position
+import ee.ui.traits.Focus
 
-class Window extends NativeElement[Window] {
+class Window extends NativeElement[Window] with Position with Size with Focus {
     
     def nativeElement = createNativeElement
     
 	protected val writableShowing = new Property(false)
 	lazy val showing:ReadOnlyProperty[Boolean] = writableShowing
 	
-	writableShowing onChangeMatch {
-        case (false, true, p) => showWindow
-        case (true, false, p) => hideWindow
-    }
-
-    protected def showWindow() = {}
-    protected def hideWindow() = {}	
+	private val _opacity = new Property(1.0)
+    def opacity = _opacity
+    def opacity_=(value:Double) = opacity.value = value
     
-    val _width = new Property(Double.NaN)
-    def width = _width
-    def width_=(value:Double) = width.value = value
-    
-    val _height = new Property(Double.NaN)
-    def height = _height
-    def height_=(value:Double) = height.value = value
+    private val _scene = new Property[Option[Scene]](None)
+    def scene = _scene
+    def scene_=(value:Scene) = scene.value = Some(value)
 }

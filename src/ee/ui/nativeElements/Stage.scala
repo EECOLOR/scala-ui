@@ -76,7 +76,8 @@ class Stage(val primary: Boolean,val defaultStyle: StageStyle = StageStyle.DECOR
 	 * OWNER
 	 */
 
-    val owner = new Property[Option[Window]](None)
+    val _owner = new Property[Option[Window]](None)
+    def owner = _owner
     def owner_=(value: Window) = owner.value = Some(value)
     owner forNewValue { n =>
         if (hasBeenVisible) throw new IllegalStateException("Cannot set owner once stage has been set visible")
