@@ -5,6 +5,7 @@ import ee.ui.properties.ReadOnlyProperty
 import ee.ui.traits.Size
 import ee.ui.traits.Position
 import ee.ui.traits.Focus
+import ee.ui.nativeImplementation.NativeImplementation
 
 class Window extends NativeElement[Window] with Position with Size with Focus {
     

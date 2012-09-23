@@ -5,11 +5,15 @@ import ee.ui.nativeImplementation.NativeManager
 import ee.ui.nativeElements.Window
 import ee.ui.nativeElements.Stage
 import ee.ui.nativeElements.Scene
+import ee.ui.Node
+import ee.ui.Group
 
 trait DummyNativeManagerDependencies extends NativeManagerDependencies {
   implicit def windowManager = DummyWindowManager
   implicit def stageManager = DummyStageManager
   implicit def sceneManager = DummySceneManager
+  implicit def nodeManager = DummyNodeManager
+  implicit def groupManager = DummyGroupManager
 }
 
 object DummyNativeManagerDependencies extends DummyNativeManagerDependencies
@@ -24,4 +28,12 @@ object DummyStageManager extends NativeManager[Stage, DummyStage] {
 
 object DummySceneManager extends NativeManager[Scene, DummyScene] {
 	protected def createInstance(element: Scene) = new DummyScene(element)
+}
+
+object DummyNodeManager extends NativeManager[Node, DummyNode] {
+	protected def createInstance(element: Node) = new DummyNode(element)
+}
+
+object DummyGroupManager extends NativeManager[Group, DummyGroup] {
+	protected def createInstance(element: Group) = new DummyGroup(element)
 }
