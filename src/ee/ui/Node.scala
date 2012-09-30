@@ -1,4 +1,4 @@
 package ee.ui
 
-class Node {
+abstract class Node {
 }

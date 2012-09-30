@@ -1,16 +1,37 @@
 package ee.ui
 
-import scala.collection.mutable.Subscriber
-import scala.collection.script.Message
-import scala.collection.mutable.ObservableBuffer
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.Undoable
+import ee.ui.properties.ObservableArrayBuffer
+import scala.collection.mutable.ListBuffer
 import ee.ui.nativeElements.NativeElement
+import ee.ui.properties.Change
+import ee.ui.properties.Add
+import ee.ui.properties.Clear
+import ee.ui.properties.Remove
 
 class Group extends Node with NativeElement[Group] {
-  
-	override def nativeElement = createNativeElement
-	
-	val children:ObservableBuffer[Node] = new ArrayBuffer[Node] with ObservableBuffer[Node]
+
+  override def nativeElement = createNativeElement
+
+  val children: Children = new Children
+
+  class Children extends ObservableArrayBuffer[Node] {
+
+    val removed = ListBuffer[Change[Node]]()
+    val added = ListBuffer[Change[Node]]()
+
+    def reset = {
+      removed.clear
+      added.clear
+    }
+
+    onChangedIn {
+      case x: Add[_] => added += x
+      case x: Remove[_] => removed += x
+      case x: Clear[_] => removed ++= view.zipWithIndex.map {
+        case (elem, index) => Remove(index, elem)
+      }
+    }
+  }
+
 }
 
