@@ -12,7 +12,6 @@ trait NativeManagerDependencies {
   def windowManager: NativeManager[Window, _ <: NativeImplementation]
   def stageManager: NativeManager[Stage, _ <: NativeImplementation]
   def sceneManager: NativeManager[Scene, _ <: NativeImplementation]
-  def nodeManager: NativeManager[Node, _ <: NativeImplementation]
   def groupManager: NativeManager[Group, _ <: NativeImplementation]
 }
 
@@ -22,7 +21,6 @@ trait ImplicitNativeManagerDependencies {
   implicit def implicitWindowManager = di.windowManager
   implicit def implicitStageManager = di.stageManager
   implicit def implicitSceneManager = di.sceneManager
-  implicit def implicitNodeManager = di.nodeManager
   implicit def implicitGroupManager = di.groupManager
 
 }

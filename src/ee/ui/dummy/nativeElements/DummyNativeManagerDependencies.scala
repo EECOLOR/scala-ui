@@ -12,7 +12,6 @@ trait DummyNativeManagerDependencies extends NativeManagerDependencies {
   implicit def windowManager = DummyWindowManager
   implicit def stageManager = DummyStageManager
   implicit def sceneManager = DummySceneManager
-  implicit def nodeManager = DummyNodeManager
   implicit def groupManager = DummyGroupManager
 }
 
@@ -28,10 +27,6 @@ object DummyStageManager extends NativeManager[Stage, DummyStage] {
 
 object DummySceneManager extends NativeManager[Scene, DummyScene] {
 	protected def createInstance(element: Scene) = new DummyScene(element)
-}
-
-object DummyNodeManager extends NativeManager[Node, DummyNode] {
-	protected def createInstance(element: Node) = new DummyNode(element)
 }
 
 object DummyGroupManager extends NativeManager[Group, DummyGroup] {

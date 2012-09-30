@@ -14,6 +14,7 @@ trait Observable[T] {
     listeners foreach { _(information) }
 
   protected def handle(handler: Handler): Unit = handler +: handlers
+  protected def handle(handler: => Boolean): Unit = handle(information => handler)
   protected def handleIn(handler: PartialFunction[T, Boolean]): Unit =
     handle { i =>
       if (handler isDefinedAt i) handler(i)
@@ -21,17 +22,20 @@ trait Observable[T] {
     }
 
   protected def listen(listener: Listener): Unit = listener +: listeners
+  protected def listen(listener: => Unit): Unit = listen(information => listener)
+
   protected def listenIn(listener: PartialFunction[T, Unit]): Unit =
     listen { i =>
       if (listener isDefinedAt i) listener(i)
     }
 
-  def notify(information: T, apply: => Unit):Unit = {
+  def notify(information: T, apply: => Unit): Unit = {
     if (notifyHandlers(information)) {
       apply
       notifyListeners(information)
     }
   }
-  
-  def notify(information: T):Unit = notify(information, {})
+
+  def notify(information: T): Unit = notify(information, {})
+
 }

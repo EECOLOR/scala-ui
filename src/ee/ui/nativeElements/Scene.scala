@@ -7,6 +7,7 @@ import ee.ui.primitives.Color
 import ee.ui.primitives.Camera
 import ee.ui.events.Event
 import ee.ui.events.MouseEvent
+import ee.ui.events.NullEvent
 
 class Scene(defaultDepthBuffer:Boolean = false) extends NativeElement[Scene] {
 	
@@ -27,4 +28,6 @@ class Scene(defaultDepthBuffer:Boolean = false) extends NativeElement[Scene] {
   def camera_=(value:Camera) = camera.value = Some(value)
   
   val onMouseClicked = new Event[MouseEvent]
+  val pulse = new NullEvent
+  
 }
