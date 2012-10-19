@@ -7,7 +7,6 @@ trait Bindable[T] extends WritableProperty[T] {
   def ==>(property: Bindable[T]): Unit = property bindTo this
   def <== = bindTo _
 
-  def bind2(binding:Binding[T]) = binding bind {n => value = n}
 }
 
 class Binding[T](property: ReadOnlyProperty[T]) {

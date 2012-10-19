@@ -1,13 +1,12 @@
 package ee.ui.application
 
-import ee.ui.nativeImplementation.NativeManagerDependencies
 import ee.ui.nativeImplementation.NativeManager
 
 trait ApplicationDependencies {
     def launcher:Launcher
     def application:() => Application
     
-    def nativeManagers:NativeManagerDependencies
+    def nativeManager:NativeManager
 }
 
 trait ImplicitApplicationDependencies {
@@ -17,11 +16,4 @@ trait ImplicitApplicationDependencies {
     implicit val implicitLauncher:Launcher = di.launcher
 }
 
-object ApplicationDependencies extends ImplicitDependencies[ApplicationDependencies] {
-  
-  override def set(di:ApplicationDependencies) = {
-	  super.set(di)
-	  NativeManagerDependencies set di.nativeManagers
-  }
-  
-}
+object ApplicationDependencies extends ImplicitDependencies[ApplicationDependencies]

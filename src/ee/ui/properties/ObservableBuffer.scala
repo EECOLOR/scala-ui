@@ -4,9 +4,9 @@ import scala.collection.mutable.Buffer
 import ee.ui.Observable
 
 sealed trait Change[A]
-case class Add[A](index: Int, elem: A) extends Change[A]
-case class Remove[A](index: Int, elem: A) extends Change[A]
-case class Clear[A] extends Change[A]
+case class Add[A](index: Int, element: A) extends Change[A]
+case class Remove[A](index: Int, element: A) extends Change[A]
+case class Clear[A](elements:Buffer[A]) extends Change[A]
 
 trait ObservableBuffer[A] extends Buffer[A] with Observable[Change[A]] {
 
@@ -46,8 +46,9 @@ trait ObservableBuffer[A] extends Buffer[A] with Observable[Change[A]] {
   }
 
   abstract override def clear(): Unit = {
+    val elements = clone
     super.clear
-    notify(Clear())
+    notify(Clear(elements))
   }
 
   abstract override def insertAll(n: Int, elems: collection.Traversable[A]) {

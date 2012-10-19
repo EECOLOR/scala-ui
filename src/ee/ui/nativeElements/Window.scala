@@ -5,11 +5,8 @@ import ee.ui.properties.ReadOnlyProperty
 import ee.ui.traits.Size
 import ee.ui.traits.Position
 import ee.ui.traits.Focus
-import ee.ui.nativeImplementation.NativeImplementation
 
-class Window extends NativeElement[Window] with Position with Size with Focus {
-    
-    def nativeElement = createNativeElement
+abstract class Window extends Position with Size with Focus {
     
 	protected val writableShowing = new Property(false)
 	lazy val showing:ReadOnlyProperty[Boolean] = writableShowing

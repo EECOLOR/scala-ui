@@ -58,20 +58,17 @@ object StageStyle {
 
 }
 
-class Stage(val primary: Boolean,val defaultStyle: StageStyle = StageStyle.DECORATED) extends Window with NativeElement[Stage] {
-    
-    override def nativeElement = createNativeElement
+class Stage(val primary: Boolean,val defaultStyle: StageStyle = StageStyle.DECORATED) extends Window {
     
     private var hasBeenVisible: Boolean = false
     
     def show(): Unit = {
         writableShowing set true
-        if (!hasBeenVisible) {
-            hasBeenVisible = true
-            Stage.stages += this
-        }
+        if (!hasBeenVisible) hasBeenVisible = true
     }
 
+    def hide():Unit = writableShowing set false
+    
     /*
 	 * OWNER
 	 */

@@ -9,10 +9,8 @@ import ee.ui.events.Event
 import ee.ui.events.MouseEvent
 import ee.ui.events.NullEvent
 
-class Scene(defaultDepthBuffer:Boolean = false) extends NativeElement[Scene] {
+class Scene(defaultDepthBuffer:Boolean = false) {
 	
-  def nativeElement = createNativeElement
-  
   lazy val depthBuffer:ReadOnlyProperty[Boolean] = new Property(defaultDepthBuffer)
   
   private val _root = new Property[Option[Group]](None)
