@@ -58,16 +58,17 @@ object StageStyle {
 
 }
 
-class Stage(val primary: Boolean,val defaultStyle: StageStyle = StageStyle.DECORATED) extends Window {
+class Stage(val primary: Boolean = false,val defaultStyle: StageStyle = StageStyle.DECORATED) extends Window {
     
     private var hasBeenVisible: Boolean = false
     
     def show(): Unit = {
         writableShowing set true
-        if (!hasBeenVisible) hasBeenVisible = true
+        hasBeenVisible = true
     }
 
-    def hide():Unit = writableShowing set false
+    def hide():Unit =
+      writableShowing set false
     
     /*
 	 * OWNER
@@ -148,8 +149,4 @@ class Stage(val primary: Boolean,val defaultStyle: StageStyle = StageStyle.DECOR
     }
 
     val icons = new ObservableArrayBuffer[Image]
-}
-
-object Stage {
-    val stages = new ObservableArrayBuffer[Stage]
 }

@@ -6,7 +6,5 @@ import scala.collection.mutable.Undoable
 import scala.collection.script.Message
 
 trait Layout extends Stylable { self:Group =>
-	children onChanged {
-	  
-	}
+	def updateLayout
 }
