@@ -6,16 +6,21 @@ import ee.ui.traits.Size
 import ee.ui.traits.Position
 import ee.ui.traits.Focus
 import scala.collection.mutable.ListBuffer
+import ee.ui.application.ImplicitApplicationDependencies
+import ee.ui.nativeImplementation.NativeManager
+import ee.ui.traits.OnCreate
 
-abstract class Window extends Position with Size with Focus {
+abstract class Window extends OnCreate with ImplicitApplicationDependencies with Position with Size with Focus {
 
+  def onCreate = implicitly[NativeManager] windowCreated this
+  
   protected val writableShowing = new Property(false)
   lazy val showing: ReadOnlyProperty[Boolean] = writableShowing
 
   showing forNewValue { show =>
-    if (show)
+    if (show) {
       Window.windows += this
-    else
+    } else
       Window.windows -= this
   }
 

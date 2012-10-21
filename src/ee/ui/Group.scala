@@ -13,8 +13,11 @@ class Group extends Node {
 
   class Children extends ObservableArrayBuffer[Node] {
 
-    val removed = ListBuffer[Change[Node]]()
-    val added = ListBuffer[Change[Node]]()
+    def apply(nodes:Node *):Unit = 
+      this ++= nodes
+    
+    val removed = ListBuffer[Remove[Node]]()
+    val added = ListBuffer[Add[Node]]()
 
     def reset = {
       removed.clear

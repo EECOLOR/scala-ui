@@ -15,15 +15,15 @@ class PulseHandler extends ImplicitApplicationDependencies {
   def pulse = Window.windows foreach notify _
 
   def notify(window: Window): Unit = {
-    window match {
-      case stage:Stage => nativeManager update stage
-    }
+    println("PulseHandler.notify window")
+    
+    nativeManager updateImplementationOf window
 
     window.scene foreach notify _
   }
 
   def notify(scene: Scene): Unit = {
-    nativeManager update scene
+    nativeManager updateImplementationOf scene
 
     scene.root foreach { group =>
       layout(group)
@@ -46,12 +46,13 @@ class PulseHandler extends ImplicitApplicationDependencies {
   }
   
   def notify(node: Node): Unit = {
+    nativeManager updateImplementationOf node
+    
     node match {
       case group: Group => {
-        nativeManager update group
         group.children foreach notify _
       }
-      case _ => //does not need to be notified
+      case _ => //we only need to recurse for groups
     }
   }
 }

@@ -12,11 +12,15 @@ trait Application {
 object Application extends ImplicitApplicationDependencies {
     
     def launch(args:Array[String])(implicit launcher:Launcher):Unit = {
+    	launcher launchComplete {
+    		println("launchComplete")
+    	}
     	launcher launchComplete createPulseHandler _
     	launcher launch args
     }
     
     def createPulseHandler(application:Application)(implicit pulseEvent:PulseEvent) = {
+      println("Application.createPulseHandler")
       val pulseHandler = new PulseHandler
       pulseEvent(pulseHandler.pulse)
     }
