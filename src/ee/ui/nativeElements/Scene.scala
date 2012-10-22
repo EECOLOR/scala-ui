@@ -27,6 +27,7 @@ class Scene(defaultDepthBuffer:Boolean = false) extends Fill {
   def camera_=(value:Option[Camera]) = camera.value = value
   
   val onMouseClicked = new Event[MouseEvent]
+  val onMouseMoved = new Event[MouseEvent]
   val pulse = new NullEvent
   
 }

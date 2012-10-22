@@ -19,7 +19,7 @@ class Text extends Shape with Position {
   def boundsType = _boundsType
   def boundsType_=(value: TextBoundsType) = _boundsType.value = value
 
-  private val _textOrigin = new Property[VerticalPosition](VerticalPosition.BASELINE)
+  private val _textOrigin = new Property[VerticalPosition](VerticalPosition.TOP)
   def textOrigin = _textOrigin
   def textOrigin_=(value: VerticalPosition) = _textOrigin.value = value
 

@@ -25,26 +25,9 @@ class PulseHandler(application:Application) extends ImplicitNativeManager {
   def notify(scene: Scene): Unit = {
     nativeManager updateImplementationOf scene
 
-    scene.root foreach { group =>
-      layout(group)
-      notify(group)
-    }
+    scene.root foreach notify _
   }
 
-  def layout(group:Group):Unit = {
-    group.children foreach { 
-      case group:Group => layout(group)
-      case _ => //no need to do layout for a non group
-    }
-    
-    group match {
-      case layout:Layout => {
-        layout.updateLayout
-      }
-      case _ => //group does not have a layout
-    }
-  }
-  
   def notify(node: Node): Unit = {
     nativeManager updateImplementationOf node
     

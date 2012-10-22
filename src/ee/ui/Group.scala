@@ -13,9 +13,9 @@ class Group extends Node {
 
   class Children extends ObservableArrayBuffer[Node] {
 
-    def apply(nodes:Node *):Unit = 
+    def apply(nodes: Node*): Unit =
       this ++= nodes
-    
+
     val removed = ListBuffer[Remove[Node]]()
     val added = ListBuffer[Add[Node]]()
 
@@ -25,8 +25,20 @@ class Group extends Node {
     }
 
     onChangedIn {
-      case x: Add[_] => added += x
-      case x: Remove[_] => removed += x
+      case x @ Add(index, element) => {
+        //remove the node from the parent
+        element.parent foreach (_.children -= element)
+        //set the parent to this group
+        Node setParent (element, Some(Group.this))
+        //remember it was added
+        added += x
+      }
+      case x @ Remove(index, element) => {
+        //on removal set the parent to None
+        Node setParent (element, None)
+        //remember it was removed
+        removed += x
+      }
       case Clear(elements) => removed ++= elements.view.zipWithIndex.map {
         case (elem, index) => Remove(index, elem)
       }
