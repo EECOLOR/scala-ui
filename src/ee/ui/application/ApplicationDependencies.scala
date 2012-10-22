@@ -6,18 +6,22 @@ import ee.ui.events.PulseEvent
 
 trait ApplicationDependencies {
     def launcher:Launcher
-    def application:() => Application
+    def applicationConstructor:() => Application
     def nativeManager:NativeManager
     def pulseEvent:PulseEvent
 }
 
-trait ImplicitApplicationDependencies {
-    import ApplicationDependencies.di
-    
-    implicit def implicitApplication:() => Application = di.application
-    implicit def implicitLauncher:Launcher = di.launcher
-    implicit def implicitNativeManager:NativeManager = di.nativeManager
-    implicit def implicitPulseEvent:PulseEvent = di.pulseEvent
-}
+object ApplicationDependencies extends Dependencies[ApplicationDependencies]
 
-object ApplicationDependencies extends ImplicitDependencies[ApplicationDependencies]
+trait ImplicitLauncher {
+	implicit def implicitLauncher:Launcher = ApplicationDependencies.di.launcher
+}
+trait ImplicitApplicationConstructor {
+	implicit def implicitApplication:() => Application = ApplicationDependencies.di.applicationConstructor
+}
+trait ImplicitNativeManager {
+	implicit def implicitNativeManager:NativeManager = ApplicationDependencies.di.nativeManager
+}
+trait ImplicitPulseEvent {
+	implicit def implicitPulseEvent:PulseEvent = ApplicationDependencies.di.pulseEvent
+}

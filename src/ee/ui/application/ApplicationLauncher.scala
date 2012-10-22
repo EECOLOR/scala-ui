@@ -1,6 +1,6 @@
 package ee.ui.application
 
-trait ApplicationLauncher extends ImplicitApplicationDependencies {
+trait ApplicationLauncher extends ImplicitLauncher  {
     
     def createApplication:Application
     def applicationDependencies:ApplicationDependencies

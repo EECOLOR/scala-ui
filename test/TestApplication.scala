@@ -1,5 +1,4 @@
 import ee.ui.application.Application
-import ee.ui.application.ImplicitDependencies
 import ee.ui.dummy.application.DummyApplicationLauncher
 import ee.ui.nativeElements.Stage
 

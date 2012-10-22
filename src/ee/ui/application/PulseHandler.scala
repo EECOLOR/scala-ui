@@ -8,11 +8,11 @@ import ee.ui.Group
 import ee.ui.Layout
 import ee.ui.nativeElements.Window
 
-class PulseHandler extends ImplicitApplicationDependencies {
+class PulseHandler(application:Application) extends ImplicitNativeManager {
 
   def nativeManager(implicit nativeManager: NativeManager) = nativeManager
 
-  def pulse = Window.windows foreach notify _
+  def pulse = application.windows foreach notify _
 
   def notify(window: Window): Unit = {
     println("PulseHandler.notify window")

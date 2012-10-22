@@ -6,23 +6,16 @@ import ee.ui.traits.Size
 import ee.ui.traits.Position
 import ee.ui.traits.Focus
 import scala.collection.mutable.ListBuffer
-import ee.ui.application.ImplicitApplicationDependencies
 import ee.ui.nativeImplementation.NativeManager
 import ee.ui.traits.OnCreate
+import ee.ui.application.ImplicitNativeManager
+import ee.ui.events.NullEvent
+import ee.ui.application.ImplicitNativeManager
 
-abstract class Window extends OnCreate with ImplicitApplicationDependencies with Position with Size with Focus {
+abstract class Window extends Position with Size with Focus {
 
-  def onCreate = implicitly[NativeManager] windowCreated this
-  
-  protected val writableShowing = new Property(false)
+  private val writableShowing = new Property(false)
   lazy val showing: ReadOnlyProperty[Boolean] = writableShowing
-
-  showing forNewValue { show =>
-    if (show) {
-      Window.windows += this
-    } else
-      Window.windows -= this
-  }
 
   private val _opacity = new Property(1.0)
   def opacity = _opacity
@@ -31,8 +24,22 @@ abstract class Window extends OnCreate with ImplicitApplicationDependencies with
   private val _scene = new Property[Option[Scene]](None)
   def scene = _scene
   def scene_=(value: Scene) = scene.value = Some(value)
+
 }
 
-object Window {
-  val windows = ListBuffer[Window]()
+object Window extends ImplicitNativeManager {
+  private val _windows = ListBuffer[Window]()
+
+  def windows = _windows.toSeq
+  
+  def show(window: Window): Unit = {
+    implicitly[NativeManager] windowCreated window
+    _windows += window
+    window.writableShowing.value = true
+  }
+
+  def hide(window: Window): Unit = {
+    window.writableShowing.value = false
+    _windows -= window
+  }
 }

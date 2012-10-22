@@ -1,5 +1,5 @@
 package ee.ui.application
-trait ImplicitDependencies[T] {
+trait Dependencies[T] {
     var _di:Option[T] = None
     
 	def set(di:T) =  _di = Some(di)
