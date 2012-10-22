@@ -9,8 +9,10 @@ import ee.ui.events.Event
 import ee.ui.events.MouseEvent
 import ee.ui.events.NullEvent
 import ee.ui.traits.Fill
+import ee.ui.traits.LayoutSize
+import ee.ui.traits.LayoutPosition
 
-class Scene(defaultDepthBuffer:Boolean = false) extends Fill {
+class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with LayoutSize with Fill {
 	
   def defaultFill = Color.WHITE
   

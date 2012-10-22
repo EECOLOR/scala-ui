@@ -1,11 +1,13 @@
 package ee.ui
 
+import scala.collection.mutable.ListBuffer
+
 trait Observable[T] {
   type Handler = T => Boolean
   type Listener = T => Unit
 
-  private var handlers: Seq[Handler] = Seq.empty
-  private var listeners: Seq[Listener] = Seq.empty
+  private val handlers = ListBuffer[Handler]()
+  private val listeners = ListBuffer[Listener]()
 
   protected def notifyHandlers(information: T) =
     handlers forall { _(information) }
@@ -15,7 +17,7 @@ trait Observable[T] {
 	  _(information) 
     }
 
-  protected def handle(handler: Handler): Unit = handlers = handler +: handlers
+  protected def handle(handler: Handler): Unit = handlers += handler
   protected def handle(handler: => Boolean): Unit = handle(information => handler)
   protected def handleIn(handler: PartialFunction[T, Boolean]): Unit =
     handle { i =>
@@ -23,7 +25,7 @@ trait Observable[T] {
       else true
     }
 
-  protected def listen(listener: Listener): Unit = listeners = listener +: listeners
+  protected def listen(listener: Listener): Unit = listeners += listener
   protected def listen(listener: => Unit): Unit = listen(information => listener)
 
   protected def listenIn(listener: PartialFunction[T, Unit]): Unit =
@@ -32,7 +34,7 @@ trait Observable[T] {
     }
 
   protected def notify(information: T, apply: => Unit): Unit = {
-    println("Observable notify " + information + " -- " + this)
+    //println("Observable notify " + information + " -- " + this)
     if (notifyHandlers(information)) {
       apply
       notifyListeners(information)

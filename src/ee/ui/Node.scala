@@ -2,8 +2,11 @@ package ee.ui
 
 import ee.ui.properties.ReadOnlyProperty
 import ee.ui.properties.Property
+import ee.ui.traits.LayoutSize
+import ee.ui.traits.LayoutPosition
+import ee.ui.layout.LayoutClient
 
-abstract class Node {
+abstract class Node extends LayoutClient with LayoutPosition with LayoutSize {
   private val writeableParent = new Property[Option[Group]](None) with ParentProperty
   val parent:ParentProperty = writeableParent
 }

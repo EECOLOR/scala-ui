@@ -96,7 +96,7 @@ class PropertyChangeHandler2[A, B](
   p1: ReadOnlyProperty[A],
   p2: ReadOnlyProperty[B],
   onNewValue: (A, B) => Unit)
-  extends PropertyChangeHandler(Iterable()) {
+  extends PropertyChangeHandler(Iterable(p1, p2)) {
 
   def handleChanges = onNewValue.tupled(p1.value, p2.value)
 }

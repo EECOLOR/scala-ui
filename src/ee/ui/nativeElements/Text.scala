@@ -5,8 +5,9 @@ import ee.ui.properties.Property
 import ee.ui.primitives.Font
 import ee.ui.primitives.VerticalPosition
 import ee.ui.primitives.Paint
+import ee.ui.traits.LayoutPosition
 
-class Text extends Shape with Position {
+class Text extends Shape {
   private val _text = new Property[String]("")
   def text = _text
   def text_=(value: String) = _text.value = value
