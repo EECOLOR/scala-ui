@@ -15,7 +15,7 @@ trait DummyApplicationLauncher extends ApplicationLauncher {
     val launcher = DummyLauncher
     val applicationConstructor = createApplication _
     val nativeManager = DummyNativeManager
-    def pulseEvent = DummyPulseEvent
+    val pulseEvent = DummyPulseEvent
   }
 }
 

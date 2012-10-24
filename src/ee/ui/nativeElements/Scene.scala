@@ -11,6 +11,7 @@ import ee.ui.events.NullEvent
 import ee.ui.traits.Fill
 import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutPosition
+import ee.ui.Node
 
 class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with LayoutSize with Fill {
 	
@@ -18,10 +19,10 @@ class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with Layo
   
   lazy val depthBuffer:ReadOnlyProperty[Boolean] = new Property(defaultDepthBuffer)
   
-  private val _root = new Property[Option[Group]](None)
+  private val _root = new Property[Option[Node]](None)
   def root = _root
-  def root_=(value:Group) = root.value = Some(value)
-  def root_=(value:Option[Group]) = root.value = value
+  def root_=(value:Node) = root.value = Some(value)
+  def root_=(value:Option[Node]) = root.value = value
   
   private val _camera = new Property[Option[Camera]](None)
   def camera = _camera

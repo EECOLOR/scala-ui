@@ -3,12 +3,15 @@ package ee.ui.application
 import ee.ui.nativeImplementation.NativeManager
 import ee.ui.nativeElements.Stage
 import ee.ui.events.PulseEvent
+import ee.ui.layout.LayoutEngine
+import ee.ui.layout.DefaultLayoutEngine
 
 trait ApplicationDependencies {
-    def launcher:Launcher
-    def applicationConstructor:() => Application
-    def nativeManager:NativeManager
-    def pulseEvent:PulseEvent
+    val launcher:Launcher
+    val applicationConstructor:() => Application
+    val nativeManager:NativeManager
+    val pulseEvent:PulseEvent
+    lazy val layoutEngine:LayoutEngine = new DefaultLayoutEngine
 }
 
 object ApplicationDependencies extends Dependencies[ApplicationDependencies]
@@ -24,4 +27,7 @@ trait ImplicitNativeManager {
 }
 trait ImplicitPulseEvent {
 	implicit def implicitPulseEvent:PulseEvent = ApplicationDependencies.di.pulseEvent
+}
+trait ImplicitLayoutEngine {
+  implicit def layoutEngine:LayoutEngine = ApplicationDependencies.di.layoutEngine
 }

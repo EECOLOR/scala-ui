@@ -5,7 +5,7 @@ import ee.ui.nativeImplementation.NativeManager
 import ee.ui.nativeElements.Scene
 import ee.ui.Node
 import ee.ui.Group
-import ee.ui.Layout
+import ee.ui.layout.Layout
 import ee.ui.nativeElements.Window
 
 class PulseHandler(application:Application) extends ImplicitNativeManager {
@@ -17,19 +17,18 @@ class PulseHandler(application:Application) extends ImplicitNativeManager {
   def notify(window: Window): Unit = {
     println("PulseHandler.notify window")
     
-    nativeManager updateImplementationOf window
-
     window.scene foreach notify _
+    
+    nativeManager updateImplementationOf window
   }
 
   def notify(scene: Scene): Unit = {
-    nativeManager updateImplementationOf scene
-
     scene.root foreach notify _
+    
+    nativeManager updateImplementationOf scene
   }
 
   def notify(node: Node): Unit = {
-    nativeManager updateImplementationOf node
     
     node match {
       case group: Group => {
@@ -37,5 +36,7 @@ class PulseHandler(application:Application) extends ImplicitNativeManager {
       }
       case _ => //we only need to recurse for groups
     }
+    
+    nativeManager updateImplementationOf node
   }
 }
