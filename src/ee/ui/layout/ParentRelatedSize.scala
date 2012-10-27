@@ -5,60 +5,122 @@ import ee.ui.Node
 import ee.ui.properties.Property
 import ee.ui.traits.RestrictedAccess
 import ee.ui.traits.LayoutSize
+import ee.ui.traits.LayoutWidth
+import ee.ui.traits.LayoutHeight
 
-sealed trait ParentRelatedSize { self: Node =>
-  
-  def determineSize(parent: LayoutSize): Unit = {
-    val (newWidth, newHeight) = parent match {
-      case layout: Layout =>
-        this match {
-          case node: PercentageBased => layout determineSize node
-          case node: AnchorBased => layout determineSize node
-        }
-      case parent => calculateSize(parent)
-    }
+sealed trait PartialParentRelatedSize { self: Node => }
+
+sealed trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
+  def calculateWidth(parent: LayoutWidth): Width
+
+  def adjustWidth(parent: LayoutWidth): Unit = {
+    val newWidth =
+      parent match {
+        case layout: Layout =>
+          this match {
+            case node: PercentageBasedSize => layout calculateWidth node
+            case node: AnchorBasedSize => layout calculateWidth node
+          }
+        case parent => calculateWidth(parent)
+      }
 
     implicit val access = RestrictedAccess
 
     width = newWidth
+  }
+
+  private val _minWidth = new Property(0d)
+  def minWidth = _minWidth
+  def minWidth_=(value: Double) = _minWidth.value = value
+}
+
+sealed trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =>
+
+  def calculateHeight(parent: LayoutHeight): Height
+
+  def adjustHeight(parent: LayoutHeight): Unit = {
+    val newHeight =
+      parent match {
+        case layout: Layout =>
+          this match {
+            case node: PercentageBasedSize => layout calculateHeight node
+            case node: AnchorBasedSize => layout calculateHeight node
+          }
+        case parent => calculateHeight(parent)
+      }
+
+    implicit val access = RestrictedAccess
+
     height = newHeight
   }
 
-  def calculateSize(parent: LayoutSize): (Double, Double)
+  private val _minHeight = new Property(0d)
+  def minHeight = _minHeight
+  def minHeight_=(value: Double) = _minHeight.value = value
 }
 
-trait PercentageBased extends ParentRelatedSize { self: Node =>
-  
+sealed trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>
+
+  def adjustSize(parent: LayoutSize): Unit = {
+    adjustWidth(parent)
+    adjustHeight(parent)
+  }
+
+  def calculateSize(parent: LayoutSize): Size =
+    (calculateWidth(parent), calculateHeight(parent))
+
+}
+
+trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
+
+  def calculateWidth(parent: LayoutSize): Width =
+    (percentWidth / 100) * parent.width
+
   private val _percentWidth = new Property(100)
   def percentWidth = _percentWidth
   def percentWidth_=(value: Int) = _percentWidth.value = value
+}
+
+trait PercentageBasedHeight extends ParentRelatedHeight { self: Node =>
+
+  def calculateHeight(parent: LayoutSize): Height =
+    (percentHeight / 100) * parent.height
 
   private val _percentHeight = new Property(100)
   def percentHeight = _percentHeight
   def percentHeight_=(value: Int) = _percentHeight.value = value
-
-  def calculateSize(parent: Group): (Double, Double) =
-    ((percentWidth / 100) * parent.width, (percentHeight / 100) * parent.height)
 }
 
-trait AnchorBased extends ParentRelatedSize { self: Node =>
-  
-  private val _top = new Property(0d)
-  def top = _top
-  def top_=(value: Double) = _top.value = value
+trait PercentageBasedSize extends ParentRelatedSize
+  with PercentageBasedWidth with PercentageBasedHeight { self: Node => }
+
+trait AnchorBasedWidth extends ParentRelatedWidth { self: Node =>
+
+  def calculateWidth(parent: LayoutSize): Width =
+    parent.width - left - right
 
   private val _left = new Property(0d)
   def left = _left
   def left_=(value: Double) = _left.value = value
 
-  private val _bottom = new Property(0d)
-  def bottom = _bottom
-  def bottom_=(value: Double) = _bottom.value = value
-
   private val _right = new Property(0d)
   def right = _right
   def right_=(value: Double) = _right.value = value
-
-  def calculateSize(parent: Group): (Double, Double) =
-    (parent.width - left - right, parent.height - top - bottom)
 }
+
+trait AnchorBasedHeight extends ParentRelatedWidth { self: Node =>
+
+  def calculateHeight(parent: LayoutSize): Height =
+    parent.height - top - bottom
+
+  private val _top = new Property(0d)
+  def top = _top
+  def top_=(value: Double) = _top.value = value
+
+  private val _bottom = new Property(0d)
+  def bottom = _bottom
+  def bottom_=(value: Double) = _bottom.value = value
+}
+
+trait AnchorBasedSize extends ParentRelatedSize
+  with AnchorBasedWidth with AnchorBasedHeight { self: Node => }

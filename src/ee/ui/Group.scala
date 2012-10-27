@@ -7,9 +7,8 @@ import ee.ui.properties.Add
 import ee.ui.properties.Clear
 import ee.ui.properties.Remove
 import ee.ui.traits.RestrictedAccess
-import ee.ui.layout.CanResizeToChildren
 
-class Group extends Node with CanResizeToChildren {
+class Group extends Node {
 
   val children: Children = new Children
 
