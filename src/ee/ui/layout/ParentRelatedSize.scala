@@ -8,12 +8,12 @@ import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
 
-sealed trait PartialParentRelatedSize { self: Node => }
+trait PartialParentRelatedSize
 
 sealed trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
   def calculateWidth(parent: LayoutWidth): Width
 
-  def adjustWidth(parent: LayoutWidth): Unit = {
+  def adjustWidthTo(parent: LayoutWidth): Unit = {
     val newWidth =
       parent match {
         case layout: Layout =>
@@ -38,7 +38,7 @@ sealed trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =
 
   def calculateHeight(parent: LayoutHeight): Height
 
-  def adjustHeight(parent: LayoutHeight): Unit = {
+  def adjustHeightTo(parent: LayoutHeight): Unit = {
     val newHeight =
       parent match {
         case layout: Layout =>
@@ -57,18 +57,6 @@ sealed trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =
   private val _minHeight = new Property(0d)
   def minHeight = _minHeight
   def minHeight_=(value: Double) = _minHeight.value = value
-}
-
-sealed trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>
-
-  def adjustSize(parent: LayoutSize): Unit = {
-    adjustWidth(parent)
-    adjustHeight(parent)
-  }
-
-  def calculateSize(parent: LayoutSize): Size =
-    (calculateWidth(parent), calculateHeight(parent))
-
 }
 
 trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
@@ -91,8 +79,7 @@ trait PercentageBasedHeight extends ParentRelatedHeight { self: Node =>
   def percentHeight_=(value: Int) = _percentHeight.value = value
 }
 
-trait PercentageBasedSize extends ParentRelatedSize
-  with PercentageBasedWidth with PercentageBasedHeight { self: Node => }
+trait PercentageBasedSize extends PercentageBasedWidth with PercentageBasedHeight { self: Node => }
 
 trait AnchorBasedWidth extends ParentRelatedWidth { self: Node =>
 
@@ -122,5 +109,4 @@ trait AnchorBasedHeight extends ParentRelatedWidth { self: Node =>
   def bottom_=(value: Double) = _bottom.value = value
 }
 
-trait AnchorBasedSize extends ParentRelatedSize
-  with AnchorBasedWidth with AnchorBasedHeight { self: Node => }
+trait AnchorBasedSize extends AnchorBasedWidth with AnchorBasedHeight { self: Node => }
