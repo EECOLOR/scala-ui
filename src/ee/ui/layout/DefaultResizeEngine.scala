@@ -15,8 +15,8 @@ class DefaultResizeEngine {
 
   def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit =
     adjustSizeWithParent(true)(parent)(node)
-    
-  def adjustSizeWithParent(allowChildBasedResize:Boolean)(parent: LayoutSize)(node: Node): Unit =
+
+  def adjustSizeWithParent(allowChildBasedResize: Boolean)(parent: LayoutSize)(node: Node): Unit =
     node match {
       case group: Group with ParentRelatedWidth with ParentRelatedHeight => {
         group adjustSizeTo parent
@@ -96,13 +96,17 @@ class DefaultResizeEngine {
 
     def defaultSizeCalculator: SizeCalculator = math.max
 
-    class ChildUpdater(childUpdates: Queue[LayoutSize => Unit] = Queue.empty) extends Function0[Unit] {
-      def apply(): Unit = 
-        childUpdates foreach (childUpdate => childUpdate(group))
-
-      def :+(childUpdate: LayoutSize => Unit): ChildUpdater =
-        new ChildUpdater(childUpdates :+ childUpdate)
-    }
+    /*
+	   	Groups that have a Layout need to be treated different. The layout 
+	   	determines the total width and height of the children. Think of 
+	   	the HorizontalLayout for example. As a default we use the biggest 
+	   	width and height of a child.
+	   */
+    lazy val (totalChildWidthCalculator, totalChildHeightCalculator) =
+      group match {
+        case layout: Layout => layout.updateTotalChildWidth _ -> layout.updateTotalChildHeight _
+        case group => defaultSizeCalculator -> defaultSizeCalculator
+      }
 
     def run: Unit = {
 
@@ -116,63 +120,6 @@ class DefaultResizeEngine {
         sizeAdjustment map { sizeAdjustment =>
 
           /*
-           	Groups that have a Layout need to be treated different. The layout 
-           	determines the total width and height of the children. Think of 
-           	the HorizontalLayout for example. As a default we use the biggest 
-           	width and height of a child.
-           */
-          lazy val (totalChildWidthCalculator, totalChildHeightCalculator) =
-            group match {
-              case layout: Layout => layout.updateTotalChildWidth _ -> layout.updateTotalChildHeight _
-              case group => defaultSizeCalculator -> defaultSizeCalculator
-            }
-
-          type Information = (ChildUpdater, Width, Height)
-
-          def sizeAndUpdate(information: Information, node: Node): Information = {
-            val ( /* childUpdater */ cu, width, height) = information
-
-            val tw = totalChildWidthCalculator(width, _:Double)
-            val th = totalChildHeightCalculator(height, _:Double)
-            val sizeUpdate = adjustSizeWithParent(false)(_:LayoutSize)(node)
-            val sizeUpdateWithChildren = adjustSizeWithParent(true)(_:LayoutSize)(node)
-            
-            //TODO not too happy about this, maybe I can refactor it
-            (sizeAdjustment, node) match {
-              case (GROUP_SIZE, node: ParentRelatedWidth with ParentRelatedHeight) =>
-                (cu :+ sizeUpdate, tw(node.minWidth), th(node.minHeight))
-              case (GROUP_SIZE, node: ParentRelatedWidth) =>
-                adjustSizeWithoutParent(node)
-                (cu :+ sizeUpdate, tw(node.minWidth), th(node.height))
-              case (GROUP_SIZE, node: ParentRelatedHeight) =>
-                adjustSizeWithoutParent(node)
-                (cu :+ sizeUpdate, tw(node.width), th(node.minHeight))
-              case (GROUP_SIZE, node) =>
-                adjustSizeWithoutParent(node)
-                (cu, tw(node.width), th(node.height))
-              case (GROUP_WIDTH, node: ParentRelatedWidth with ParentRelatedHeight) =>
-                (cu :+ sizeUpdateWithChildren, tw(node.minWidth), height)
-              case (GROUP_WIDTH, node: ParentRelatedWidth) =>
-                (cu :+ sizeUpdateWithChildren, tw(node.minWidth), height)
-              case (GROUP_WIDTH, node: ParentRelatedHeight) =>
-                adjustSizeWithoutParent(node)
-                (cu :+ sizeUpdate, tw(node.width), height)
-              case (GROUP_WIDTH, node) =>
-                adjustSizeWithoutParent(node)
-                (cu, tw(node.width), height)
-              case (GROUP_HEIGHT, node: ParentRelatedWidth with ParentRelatedHeight) =>
-                (cu :+ sizeUpdateWithChildren, width, th(node.minHeight))
-              case (GROUP_HEIGHT, node: ParentRelatedWidth) =>
-                adjustSizeWithoutParent(node)
-                (cu :+ sizeUpdate, width, th(node.height))
-              case (GROUP_HEIGHT, node: ParentRelatedHeight) =>
-                (cu :+ sizeUpdateWithChildren, width, th(node.minHeight))
-              case (GROUP_HEIGHT, node) =>
-                adjustSizeWithoutParent(node)
-                (cu, width, th(node.height))
-            }
-          }
-          /*
         	We need to determine the width, the height or both based on the children.
         	
         	We need to loop through all children, we will store the children that 
@@ -181,7 +128,7 @@ class DefaultResizeEngine {
           */
           val startInformation = (new ChildUpdater, 0d, 0d)
           val (childUpdater, width, height) =
-            (children foldLeft startInformation)(sizeAndUpdate)
+            (children foldLeft startInformation)(sizeAndUpdate(sizeAdjustment))
 
           //perform the correct size adjustment
           (sizeAdjustment update group)(width, height)
@@ -192,6 +139,60 @@ class DefaultResizeEngine {
         } getOrElse adjustSizeForChildren(children, adjustSizeWithParent(true)(group))
 
       updateChildren()
+    }
+
+    class ChildUpdater(childUpdates: Queue[LayoutSize => Unit] = Queue.empty) extends Function0[Unit] {
+      def apply(): Unit =
+        childUpdates foreach (childUpdate => childUpdate(group))
+
+      def :+(childUpdate: LayoutSize => Unit): ChildUpdater =
+        new ChildUpdater(childUpdates :+ childUpdate)
+    }
+
+    type Information = (ChildUpdater, Width, Height)
+
+    def sizeAndUpdate(sizeAdjustment: SizeAdjustmentType)(information: Information, node: Node): Information = {
+      val ( /* childUpdater */ cu, width, height) = information
+
+      val tw = totalChildWidthCalculator(width, _: Double)
+      val th = totalChildHeightCalculator(height, _: Double)
+      val sizeUpdate = adjustSizeWithParent(false)(_: LayoutSize)(node)
+      val sizeUpdateWithChildren = adjustSizeWithParent(true)(_: LayoutSize)(node)
+
+      //TODO not too happy about this, maybe I can refactor it
+      (sizeAdjustment, node) match {
+        case (GROUP_SIZE, node: ParentRelatedWidth with ParentRelatedHeight) =>
+          (cu :+ sizeUpdate, tw(node.minWidth), th(node.minHeight))
+        case (GROUP_SIZE, node: ParentRelatedWidth) =>
+          adjustSizeWithoutParent(node)
+          (cu :+ sizeUpdate, tw(node.minWidth), th(node.height))
+        case (GROUP_SIZE, node: ParentRelatedHeight) =>
+          adjustSizeWithoutParent(node)
+          (cu :+ sizeUpdate, tw(node.width), th(node.minHeight))
+        case (GROUP_SIZE, node) =>
+          adjustSizeWithoutParent(node)
+          (cu, tw(node.width), th(node.height))
+        case (GROUP_WIDTH, node: ParentRelatedWidth with ParentRelatedHeight) =>
+          (cu :+ sizeUpdateWithChildren, tw(node.minWidth), height)
+        case (GROUP_WIDTH, node: ParentRelatedWidth) =>
+          (cu :+ sizeUpdateWithChildren, tw(node.minWidth), height)
+        case (GROUP_WIDTH, node: ParentRelatedHeight) =>
+          adjustSizeWithoutParent(node)
+          (cu :+ sizeUpdate, tw(node.width), height)
+        case (GROUP_WIDTH, node) =>
+          adjustSizeWithoutParent(node)
+          (cu, tw(node.width), height)
+        case (GROUP_HEIGHT, node: ParentRelatedWidth with ParentRelatedHeight) =>
+          (cu :+ sizeUpdateWithChildren, width, th(node.minHeight))
+        case (GROUP_HEIGHT, node: ParentRelatedWidth) =>
+          adjustSizeWithoutParent(node)
+          (cu :+ sizeUpdate, width, th(node.height))
+        case (GROUP_HEIGHT, node: ParentRelatedHeight) =>
+          (cu :+ sizeUpdateWithChildren, width, th(node.minHeight))
+        case (GROUP_HEIGHT, node) =>
+          adjustSizeWithoutParent(node)
+          (cu, width, th(node.height))
+      }
     }
 
     def adjustSizeForChildren(children: Group#Children, adjustMethod: Node => Unit)() =
