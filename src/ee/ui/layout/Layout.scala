@@ -12,8 +12,8 @@ trait Layout extends Stylable { self: Group =>
   def calculateWidth(node:AnchorBasedWidth):Width
   def calculateHeight(node:AnchorBasedHeight):Height
   
-  def updateTotalChildWidth(totalWidth:Double, nodeWidth:Double):Width
-  def updateTotalChildHeight(totalHeight:Double, nodeHeight:Double):Height
+  def determineTotalChildWidth(totalWidth:Double, nodeWidth:Double):Width
+  def determineTotalChildHeight(totalHeight:Double, nodeHeight:Double):Height
   
-  //def updateLayout:Unit
+  def updateLayout:Unit
 }

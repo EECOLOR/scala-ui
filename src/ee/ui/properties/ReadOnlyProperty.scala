@@ -6,5 +6,5 @@ trait ReadOnlyProperty[T] extends ObservableProperty[T] {
 }
 
 object ReadOnlyProperty {
-	implicit def propertyToValue[T](property:ReadOnlyProperty[T]):T = property.value
+	@inline implicit def propertyToValue[T](property:ReadOnlyProperty[T]):T = property.value
 }

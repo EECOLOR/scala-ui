@@ -4,214 +4,234 @@ import ee.ui.traits.LayoutSize
 import ee.ui.Node
 import ee.ui.Group
 import ee.ui.traits.RestrictedAccess
-import scala.collection.immutable.Queue
+import scala.collection.immutable.Vector
+import ee.ui.traits.LayoutWidth
+import ee.ui.traits.LayoutHeight
+
+//TODO build something so that only shizzle is measured if something has changed 
 class DefaultResizeEngine {
 
-  implicit private def parentRelatedSize(node: ParentRelatedWidth with ParentRelatedHeight) =
-    new ParentRelatedSize(node)
+  def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit = {
+    val commands = parentSizeKnownCommands(parent, node, determineSizeCommands)
 
-  implicit private def groupResizeHelper(group: Group) =
-    new GroupResizeHelperBuilder(group)
+    commands foreach (_.execute)
+  }
 
-  def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit =
-    adjustSizeWithParent(true)(parent)(node)
+  type ParentRelatedSize = ParentRelatedWidth with ParentRelatedHeight
 
-  def adjustSizeWithParent(allowChildBasedResize: Boolean)(parent: LayoutSize)(node: Node): Unit =
+  @inline def dontDetermineSizeCommands(node: Node) = Vector.empty[Command]
+  @inline def dontDetermineWidthCommands(parent: Group, node: Node) = dontDetermineSizeCommands(node)
+  @inline def dontDetermineHeightCommands(parent: Group, node: Node) = dontDetermineSizeCommands(node)
+
+  def determineSizeCommands(node: Node): Vector[Command] =
     node match {
-      case group: Group with ParentRelatedWidth with ParentRelatedHeight => {
-        group adjustSizeTo parent
-        group call RESIZE_CHILDREN
-      }
-      case group: Group with ParentRelatedWidth => {
-        group adjustWidthTo parent
-        if (allowChildBasedResize) group adjust GROUP_HEIGHT and RESIZE_CHILDREN
-      }
-      case group: Group with ParentRelatedHeight => {
-        group adjustHeightTo parent
-        if (allowChildBasedResize) group adjust GROUP_WIDTH and RESIZE_CHILDREN
-      }
-      case node: ParentRelatedWidth with ParentRelatedHeight =>
-        node adjustSizeTo parent
-      case node: ParentRelatedWidth =>
-        node adjustWidthTo parent
-      case node: ParentRelatedHeight =>
-        node adjustHeightTo parent
-      case node =>
-        adjustSizeWithoutParent(node)
+      case both: PartialParentRelatedSize => Vector.empty
+      case group: Group => groupDetermineSizeCommands(group)
+      case node => Vector.empty
     }
 
-  protected def adjustSizeWithoutParent(node: Node): Unit =
+  def determineWidthCommands(node: Node): Vector[Command] =
     node match {
-      case node: ParentRelatedWidth with ParentRelatedHeight =>
-        throw new IllegalArgumentException("Can not resize a node that relies on it's parent for size, this method does not know the parent. There is a flaw in your resize logic")
-      case group: Group with ParentRelatedWidth =>
-        group adjust GROUP_HEIGHT and RESIZE_CHILDREN
-      case group: Group with ParentRelatedHeight =>
-        group adjust GROUP_WIDTH and RESIZE_CHILDREN
-      case group: Group =>
-        group adjust GROUP_SIZE and RESIZE_CHILDREN
-      case node => // no need to resize, has probably explicit size
-
+      case both: PartialParentRelatedSize => Vector.empty
+      case group: Group => groupDetermineWidthCommands(group)(dontDetermineHeightCommands)
+      case node => Vector.empty
     }
 
-  /*
-   * The traits and objects only exist to help improve the readability 
-   * of the adjustSizeWithParent method
-   */
-  private sealed trait SizeAdjustmentType extends RestrictedAccess {
-    def update(group: Group)(width: Double, height: Double): Unit
-  }
-  private object GROUP_SIZE extends SizeAdjustmentType {
-    def update(group: Group)(width: Double, height: Double): Unit = {
-      group.width = width
-      group.height = height
+  def determineHeightCommands(node: Node): Vector[Command] =
+    node match {
+      case group: PartialParentRelatedSize => Vector.empty
+      case group: Group => groupDetermineHeightCommands(group)(dontDetermineWidthCommands)
+      case node => Vector.empty
     }
-  }
-  private object GROUP_WIDTH extends SizeAdjustmentType {
-    def update(group: Group)(width: Double, height: Double): Unit = {
-      group.width = width
-    }
-  }
-  private object GROUP_HEIGHT extends SizeAdjustmentType {
-    def update(group: Group)(width: Double, height: Double): Unit = {
-      group.height = height
-    }
-  }
-  //this object exists purely for readability
-  private object RESIZE_CHILDREN
 
-  private class GroupResizeHelperBuilder(group: Group) {
-    def adjust(sizeAdjustmentType: SizeAdjustmentType): GroupResizeHelper =
-      new GroupResizeHelper(group, Some(sizeAdjustmentType))
+  def parentSizeKnownCommands(parent: LayoutSize, node: Node, determineSizeCommands: Node => Vector[Command]): Vector[Command] =
+    node match {
+      case group: Group with ParentRelatedSize => groupCommands(group, parent)
+      case group: Group with ParentRelatedWidth => groupCommands(group, parent)
+      case group: Group with ParentRelatedHeight => groupCommands(group, parent)
+      case node: ParentRelatedSize => Vector(ResizeBothCommand(node, parent))
+      case node: ParentRelatedWidth => Vector(ResizeWidthCommand(node, parent))
+      case node: ParentRelatedHeight => Vector(ResizeHeightCommand(node, parent))
+      case nodeOrGroup => determineSizeCommands(nodeOrGroup)
+    }
 
-    def call(readability: RESIZE_CHILDREN.type): Unit =
-      new GroupResizeHelper(group, None).run
+  def parentWidthKnownCommands(parent: LayoutWidth, node: Node, determineWidthCommands: Node => Vector[Command]): Vector[Command] =
+    node match {
+      case group: Group with ParentRelatedWidth => groupCommands(group, parent)
+      case node: ParentRelatedWidth => Vector(ResizeWidthCommand(node, parent))
+      case nodeOrGroup => determineWidthCommands(nodeOrGroup)
+    }
+
+  def parentHeightKnownCommands(parent: LayoutHeight, node: Node, determineHeightCommands: Node => Vector[Command]): Vector[Command] =
+    node match {
+      case group: Group with ParentRelatedHeight => groupCommands(group, parent)
+      case node: ParentRelatedHeight => Vector(ResizeHeightCommand(node, parent))
+      case nodeOrGroup => determineHeightCommands(nodeOrGroup)
+    }
+
+  def parentSizeUnknownCommands(parent: Group, node: Node): Vector[Command] = Vector.empty
+
+  trait Command {
+    def execute(): Unit
   }
 
-  private class GroupResizeHelper(group: Group, sizeAdjustment: Option[SizeAdjustmentType]) {
-
-    type TotalWidth = Double
-    type NodeWidth = Double
-    type SizeCalculator = (TotalWidth, NodeWidth) => TotalWidth
-
-    def defaultSizeCalculator: SizeCalculator = math.max
-
-    /*
-	   	Groups that have a Layout need to be treated different. The layout 
-	   	determines the total width and height of the children. Think of 
-	   	the HorizontalLayout for example. As a default we use the biggest 
-	   	width and height of a child.
-	   */
-    lazy val (totalChildWidthCalculator, totalChildHeightCalculator) =
-      group match {
-        case layout: Layout => layout.updateTotalChildWidth _ -> layout.updateTotalChildHeight _
-        case group => defaultSizeCalculator -> defaultSizeCalculator
-      }
-
-    def run: Unit = {
-
-      val children = group.children
-
-      val updateChildren: () => Unit =
-        /*
-          If we have a size adjustment we need to size (part) of the group 
-          to it's children. 
-         */
-        sizeAdjustment map { sizeAdjustment =>
-
-          /*
-        	We need to determine the width, the height or both based on the children.
-        	
-        	We need to loop through all children, we will store the children that 
-        	require the size of their parent (this group) for their own size. The 
-        	other children are updated within this loop. 
-          */
-          val startInformation = (new ChildUpdater, 0d, 0d)
-          val (childUpdater, width, height) =
-            (children foldLeft startInformation)(sizeAndUpdate(sizeAdjustment))
-
-          //perform the correct size adjustment
-          (sizeAdjustment update group)(width, height)
-
-          childUpdater
-
-          //if no size adjustment has taken place we want to adjust the size of all children
-        } getOrElse adjustSizeForChildren(children, adjustSizeWithParent(true)(group))
-
-      updateChildren()
-    }
-
-    class ChildUpdater(childUpdates: Queue[LayoutSize => Unit] = Queue.empty) extends Function0[Unit] {
-      def apply(): Unit =
-        childUpdates foreach (childUpdate => childUpdate(group))
-
-      def :+(childUpdate: LayoutSize => Unit): ChildUpdater =
-        new ChildUpdater(childUpdates :+ childUpdate)
-    }
-
-    type Information = (ChildUpdater, Width, Height)
-
-    def sizeAndUpdate(sizeAdjustment: SizeAdjustmentType)(information: Information, node: Node): Information = {
-      val ( /* childUpdater */ cu, width, height) = information
-
-      val tw = totalChildWidthCalculator(width, _: Double)
-      val th = totalChildHeightCalculator(height, _: Double)
-      val sizeUpdate = adjustSizeWithParent(false)(_: LayoutSize)(node)
-      val sizeUpdateWithChildren = adjustSizeWithParent(true)(_: LayoutSize)(node)
-
-      //TODO not too happy about this, maybe I can refactor it
-      (sizeAdjustment, node) match {
-        case (GROUP_SIZE, node: ParentRelatedWidth with ParentRelatedHeight) =>
-          (cu :+ sizeUpdate, tw(node.minWidth), th(node.minHeight))
-        case (GROUP_SIZE, node: ParentRelatedWidth) =>
-          adjustSizeWithoutParent(node)
-          (cu :+ sizeUpdate, tw(node.minWidth), th(node.height))
-        case (GROUP_SIZE, node: ParentRelatedHeight) =>
-          adjustSizeWithoutParent(node)
-          (cu :+ sizeUpdate, tw(node.width), th(node.minHeight))
-        case (GROUP_SIZE, node) =>
-          adjustSizeWithoutParent(node)
-          (cu, tw(node.width), th(node.height))
-        case (GROUP_WIDTH, node: ParentRelatedWidth with ParentRelatedHeight) =>
-          (cu :+ sizeUpdateWithChildren, tw(node.minWidth), height)
-        case (GROUP_WIDTH, node: ParentRelatedWidth) =>
-          (cu :+ sizeUpdateWithChildren, tw(node.minWidth), height)
-        case (GROUP_WIDTH, node: ParentRelatedHeight) =>
-          adjustSizeWithoutParent(node)
-          (cu :+ sizeUpdate, tw(node.width), height)
-        case (GROUP_WIDTH, node) =>
-          adjustSizeWithoutParent(node)
-          (cu, tw(node.width), height)
-        case (GROUP_HEIGHT, node: ParentRelatedWidth with ParentRelatedHeight) =>
-          (cu :+ sizeUpdateWithChildren, width, th(node.minHeight))
-        case (GROUP_HEIGHT, node: ParentRelatedWidth) =>
-          adjustSizeWithoutParent(node)
-          (cu :+ sizeUpdate, width, th(node.height))
-        case (GROUP_HEIGHT, node: ParentRelatedHeight) =>
-          (cu :+ sizeUpdateWithChildren, width, th(node.minHeight))
-        case (GROUP_HEIGHT, node) =>
-          adjustSizeWithoutParent(node)
-          (cu, width, th(node.height))
-      }
-    }
-
-    def adjustSizeForChildren(children: Group#Children, adjustMethod: Node => Unit)() =
-      children foreach adjustMethod
-
-    def and(readability: RESIZE_CHILDREN.type): Unit =
-      run
-
-  }
-
-  private class ParentRelatedSize(node: ParentRelatedWidth with ParentRelatedHeight) {
-
-    def adjustSizeTo(parent: LayoutSize): Unit = {
+  case class ResizeBothCommand(node: ParentRelatedSize, parent: LayoutSize) extends Command {
+    def execute() = {
       node adjustWidthTo parent
       node adjustHeightTo parent
     }
+  }
 
-    def calculateSize(parent: LayoutSize): Size =
-      (node calculateWidth parent, node calculateHeight parent)
+  case class ResizeWidthCommand(node: ParentRelatedWidth, parent: LayoutWidth) extends Command {
+    def execute() = node adjustWidthTo parent
+  }
+
+  case class ResizeHeightCommand(node: ParentRelatedHeight, parent: LayoutHeight) extends Command {
+    def execute() = node adjustHeightTo parent
+  }
+
+  case class AccumulatorCommand[T](
+    accumulatorEntries: Seq[AccumulatorEntry[T]],
+    start: T,
+    accumulationFunction: (T, T) => T,
+    applyResult: T => Unit) extends Command {
+
+    def execute() = {
+      val result =
+        (accumulatorEntries foldLeft start) { (acc, entry) =>
+
+          entry.commands foreach (_.execute)
+          accumulationFunction(acc, entry.value)
+        }
+
+      applyResult(result)
+    }
+  }
+
+  class AccumulatorEntry[T](val commands: Vector[Command], retrieveValue: => T) {
+    def value: T = retrieveValue
+  }
+
+  object AccumulatorEntry {
+    def apply[T](commands: Vector[Command], retrieveValue: => T) = new AccumulatorEntry(commands, retrieveValue)
+  }
+
+  def groupCommands(group: Group with ParentRelatedSize, parent: LayoutSize): Vector[Command] = {
+    ResizeBothCommand(group, parent) +:
+      //since we have resized the group it's safe to create commands for all children
+      (group.children foldLeft Vector[Command]()) { (commands, child) =>
+        commands ++ parentSizeKnownCommands(parent, child, determineSizeCommands)
+      }
+  }
+
+  def groupCommands(group: Group with ParentRelatedWidth, parent: LayoutWidth): Vector[Command] = {
+
+    ResizeWidthCommand(group, parent) +:
+      groupDetermineHeightCommands(group)(parentWidthKnownCommands(_: LayoutWidth, _: Node, determineWidthCommands))
+  }
+
+  def groupCommands(group: Group with ParentRelatedHeight, parent: LayoutHeight): Vector[Command] = {
+
+    ResizeHeightCommand(group, parent) +:
+      groupDetermineWidthCommands(group: Group)(parentHeightKnownCommands(_: LayoutHeight, _: Node, determineHeightCommands))
+  }
+
+  def groupDetermineSizeCommands(group: Group): Vector[Command] = {
+    implicit val access = RestrictedAccess
+
+    resizeToChildrenCommands[Size](group)(
+      start = (0d, 0d),
+      accumulator = sizeAccumulation(group),
+      childSize = { child => (child.width, child.height) },
+      applyResult = {
+        case (width, height) =>
+          group.width = width
+          group.height = height
+      })(
+        directChildSizeCommands = parentSizeUnknownCommands,
+        accumulatorSizeCommands = determineSizeCommands,
+        delayedSizeCommands = parentSizeKnownCommands(_: LayoutSize, _: Node, dontDetermineSizeCommands))
+  }
+
+  def groupDetermineWidthCommands(group: Group)(parentHeightKnownCommands: (Group, Node) => Vector[Command]): Vector[Command] = {
+    implicit val access = RestrictedAccess
+
+    resizeToChildrenCommands[Width](group)(
+      start = 0d,
+      accumulator = widthAccumulation(group),
+      childSize = _.width,
+      applyResult = group.width_=)(
+        directChildSizeCommands = parentHeightKnownCommands,
+        accumulatorSizeCommands = determineWidthCommands,
+        delayedSizeCommands = parentWidthKnownCommands(_: LayoutWidth, _: Node, dontDetermineSizeCommands))
 
   }
+
+  def groupDetermineHeightCommands(group: Group)(parentWidthKnownCommands: (Group, Node) => Vector[Command]): Vector[Command] = {
+    implicit val access = RestrictedAccess
+
+    resizeToChildrenCommands[Height](group)(
+      start = 0d,
+      accumulator = heightAccumulation(group),
+      childSize = _.height,
+      applyResult = group.height_=)(
+        directChildSizeCommands = parentWidthKnownCommands,
+        accumulatorSizeCommands = determineHeightCommands,
+        delayedSizeCommands = parentHeightKnownCommands(_: LayoutHeight, _: Node, dontDetermineSizeCommands))
+  }
+
+  def resizeToChildrenCommands[T](group: Group)(
+    start: T, accumulator: (T, T) => T, childSize: Node => T, applyResult: T => Unit)(
+      directChildSizeCommands: (Group, Node) => Vector[Command],
+      accumulatorSizeCommands: (Node) => Vector[Command],
+      delayedSizeCommands: (Group, Node) => Vector[Command]): Vector[Command] = {
+
+    // these are the vectors we use to gather information while looping over the children
+    val startInformation = (Vector[Command](), Vector[AccumulatorEntry[T]](), Vector[Command]())
+
+    val (directCommands, accumulatorEntries, afterSelfResizeCommands) =
+      (group.children foldLeft startInformation) { (information, child) =>
+
+        val (directCommands, accumulatorEntries, afterSelfResizeCommands) = information
+
+        (directCommands ++ parentWidthKnownCommands(group, child, determineWidthCommands),
+          accumulatorEntries :+ AccumulatorEntry[T](determineHeightCommands(child), childSize(child)),
+          afterSelfResizeCommands ++ parentHeightKnownCommands(group, child, dontDetermineSizeCommands))
+      }
+
+    implicit val access = RestrictedAccess
+
+    val accumulateAndResizeCommand = AccumulatorCommand[T](
+      accumulatorEntries,
+      start,
+      accumulator,
+      applyResult)
+
+    (directCommands :+ accumulateAndResizeCommand) ++ afterSelfResizeCommands
+  }
+
+  def sizeAccumulation(group: Group): (Size, Size) => Size = {
+    //retrieve outside of the returned method so they don't need to be called too often
+    val wAccumulation = widthAccumulation(group)
+    val hAccumulation = heightAccumulation(group)
+
+    {
+      case ((totalWidth, totalHeight), (nodeWidth, nodeHeight)) =>
+
+        wAccumulation(totalWidth, nodeWidth) -> wAccumulation(totalHeight, nodeHeight)
+    }
+  }
+
+  @inline def widthAccumulation(group: Group): (Width, Width) => Width =
+    group match {
+      case layout: Layout => layout.determineTotalChildWidth
+      case group => math.max
+    }
+
+  @inline def heightAccumulation(group: Group): (Height, Height) => Height =
+    group match {
+      case layout: Layout => layout.determineTotalChildHeight
+      case group => math.max
+    }
+
 }
