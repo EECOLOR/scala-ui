@@ -61,7 +61,7 @@ sealed trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =
 
 trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 
-  def calculateWidth(parent: LayoutSize): Width =
+  override def calculateWidth(parent: LayoutWidth): Width =
     (percentWidth / 100) * parent.width
 
   private val _percentWidth = new Property(100)
@@ -71,7 +71,7 @@ trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 
 trait PercentageBasedHeight extends ParentRelatedHeight { self: Node =>
 
-  def calculateHeight(parent: LayoutSize): Height =
+  override def calculateHeight(parent: LayoutHeight): Height =
     (percentHeight / 100) * parent.height
 
   private val _percentHeight = new Property(100)
@@ -83,7 +83,7 @@ trait PercentageBasedSize extends PercentageBasedWidth with PercentageBasedHeigh
 
 trait AnchorBasedWidth extends ParentRelatedWidth { self: Node =>
 
-  def calculateWidth(parent: LayoutSize): Width =
+  override def calculateWidth(parent: LayoutWidth): Width =
     parent.width - left - right
 
   private val _left = new Property(0d)
@@ -95,9 +95,9 @@ trait AnchorBasedWidth extends ParentRelatedWidth { self: Node =>
   def right_=(value: Double) = _right.value = value
 }
 
-trait AnchorBasedHeight extends ParentRelatedWidth { self: Node =>
+trait AnchorBasedHeight extends ParentRelatedHeight { self: Node =>
 
-  def calculateHeight(parent: LayoutSize): Height =
+  override def calculateHeight(parent: LayoutHeight): Height =
     parent.height - top - bottom
 
   private val _top = new Property(0d)

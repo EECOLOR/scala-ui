@@ -19,29 +19,31 @@ class DefaultResizeEngine {
 
   type ParentRelatedSize = ParentRelatedWidth with ParentRelatedHeight
 
-  @inline def dontDetermineSizeCommands(node: Node) = Vector.empty[Command]
-  @inline def dontDetermineWidthCommands(parent: Group, node: Node) = dontDetermineSizeCommands(node)
-  @inline def dontDetermineHeightCommands(parent: Group, node: Node) = dontDetermineSizeCommands(node)
+  val noCommands = Vector.empty[Command]
+  @inline def dontDetermineSizeCommands(node: Node) = noCommands
+  @inline def dontDetermineWidthCommands(parent: Group, node: Node) = noCommands
+  @inline def dontDetermineHeightCommands(parent: Group, node: Node) = noCommands
+  @inline def parentSizeUnknownCommands(parent: Group, node: Node): Vector[Command] = noCommands
 
   def determineSizeCommands(node: Node): Vector[Command] =
     node match {
-      case both: PartialParentRelatedSize => Vector.empty
+      case both: PartialParentRelatedSize => noCommands
       case group: Group => groupDetermineSizeCommands(group)
-      case node => Vector.empty
+      case node => noCommands
     }
 
   def determineWidthCommands(node: Node): Vector[Command] =
     node match {
-      case both: PartialParentRelatedSize => Vector.empty
+      case both: ParentRelatedWidth => noCommands
       case group: Group => groupDetermineWidthCommands(group)(dontDetermineHeightCommands)
-      case node => Vector.empty
+      case node => noCommands
     }
 
   def determineHeightCommands(node: Node): Vector[Command] =
     node match {
-      case group: PartialParentRelatedSize => Vector.empty
+      case group: ParentRelatedHeight => noCommands
       case group: Group => groupDetermineHeightCommands(group)(dontDetermineWidthCommands)
-      case node => Vector.empty
+      case node => noCommands
     }
 
   def parentSizeKnownCommands(parent: LayoutSize, node: Node, determineSizeCommands: Node => Vector[Command]): Vector[Command] =
@@ -68,8 +70,6 @@ class DefaultResizeEngine {
       case node: ParentRelatedHeight => Vector(ResizeHeightCommand(node, parent))
       case nodeOrGroup => determineHeightCommands(nodeOrGroup)
     }
-
-  def parentSizeUnknownCommands(parent: Group, node: Node): Vector[Command] = Vector.empty
 
   trait Command {
     def execute(): Unit
@@ -186,28 +186,32 @@ class DefaultResizeEngine {
       accumulatorSizeCommands: (Node) => Vector[Command],
       delayedSizeCommands: (Group, Node) => Vector[Command]): Vector[Command] = {
 
-    // these are the vectors we use to gather information while looping over the children
-    val startInformation = (Vector[Command](), Vector[AccumulatorEntry[T]](), Vector[Command]())
+    val children = group.children
+    if (children.isEmpty) noCommands
+    else {
+      // these are the vectors we use to gather information while looping over the children
+      val startInformation = (Vector[Command](), Vector[AccumulatorEntry[T]](), Vector[Command]())
 
-    val (directCommands, accumulatorEntries, afterSelfResizeCommands) =
-      (group.children foldLeft startInformation) { (information, child) =>
+      val (directCommands, accumulatorEntries, afterSelfResizeCommands) =
+        (children foldLeft startInformation) { (information, child) =>
 
-        val (directCommands, accumulatorEntries, afterSelfResizeCommands) = information
+          val (directCommands, accumulatorEntries, afterSelfResizeCommands) = information
 
-        (directCommands ++ parentWidthKnownCommands(group, child, determineWidthCommands),
-          accumulatorEntries :+ AccumulatorEntry[T](determineHeightCommands(child), childSize(child)),
-          afterSelfResizeCommands ++ parentHeightKnownCommands(group, child, dontDetermineSizeCommands))
-      }
+          (directCommands ++ parentWidthKnownCommands(group, child, determineWidthCommands),
+            accumulatorEntries :+ AccumulatorEntry[T](determineHeightCommands(child), childSize(child)),
+            afterSelfResizeCommands ++ parentHeightKnownCommands(group, child, dontDetermineSizeCommands))
+        }
 
-    implicit val access = RestrictedAccess
+      implicit val access = RestrictedAccess
 
-    val accumulateAndResizeCommand = AccumulatorCommand[T](
-      accumulatorEntries,
-      start,
-      accumulator,
-      applyResult)
+      val accumulateAndResizeCommand = AccumulatorCommand[T](
+        accumulatorEntries,
+        start,
+        accumulator,
+        applyResult)
 
-    (directCommands :+ accumulateAndResizeCommand) ++ afterSelfResizeCommands
+      (directCommands :+ accumulateAndResizeCommand) ++ afterSelfResizeCommands
+    }
   }
 
   def sizeAccumulation(group: Group): (Size, Size) => Size = {
@@ -218,7 +222,7 @@ class DefaultResizeEngine {
     {
       case ((totalWidth, totalHeight), (nodeWidth, nodeHeight)) =>
 
-        wAccumulation(totalWidth, nodeWidth) -> wAccumulation(totalHeight, nodeHeight)
+        wAccumulation(totalWidth, nodeWidth) -> hAccumulation(totalHeight, nodeHeight)
     }
   }
 

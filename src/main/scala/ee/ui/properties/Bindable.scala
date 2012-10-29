@@ -1,5 +1,7 @@
 package ee.ui.properties
 
+import language.implicitConversions
+
 trait Bindable[T] extends WritableProperty[T] {
 
   def bindTo(binding:Binding[T]):Unit = binding bind {value = _}

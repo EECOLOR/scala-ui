@@ -5,6 +5,7 @@ import ee.ui.properties.Property
 import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutPosition
 import ee.ui.layout.LayoutClient
+import language.implicitConversions
 
 abstract class Node extends LayoutClient with LayoutPosition with LayoutSize {
   private val writeableParent = new Property[Option[Group]](None) with ParentProperty

@@ -3,13 +3,13 @@ package ee.ui.traits
 import ee.ui.properties.Property
 
 trait Width {
-  private val _width = new Property(Double.NaN)
+  private val _width = new Property(0d)
   def width = _width
   def width_=(value: Double) = width.value = value
 }
 
 trait Height {
-  private val _height = new Property(Double.NaN)
+  private val _height = new Property(0d)
   def height = _height
   def height_=(value: Double) = height.value = value
 }

@@ -29,5 +29,5 @@ object DummyPulseEvent extends PulseEvent {
       }
     }
   }
-  timer start
+  timer.start
 }

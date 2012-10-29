@@ -1,5 +1,7 @@
 package ee.ui.properties
 
+import language.implicitConversions
+
 class PropertyChangeCollector(properties: PropertyChangeHandler*) {
 
   def applyChanges: Unit = properties foreach (_.applyChanges)
