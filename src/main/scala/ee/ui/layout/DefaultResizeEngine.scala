@@ -100,7 +100,6 @@ class DefaultResizeEngine {
       val result =
         (accumulatorEntries foldLeft start) { (acc, entry) =>
 
-          entry.commands foreach (_.execute)
           accumulationFunction(acc, entry.value)
         }
 
@@ -108,13 +107,13 @@ class DefaultResizeEngine {
     }
   }
 
-  class AccumulatorEntry[T](val commands: Vector[Command], retrieveValue: => T) {
-    def value: T = retrieveValue
+  case class AccumulatorEntry[T](val commands: Vector[Command], retrieveValue:() => T) {
+    def value: T = {
+      commands foreach (_.execute)
+      retrieveValue()
+    }
   }
 
-  object AccumulatorEntry {
-    def apply[T](commands: Vector[Command], retrieveValue: => T) = new AccumulatorEntry(commands, retrieveValue)
-  }
 
   def groupCommands(group: Group with ParentRelatedSize, parent: LayoutSize): Vector[Command] = {
     ResizeBothCommand(group, parent) +:
@@ -197,9 +196,11 @@ class DefaultResizeEngine {
 
           val (directCommands, accumulatorEntries, afterSelfResizeCommands) = information
 
-          (directCommands ++ parentWidthKnownCommands(group, child, determineWidthCommands),
-            accumulatorEntries :+ AccumulatorEntry[T](determineHeightCommands(child), childSize(child)),
-            afterSelfResizeCommands ++ parentHeightKnownCommands(group, child, dontDetermineSizeCommands))
+          def childSizeWrapper() = childSize(child)
+          
+          (directCommands ++ directChildSizeCommands(group, child),
+            accumulatorEntries :+ AccumulatorEntry[T](accumulatorSizeCommands(child), childSizeWrapper),
+            afterSelfResizeCommands ++ delayedSizeCommands(group, child))
         }
 
       implicit val access = RestrictedAccess

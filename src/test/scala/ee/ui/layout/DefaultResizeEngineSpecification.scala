@@ -11,20 +11,10 @@ object DefaultResizeEngineSpecification extends Specification {
 
   val engine = new DefaultResizeEngine
 
-  val --- = null //only here to fix a printing bug in specs2
-
   import engine._
 
   def is =
     "Unit tests on methods" ^
-      {
-        ---
-        "multiline example"
-        "is fixed with"
-        "the ---"
-        success
-      } ^
-      p ^
       """ accumulation methods
       
       	These methods are used to determine the size of a group based on it's 
@@ -32,7 +22,7 @@ object DefaultResizeEngineSpecification extends Specification {
       	The default implementation simply returns the the largest of the two. 
       	When a Layout is present however, that should be used to determine the outcome.
       """ ^
-      p ^
+      br ^
       { widthAccumulation(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
       { widthAccumulation(new TestGroup with TestLayout)(1, 2) must_== 4 } ^
       { heightAccumulation(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
@@ -40,13 +30,13 @@ object DefaultResizeEngineSpecification extends Specification {
       { sizeAccumulation(new TestGroup)((1, 2), (3, 4)) must_== (math.max(1, 3), math.max(2, 4)) } ^
       { sizeAccumulation(new TestGroup with TestLayout)((2, 1), (1, 2)) must_== (4, 5) } ^
       p ^
-      """ determine size command gathering
+      """ Determine size command gathering
       
       	These commands are called with nodes as arguments, they however react only to 
       	groups. On top of that, they only react to groups that are not dependent on 
       	their parents for size. In short they resize groups to their children.
       """ ^
-      p ^
+      br ^
       { determineSizeCommands(new TestNode) must be empty } ^
       { determineSizeCommands(new TestGroup) must be empty } ^
       { determineSizeCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
@@ -66,7 +56,7 @@ object DefaultResizeEngineSpecification extends Specification {
       
       	These are the commands that will eventually be executed
       """ ^
-      p ^
+      br ^
       { //ResizeBothCommand
         val node = new TestNode with PercentageBasedSize
         ResizeBothCommand(node, new TestGroup { width = 1; height = 2; }).execute
@@ -82,11 +72,107 @@ object DefaultResizeEngineSpecification extends Specification {
         ResizeHeightCommand(node, new TestGroup { width = 1; height = 2; }).execute
         (node.width.value must_== 0) and (node.height.value must_== 2)
       } ^
+      { //AccumulatorEntry
+        var result = false
+
+        val command = TestCommand({ result = true })
+
+        val value = AccumulatorEntry(commands = Vector(command), retrieveValue = () => 0).value
+
+        (result must_== true) and (value must_== 0)
+      } ^
+      { //AccumulatorCommand
+        val entries = Seq(AccumulatorEntry(commands = Vector.empty, retrieveValue = () => 2),
+          AccumulatorEntry(commands = Vector.empty, retrieveValue = () => 3))
+
+        var result = 0
+
+        AccumulatorCommand[Int](accumulatorEntries = entries,
+          start = 1,
+          accumulationFunction = { _ + _ },
+          applyResult = { result = _ }).execute
+
+        result must_== 6
+      } ^
+      p ^
+      """ Helper methods
+      
+      	These methods help with the readability of the other code and should return 
+      	an empty vector.
+      """ ^
+      br ^
+      { dontDetermineSizeCommands(new TestNode) must be empty } ^
+      { dontDetermineWidthCommands(new TestGroup, new TestNode) must be empty } ^
+      { dontDetermineHeightCommands(new TestGroup, new TestNode) must be empty } ^
+      { parentSizeUnknownCommands(new TestGroup, new TestNode) must be empty } ^
+      p ^
+      """ Group determine size commands
+      
+      	The underlying method they use is `resizeToChildrenCommands`. This is quite a complex 
+      	method. In order for me to keep sane the `groupDetermineXCommands` handle all use 
+      	cases and `resizeToChildrenCommands` is never called outside of those methods. 
+      """ ^
+      br ^
+      { //resizeToChildrenCommands
+        val group = new TestGroup { children(new TestNode) }
+
+        val childSize = 2
+        val Def1 = (a: Int, b: Int) => 0
+        val Def2 = (n: Node) => childSize
+        val Def3 = (i: Int) => {}
+
+        val commands = resizeToChildrenCommands[Int](group)(
+          start = 1,
+          accumulator = Def1,
+          childSize = Def2,
+          applyResult = Def3)(
+            directChildSizeCommands = { (g, n) => Vector(NamedCommand("directChildSize")) },
+            accumulatorSizeCommands = { n => Vector(NamedCommand("accumulateSizeCommand")) },
+            delayedSizeCommands = { (g, n) => Vector(NamedCommand("delayedSizeCommand")) })
+
+        commands must beLike {
+          case Vector(
+            NamedCommand("directChildSize"),
+            AccumulatorCommand(Seq(
+              AccumulatorEntry(Vector(NamedCommand("accumulateSizeCommand")), def0)),
+              1, Def1, Def3),
+            NamedCommand("delayedSizeCommand")) => def0() must_== childSize
+        }
+      } ^
+      { //groupDetermineSizeCommands
+
+        val group = new TestGroup {
+          children(
+            new TestNode { width = 1; height = 2 },
+            new TestNode { width = 3; height = 4 })
+        }
+
+        val commands = groupDetermineSizeCommands(group)
+
+        commands must beLike {
+          case Vector(AccumulatorCommand(Seq(
+            AccumulatorEntry(c1, _), AccumulatorEntry(c2, _)), _, _, _)) =>
+            (c1 must be empty) and (c2 must be empty)
+        }
+      } ^
       end
 
+  case class NamedCommand(name: String) extends Command { def execute = {} }
+
+  class TestCommand(command: => Unit) extends Command {
+    def execute = command
+  }
+  object TestCommand {
+    def apply(command: => Unit) = new TestCommand(command)
+  }
+
+  trait TestSize {
+    var size = 0
+  }
+
   //added RestrictedAccess so we can manually set sizes
-  class TestNode extends Node with RestrictedAccess
-  class TestGroup extends Group with RestrictedAccess
+  class TestNode extends Node with TestSize with RestrictedAccess
+  class TestGroup extends Group with TestSize with RestrictedAccess
 
   trait TestLayout extends Layout { self: Group =>
     def calculateWidth(node: PercentageBasedWidth): Width = 0
