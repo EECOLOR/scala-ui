@@ -1,188 +1,101 @@
 package ee.ui.layout
 
 import org.specs2.Specification
+import ee.ui.traits.ExplicitSize
 import ee.ui.Group
 import ee.ui.Node
-import language.postfixOps
-import ee.ui.traits.RestrictedAccess
+import ee.ui.properties.ReadOnlyProperty
 
 object DefaultResizeEngineSpecification extends Specification {
-  "DefaultResizeEngine Specification".title
-
-  val engine = new DefaultResizeEngine
-
-  import engine._
 
   def is =
-    "Unit tests on methods" ^
-      """ accumulation methods
-      
-      	These methods are used to determine the size of a group based on it's 
-      	children. The initial call is like acc(totalHeight = 0, nodeHeight = 100).
-      	The default implementation simply returns the the largest of the two. 
-      	When a Layout is present however, that should be used to determine the outcome.
+    "DefaultResizeEngine specification".title ^
+      """ Introduction
+    
+    	Resizing is an important part of layout. It's also quite complex. The default
+    	engine first determines a set of commands and then executes all those commands. 
+    	The reason for this is that I found it tough to mix the actual resizing with 
+    	first gathering a set of commands, the code became messy very fast.
+    	
+    	The engine takes into account the following types when calculating sizes:
+    		
+    		- Node
+    		- Group
+    		- ParentRelatedSize
+    		- ParentRelatedWidth
+    		- ParentRelatedHeight
+    		- Layout
+    	
+    	Note that the parent related sizes can be mixed onto Node and Group. Layout can 
+    	only be mixed onto Group.
+    
+    	If a Group's size is not parent related, it will be resized to it's children. If 
+    	the Group has a Layout, the layout is used to determine it's size. Node sizes are 
+    	not changed if they are not parent related.
+    
+    	The `adjustSize` method in the examples uses a root node with width 200 and height 100
       """ ^
       br ^
-      { widthAccumulation(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
-      { widthAccumulation(new TestGroup with TestLayout)(1, 2) must_== 4 } ^
-      { heightAccumulation(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
-      { heightAccumulation(new TestGroup with TestLayout)(1, 2) must_== 5 } ^
-      { sizeAccumulation(new TestGroup)((1, 2), (3, 4)) must_== (math.max(1, 3), math.max(2, 4)) } ^
-      { sizeAccumulation(new TestGroup with TestLayout)((2, 1), (1, 2)) must_== (4, 5) } ^
-      p ^
-      """ Determine size command gathering
-      
-      	These commands are called with nodes as arguments, they however react only to 
-      	groups. On top of that, they only react to groups that are not dependent on 
-      	their parents for size. In short they resize groups to their children.
-      """ ^
-      br ^
-      { determineSizeCommands(new TestNode) must be empty } ^
-      { determineSizeCommands(new TestGroup) must be empty } ^
-      { determineSizeCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineSizeCommands(new TestGroup with PercentageBasedSize { children(new TestNode) }) must be empty } ^
-      { determineWidthCommands(new TestNode) must be empty } ^
-      { determineWidthCommands(new TestGroup) must be empty } ^
-      { determineWidthCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineWidthCommands(new TestGroup with PercentageBasedHeight { children(new TestNode) }) must not be empty } ^
-      { determineWidthCommands(new TestGroup with PercentageBasedWidth { children(new TestNode) }) must be empty } ^
-      { determineHeightCommands(new TestNode) must be empty } ^
-      { determineHeightCommands(new TestGroup) must be empty } ^
-      { determineHeightCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineHeightCommands(new TestGroup with PercentageBasedWidth { children(new TestNode) }) must not be empty } ^
-      { determineHeightCommands(new TestGroup with PercentageBasedHeight { children(new TestNode) }) must be empty } ^
-      p ^
-      """ Commands
-      
-      	These are the commands that will eventually be executed
-      """ ^
-      br ^
-      { //ResizeBothCommand
-        val node = new TestNode with PercentageBasedSize
-        ResizeBothCommand(node, new TestGroup { width = 1; height = 2; }).execute
-        (node.width.value must_== 1) and (node.height.value must_== 2)
+      { // Do not change size of the node
+        val node = new Node with ExplicitSize { width = 10; height = 20 }
+
+        adjustSize(node)
+
+        (10d ==== node.width) and (20d ==== node.height)
       } ^
-      { //ResizeWidthCommand
-        val node = new TestNode with PercentageBasedSize
-        ResizeWidthCommand(node, new TestGroup { width = 1; height = 2; }).execute
-        (node.width.value must_== 1) and (node.height.value must_== 0)
+      { // Change size of the node
+        val node = new Node with PercentageBasedSize { percentWidth = 100; percentHeight = 100 }
+
+        adjustSize(node)
+
+        (200d ==== node.width) and (100d ==== node.height)
       } ^
-      { //ResizeHeightCommand
-        val node = new TestNode with PercentageBasedSize
-        ResizeHeightCommand(node, new TestGroup { width = 1; height = 2; }).execute
-        (node.width.value must_== 0) and (node.height.value must_== 2)
-      } ^
-      { //AccumulatorEntry
-        var result = false
-
-        val command = TestCommand({ result = true })
-
-        val value = AccumulatorEntry(commands = Vector(command), retrieveValue = () => 0).value
-
-        (result must_== true) and (value must_== 0)
-      } ^
-      { //AccumulatorCommand
-        val entries = Seq(AccumulatorEntry(commands = Vector.empty, retrieveValue = () => 2),
-          AccumulatorEntry(commands = Vector.empty, retrieveValue = () => 3))
-
-        var result = 0
-
-        AccumulatorCommand[Int](accumulatorEntries = entries,
-          start = 1,
-          accumulationFunction = { _ + _ },
-          applyResult = { result = _ }).execute
-
-        result must_== 6
-      } ^
-      p ^
-      """ Helper methods
-      
-      	These methods help with the readability of the other code and should return 
-      	an empty vector.
-      """ ^
-      br ^
-      { dontDetermineSizeCommands(new TestNode) must be empty } ^
-      { dontDetermineWidthCommands(new TestGroup, new TestNode) must be empty } ^
-      { dontDetermineHeightCommands(new TestGroup, new TestNode) must be empty } ^
-      { parentSizeUnknownCommands(new TestGroup, new TestNode) must be empty } ^
-      p ^
-      """ Group determine size commands
-      
-      	The underlying method they use is `resizeToChildrenCommands`. This is quite a complex 
-      	method. In order for me to keep sane the `groupDetermineXCommands` handle all use 
-      	cases and `resizeToChildrenCommands` is never called outside of those methods. 
-      """ ^
-      br ^
-      { //resizeToChildrenCommands
-        val group = new TestGroup { children(new TestNode) }
-
-        val childSize = 2
-        val Def1 = (a: Int, b: Int) => 0
-        val Def2 = (n: Node) => childSize
-        val Def3 = (i: Int) => {}
-
-        val commands = resizeToChildrenCommands[Int](group)(
-          start = 1,
-          accumulator = Def1,
-          childSize = Def2,
-          applyResult = Def3)(
-            directChildSizeCommands = { (g, n) => Vector(NamedCommand("directChildSize")) },
-            accumulatorSizeCommands = { n => Vector(NamedCommand("accumulateSizeCommand")) },
-            delayedSizeCommands = { (g, n) => Vector(NamedCommand("delayedSizeCommand")) })
-
-        commands must beLike {
-          case Vector(
-            NamedCommand("directChildSize"),
-            AccumulatorCommand(Seq(
-              AccumulatorEntry(Vector(NamedCommand("accumulateSizeCommand")), def0)),
-              1, Def1, Def3),
-            NamedCommand("delayedSizeCommand")) => def0() must_== childSize
-        }
-      } ^
-      { //groupDetermineSizeCommands
-
-        val group = new TestGroup {
-          children(
-            new TestNode { width = 1; height = 2 },
-            new TestNode { width = 3; height = 4 })
+      { // Change size of the group to the parent
+        val node = new Group with PercentageBasedSize {
+          percentWidth = 100; percentHeight = 100
+          children(new Node with ExplicitSize { width = 10; height = 20 })
         }
 
-        val commands = groupDetermineSizeCommands(group)
+        adjustSize(node)
 
-        commands must beLike {
-          case Vector(AccumulatorCommand(Seq(
-            AccumulatorEntry(c1, _), AccumulatorEntry(c2, _)), _, _, _)) =>
-            (c1 must be empty) and (c2 must be empty)
-        }
+        (200d ==== node.width) and (100d ==== node.height)
       } ^
+      { // Change size of the group to the child
+        val node = new Group {
+          children(new Node with ExplicitSize { width = 10; height = 20 })
+        }
+
+        adjustSize(node)
+
+        (10d ==== node.width) and (20d ==== node.height)
+      } ^
+      //TODO make this one example that captures all aspects
       end
 
-  case class NamedCommand(name: String) extends Command { def execute = {} }
-
-  class TestCommand(command: => Unit) extends Command {
-    def execute = command
-  }
-  object TestCommand {
-    def apply(command: => Unit) = new TestCommand(command)
-  }
-
-  trait TestSize {
-    var size = 0
-  }
-
-  //added RestrictedAccess so we can manually set sizes
-  class TestNode extends Node with TestSize with RestrictedAccess
-  class TestGroup extends Group with TestSize with RestrictedAccess
-
   trait TestLayout extends Layout { self: Group =>
-    def calculateWidth(node: PercentageBasedWidth): Width = 0
-    def calculateHeight(node: PercentageBasedWidth): Height = 1
-    def calculateWidth(node: AnchorBasedWidth): Width = 2
-    def calculateHeight(node: AnchorBasedHeight): Height = 3
+    def calculateWidth(node: PercentageBasedWidth): Width = node calculateWidth this
+    def calculateHeight(node: PercentageBasedHeight): Height = node calculateHeight this
+    def calculateWidth(node: AnchorBasedWidth): Width = ???
+    def calculateHeight(node: AnchorBasedHeight): Height = ???
 
-    def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width = 4
-    def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height = 5
+    def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width = 
+      totalWidth + nodeWidth
+      
+    def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height = 
+      totalHeight + nodeHeight
 
     def updateLayout: Unit = {}
   }
+
+  def adjustSize(node: Node): Unit = {
+    val engine = new DefaultResizeEngine
+
+    val rootNode = new Group with ExplicitSize {
+      width = 200
+      height = 100
+
+    }
+    engine.adjustSizeWithParent(rootNode, node)
+  }
+
 }

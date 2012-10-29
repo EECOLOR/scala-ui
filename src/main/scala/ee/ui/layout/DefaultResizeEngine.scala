@@ -8,7 +8,7 @@ import scala.collection.immutable.Vector
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
 
-//TODO build something so that only shizzle is measured if something has changed 
+//TODO build something so that only shizzle is measured if something has changed, also use LayoutClient.includeInLayout
 class DefaultResizeEngine {
 
   def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit = {
@@ -107,13 +107,12 @@ class DefaultResizeEngine {
     }
   }
 
-  case class AccumulatorEntry[T](val commands: Vector[Command], retrieveValue:() => T) {
+  case class AccumulatorEntry[T](val commands: Vector[Command], retrieveValue: () => T) {
     def value: T = {
       commands foreach (_.execute)
       retrieveValue()
     }
   }
-
 
   def groupCommands(group: Group with ParentRelatedSize, parent: LayoutSize): Vector[Command] = {
     ResizeBothCommand(group, parent) +:
@@ -135,13 +134,31 @@ class DefaultResizeEngine {
       groupDetermineWidthCommands(group: Group)(parentHeightKnownCommands(_: LayoutHeight, _: Node, determineHeightCommands))
   }
 
+  @inline def determineChildSize(node: Node): Size =
+    node match {
+      case node: ParentRelatedSize => (node.minWidth, node.minHeight)
+      case node => (node.width, node.height)
+    }
+
+  @inline def determineChildWidth(node: Node): Width =
+    node match {
+      case node: ParentRelatedSize => node.minWidth
+      case node => node.width
+    }
+
+  @inline def determineChildHeight(node: Node): Height =
+    node match {
+      case node: ParentRelatedSize => node.minHeight
+      case node => node.height
+    }
+
   def groupDetermineSizeCommands(group: Group): Vector[Command] = {
     implicit val access = RestrictedAccess
 
     resizeToChildrenCommands[Size](group)(
       start = (0d, 0d),
       accumulator = sizeAccumulation(group),
-      childSize = { child => (child.width, child.height) },
+      childSize = determineChildSize,
       applyResult = {
         case (width, height) =>
           group.width = width
@@ -158,7 +175,7 @@ class DefaultResizeEngine {
     resizeToChildrenCommands[Width](group)(
       start = 0d,
       accumulator = widthAccumulation(group),
-      childSize = _.width,
+      childSize = determineChildWidth,
       applyResult = group.width_=)(
         directChildSizeCommands = parentHeightKnownCommands,
         accumulatorSizeCommands = determineWidthCommands,
@@ -172,7 +189,7 @@ class DefaultResizeEngine {
     resizeToChildrenCommands[Height](group)(
       start = 0d,
       accumulator = heightAccumulation(group),
-      childSize = _.height,
+      childSize = determineChildHeight,
       applyResult = group.height_=)(
         directChildSizeCommands = parentWidthKnownCommands,
         accumulatorSizeCommands = determineHeightCommands,
@@ -197,7 +214,7 @@ class DefaultResizeEngine {
           val (directCommands, accumulatorEntries, afterSelfResizeCommands) = information
 
           def childSizeWrapper() = childSize(child)
-          
+
           (directCommands ++ directChildSizeCommands(group, child),
             accumulatorEntries :+ AccumulatorEntry[T](accumulatorSizeCommands(child), childSizeWrapper),
             afterSelfResizeCommands ++ delayedSizeCommands(group, child))

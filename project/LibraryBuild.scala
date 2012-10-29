@@ -8,7 +8,8 @@ object LibraryBuild extends Build {
 
   val appDependencies = Seq(
       "org.scala-lang" % "scala-actors" % "2.10.0-M7",
-      "org.specs2" % "specs2_2.10.0-M7" % "1.12.1.1" % "test")
+      "org.specs2" % "specs2_2.10.0-M7" % "1.12.1.1" % "test",
+      "org.mockito" % "mockito-all" % "1.9.5" % "test")
 
   lazy val root = Project(id = appName,
     base = file("."),
