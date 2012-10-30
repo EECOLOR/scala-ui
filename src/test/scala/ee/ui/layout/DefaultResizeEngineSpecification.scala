@@ -5,12 +5,27 @@ import ee.ui.traits.ExplicitSize
 import ee.ui.Group
 import ee.ui.Node
 import ee.ui.properties.ReadOnlyProperty
+import ee.ui.traits.LayoutSize
+import org.specs2.matcher.MatchResult
+import org.specs2.execute.Result
+import org.specs2.matcher.Matcher
+import ee.ui.traits.ExplicitWidth
+import ee.ui.traits.ExplicitHeight
+import ee.ui.traits.LayoutWidth
+import ee.ui.traits.LayoutHeight
 
 object DefaultResizeEngineSpecification extends Specification {
 
-  def is =
-    "DefaultResizeEngine specification".title ^
-      """ Introduction
+  val engine = new DefaultResizeEngine
+
+  def is = "DefaultResizeEngine specification".title ^
+    //hide ^ end
+    show ^ end
+
+  def hide = "Specification is hidden" ^ end
+
+  def show =
+    """ Introduction
     
     	Resizing is an important part of layout. It's also quite complex. The default
     	engine first determines a set of commands and then executes all those commands. 
@@ -24,78 +39,137 @@ object DefaultResizeEngineSpecification extends Specification {
     		- ParentRelatedSize
     		- ParentRelatedWidth
     		- ParentRelatedHeight
+    		- ExplicitSize
+  			- ExplicitWidth
+  			- ExplicitHeight
     		- Layout
     	
     	Note that the parent related sizes can be mixed onto Node and Group. Layout can 
     	only be mixed onto Group.
     
-    	If a Group's size is not parent related, it will be resized to it's children. If 
-    	the Group has a Layout, the layout is used to determine it's size. Node sizes are 
-    	not changed if they are not parent related.
+    	If a Group's size is not parent related or explicit, it will be resized to it's 
+    	children. If the Group has a Layout, the layout is used to determine it's size. 
+    	Node sizes are not changed if they are not parent related.
     
-    	The `adjustSize` method in the examples uses a root node with width 200 and height 100
+    	The example below shows a structure that captures all cases.
+    
+    	For testing I added a simple trait implemented by TestNode and TestGroup that 
+    	requires a name and allows us to expect a size.
       """ ^
       br ^
-      { // Do not change size of the node
-        val node = new Node with ExplicitSize { width = 10; height = 20 }
-
-        adjustSize(node)
-
-        (10d ==== node.width) and (20d ==== node.height)
-      } ^
-      { // Change size of the node
-        val node = new Node with PercentageBasedSize { percentWidth = 100; percentHeight = 100 }
-
-        adjustSize(node)
-
-        (200d ==== node.width) and (100d ==== node.height)
-      } ^
-      { // Change size of the group to the parent
-        val node = new Group with PercentageBasedSize {
-          percentWidth = 100; percentHeight = 100
-          children(new Node with ExplicitSize { width = 10; height = 20 })
+      { //
+        trait ParentRelatedWidth extends ee.ui.layout.ParentRelatedWidth { self: Node =>
+          def calculateWidth(parent: LayoutWidth): Width = parent.width / 2
+        }
+        trait ParentRelatedHeight extends ee.ui.layout.ParentRelatedHeight { self: Node =>
+          def calculateHeight(parent: LayoutHeight): Height = parent.height / 2
         }
 
-        adjustSize(node)
-
-        (200d ==== node.width) and (100d ==== node.height)
-      } ^
-      { // Change size of the group to the child
-        val node = new Group {
-          children(new Node with ExplicitSize { width = 10; height = 20 })
+        trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>
         }
 
-        adjustSize(node)
+        val scene = new LayoutSize with ExplicitSize { width = 200; height = 100 }
 
-        (10d ==== node.width) and (20d ==== node.height)
+        val root = new TestGroup with ParentRelatedSize {
+          val name = "root"
+          expectedSize(100, 50)
+          children(
+            new TestGroup with ParentRelatedSize {
+              val name = "group0"
+              expectedSize(50, 25)
+            },
+            new TestGroup with ParentRelatedWidth {
+              val name = "group1"
+              expectedSize(50, 0)
+            },
+            new TestGroup with ParentRelatedHeight {
+              val name = "group2"
+              expectedSize(0, 25)
+            },
+            new TestGroup with ExplicitSize {
+              val name = "group7"
+              width = 70
+              height = 20
+              expectedSize(70, 20)
+            },
+            new TestGroup with ExplicitWidth {
+              val name = "group8"
+              width = 70
+              expectedSize(70, 0)
+            },
+            new TestGroup with ExplicitHeight {
+              val name = "group9"
+              height = 20
+              expectedSize(0, 20)
+            },
+            new TestGroup {
+              val name = "group10"
+              expectedSize(0, 0)
+            },
+            new TestGroup with TestLayout {
+              val name = "group11"
+              expectedSize(0, 0)
+            })
+
+        }
+
+        engine.adjustSizeWithParent(scene, root)
+
+        checkResults(root)
       } ^
       //TODO make this one example that captures all aspects
       end
 
-  trait TestLayout extends Layout { self: Group =>
-    def calculateWidth(node: PercentageBasedWidth): Width = node calculateWidth this
-    def calculateHeight(node: PercentageBasedHeight): Height = node calculateHeight this
-    def calculateWidth(node: AnchorBasedWidth): Width = ???
-    def calculateHeight(node: AnchorBasedHeight): Height = ???
+  trait ExpectedSize { self: Node with LayoutSize =>
+    private var expectedWidth: Width = Double.NaN
+    private var expectedHeight: Height = Double.NaN
 
-    def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width = 
+    val name: String
+
+    def expectedSize(width: Width, height: Height) = {
+      expectedWidth = width
+      expectedHeight = height
+    }
+
+    def beExpected: Matcher[Size] = (size: Size) => {
+      val (width, height) = size
+
+      def displayName(node: Node with ExpectedSize): String =
+        node.parent.map(parent => displayName(parent.asInstanceOf[Node with ExpectedSize]) + " - ").getOrElse("") + node.name
+
+      val path = displayName(this)
+      (expectedWidth == width && expectedHeight == height, s"$path failed, expected ($expectedWidth,$expectedHeight), got $size")
+    }
+
+    def sizeExpected = (width.value, height.value) must beExpected
+  }
+
+  def checkResults(node: ExpectedSize): Result = {
+    node match {
+      case group: TestGroup => {
+        group.children.foldLeft(node.sizeExpected: Result) { (matcher, node) =>
+          matcher and checkResults(node.asInstanceOf[ExpectedSize])
+        }
+
+      }
+      case node => node.sizeExpected
+    }
+  }
+
+  trait TestNode extends Node with ExpectedSize
+  trait TestGroup extends Group with ExpectedSize
+
+  trait TestLayout extends Layout { self: Group =>
+    def calculateChildWidth(node: Node with ParentRelatedWidth): Width = node calculateWidth this
+    def calculateChildHeight(node: Node with ParentRelatedHeight): Height = node calculateHeight this
+
+    def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width =
       totalWidth + nodeWidth
-      
-    def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height = 
+
+    def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height =
       totalHeight + nodeHeight
 
     def updateLayout: Unit = {}
-  }
-
-  def adjustSize(node: Node): Unit = {
-    val engine = new DefaultResizeEngine
-
-    val rootNode = new Group with ExplicitSize {
-      width = 200
-      height = 100
-
-    }
-    engine.adjustSizeWithParent(rootNode, node)
   }
 
 }

@@ -7,10 +7,8 @@ import ee.ui.Node
 
 trait Layout extends Stylable { self: Group =>
 
-  def calculateWidth(node:PercentageBasedWidth):Width
-  def calculateHeight(node:PercentageBasedHeight):Height
-  def calculateWidth(node:AnchorBasedWidth):Width
-  def calculateHeight(node:AnchorBasedHeight):Height
+  def calculateChildWidth(node:Node with ParentRelatedWidth):Width
+  def calculateChildHeight(node:Node with ParentRelatedHeight):Height
   
   def determineTotalChildWidth(totalWidth:Double, nodeWidth:Double):Width
   def determineTotalChildHeight(totalHeight:Double, nodeHeight:Double):Height

@@ -7,15 +7,25 @@ import language.postfixOps
 import ee.ui.traits.RestrictedAccess
 import ee.ui.traits.LayoutSize
 import org.specs2.specification.Fragments
-/*
+import ee.ui.traits.ExplicitSize
+import ee.ui.traits.ExplicitHeight
+import ee.ui.traits.ExplicitWidth
+import ee.ui.traits.LayoutWidth
+import ee.ui.traits.LayoutHeight
+/**/
 object DefaultResizeEngineInternalsSpecification extends Specification {
-	
+
   val engine = new DefaultResizeEngine
 
   import engine._
 
-  def is = 
-    "DefaultResizeEngine internals Specification".title ^
+  def is = "DefaultResizeEngine internals Specification".title ^
+  //hide ^ end
+  show ^ end
+
+  def hide = "Specification is hidden" ^ end
+
+  def show =
     "Unit tests on methods" ^
       """ accumulation methods
       
@@ -37,12 +47,12 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       	If a child depends on it's parent for size, we use it's minimal size
       """ ^
       br ^
-      { determineChildSize(new TestNode {width = 1; height = 2}) must_== (1, 2) } ^
-      { determineChildSize(new TestNode with PercentageBasedSize {minWidth = 1; minHeight = 2}) must_== (1, 2) } ^
-      { determineChildWidth(new TestNode {width = 1}) must_== 1 } ^
-      { determineChildWidth(new TestNode with PercentageBasedSize {minWidth = 1}) must_== 1 } ^
-      { determineChildHeight(new TestNode {height = 1}) must_== 1 } ^
-      { determineChildHeight(new TestNode with PercentageBasedSize {minHeight = 1}) must_== 1 } ^
+      { determineChildSize(new TestNode { width = 1; height = 2 }) must_== (1, 2) } ^
+      { determineChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
+      { determineChildWidth(new TestNode { width = 1 }) must_== 1 } ^
+      { determineChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
+      { determineChildHeight(new TestNode { height = 1 }) must_== 1 } ^
+      { determineChildHeight(new TestNode with ParentRelatedSize { minHeight = 1 }) must_== 1 } ^
       p ^
       """ Determine size command gathering
       
@@ -54,17 +64,22 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       { determineSizeCommands(new TestNode) must be empty } ^
       { determineSizeCommands(new TestGroup) must be empty } ^
       { determineSizeCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineSizeCommands(new TestGroup with PercentageBasedSize { children(new TestNode) }) must be empty } ^
+      { determineSizeCommands(new TestGroup with ParentRelatedSize { children(new TestNode) }) must be empty } ^
+      { determineSizeCommands(new TestGroup with ExplicitSize { children(new TestNode) }) must be empty } ^
       { determineWidthCommands(new TestNode) must be empty } ^
       { determineWidthCommands(new TestGroup) must be empty } ^
       { determineWidthCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineWidthCommands(new TestGroup with PercentageBasedHeight { children(new TestNode) }) must not be empty } ^
-      { determineWidthCommands(new TestGroup with PercentageBasedWidth { children(new TestNode) }) must be empty } ^
+      { determineWidthCommands(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must not be empty } ^
+      { determineWidthCommands(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must be empty } ^
+      { determineWidthCommands(new TestGroup with ExplicitHeight { children(new TestNode) }) must not be empty } ^
+      { determineWidthCommands(new TestGroup with ExplicitWidth { children(new TestNode) }) must be empty } ^
       { determineHeightCommands(new TestNode) must be empty } ^
       { determineHeightCommands(new TestGroup) must be empty } ^
       { determineHeightCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineHeightCommands(new TestGroup with PercentageBasedWidth { children(new TestNode) }) must not be empty } ^
-      { determineHeightCommands(new TestGroup with PercentageBasedHeight { children(new TestNode) }) must be empty } ^
+      { determineHeightCommands(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must not be empty } ^
+      { determineHeightCommands(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must be empty } ^
+      { determineHeightCommands(new TestGroup with ExplicitWidth { children(new TestNode) }) must not be empty } ^
+      { determineHeightCommands(new TestGroup with ExplicitHeight { children(new TestNode) }) must be empty } ^
       p ^
       """ Commands
       
@@ -72,18 +87,18 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       """ ^
       br ^
       { //ResizeBothCommand
-        val node = new TestNode with PercentageBasedSize
-        ResizeBothCommand(node, new TestGroup { width = 1; height = 2; }).execute
+        val node = new TestNode with ParentRelatedSize
+        ResizeBothCommand(node, new TestGroup { width = 2; height = 4; }).execute
         (node.width.value must_== 1) and (node.height.value must_== 2)
       } ^
       { //ResizeWidthCommand
-        val node = new TestNode with PercentageBasedSize
-        ResizeWidthCommand(node, new TestGroup { width = 1; height = 2; }).execute
+        val node = new TestNode with ParentRelatedSize
+        ResizeWidthCommand(node, new TestGroup { width = 2; height = 4; }).execute
         (node.width.value must_== 1) and (node.height.value must_== 0)
       } ^
       { //ResizeHeightCommand
-        val node = new TestNode with PercentageBasedSize
-        ResizeHeightCommand(node, new TestGroup { width = 1; height = 2; }).execute
+        val node = new TestNode with ParentRelatedSize
+        ResizeHeightCommand(node, new TestGroup { width = 2; height = 4; }).execute
         (node.width.value must_== 0) and (node.height.value must_== 2)
       } ^
       { //AccumulatorEntry
@@ -146,10 +161,10 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
         commands must beLike {
           case Vector(
-            NamedCommand("directChildSize"), 
+            NamedCommand("directChildSize"),
             AccumulatorCommand(Seq(
               AccumulatorEntry(Vector(NamedCommand("accumulateSizeCommand")), def0)),
-              1, Def1, Def3), 
+              1, Def1, Def3),
             NamedCommand("delayedSizeCommand")) => def0() must_== childSize
         }
       } ^
@@ -158,7 +173,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         val group = new TestGroup {
           children(
             new TestNode,
-            new TestNode with PercentageBasedSize)
+            new TestNode with ParentRelatedSize)
         }
 
         val commands = groupDetermineSizeCommands(group)
@@ -167,8 +182,8 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
           case Vector(
             AccumulatorCommand(Seq(
               AccumulatorEntry(Vector(), _), AccumulatorEntry(Vector(), _)),
-              _, _, _), 
-            ResizeBothCommand(_: TestNode with PercentageBasedSize, _)
+              _, _, _),
+            ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
         }
       } ^
@@ -177,7 +192,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         val group = new TestGroup {
           children(
             new TestNode,
-            new TestNode with PercentageBasedSize)
+            new TestNode with ParentRelatedSize)
         }
 
         val commands = groupDetermineWidthCommands(group)(dontDetermineHeightCommands)
@@ -186,8 +201,8 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
           case Vector(
             AccumulatorCommand(Seq(
               AccumulatorEntry(Vector(), _), AccumulatorEntry(Vector(), _)),
-              _, _, _), 
-            ResizeWidthCommand(_: TestNode with PercentageBasedSize, _)
+              _, _, _),
+            ResizeWidthCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
         }
       } ^ end
@@ -201,20 +216,26 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
     def apply(command: => Unit) = new TestCommand(command)
   }
 
-  //added RestrictedAccess so we can manually set sizes
   class TestNode extends Node with RestrictedAccess
   class TestGroup extends Group with RestrictedAccess
 
-  trait TestLayout extends Layout { self: Group =>
-    def calculateWidth(node: PercentageBasedWidth): Width = 0
-    def calculateHeight(node: PercentageBasedWidth): Height = 1
-    def calculateWidth(node: AnchorBasedWidth): Width = 2
-    def calculateHeight(node: AnchorBasedHeight): Height = 3
+  trait ParentRelatedWidth extends ee.ui.layout.ParentRelatedWidth { self: Node =>
+    def calculateWidth(parent: LayoutWidth): Width = parent.width / 2
+  }
+  trait ParentRelatedHeight extends ee.ui.layout.ParentRelatedHeight { self: Node =>
+    def calculateHeight(parent: LayoutHeight): Height = parent.height / 2
+  }
 
+  trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>
+  }
+
+  trait TestLayout extends Layout { self: Group =>
+    def calculateChildWidth(node: Node with ee.ui.layout.ParentRelatedWidth): Width = 2
+    def calculateChildHeight(node: Node with ee.ui.layout.ParentRelatedHeight): Height = 3
     def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width = 4
     def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height = 5
 
     def updateLayout: Unit = {}
   }
 }
-*/
+/**/

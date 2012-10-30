@@ -10,17 +10,13 @@ import ee.ui.traits.LayoutHeight
 
 trait PartialParentRelatedSize
 
-sealed trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
+trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
   def calculateWidth(parent: LayoutWidth): Width
 
   def adjustWidthTo(parent: LayoutWidth): Unit = {
     val newWidth =
       parent match {
-        case layout: Layout =>
-          this match {
-            case node: PercentageBasedSize => layout calculateWidth node
-            case node: AnchorBasedSize => layout calculateWidth node
-          }
+        case layout: Layout => layout calculateChildWidth this
         case parent => calculateWidth(parent)
       }
 
@@ -34,18 +30,14 @@ sealed trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
   def minWidth_=(value: Double) = _minWidth.value = value
 }
 
-sealed trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =>
+trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =>
 
   def calculateHeight(parent: LayoutHeight): Height
 
   def adjustHeightTo(parent: LayoutHeight): Unit = {
     val newHeight =
       parent match {
-        case layout: Layout =>
-          this match {
-            case node: PercentageBasedSize => layout calculateHeight node
-            case node: AnchorBasedSize => layout calculateHeight node
-          }
+        case layout: Layout => layout calculateChildHeight this
         case parent => calculateHeight(parent)
       }
 
@@ -62,7 +54,7 @@ sealed trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =
 trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 
   override def calculateWidth(parent: LayoutWidth): Width =
-    (percentWidth / 100) * parent.width
+    (percentWidth / 100d) * parent.width
 
   private val _percentWidth = new Property(100)
   def percentWidth = _percentWidth
@@ -72,7 +64,7 @@ trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 trait PercentageBasedHeight extends ParentRelatedHeight { self: Node =>
 
   override def calculateHeight(parent: LayoutHeight): Height =
-    (percentHeight / 100) * parent.height
+    (percentHeight / 100d) * parent.height
 
   private val _percentHeight = new Property(100)
   def percentHeight = _percentHeight

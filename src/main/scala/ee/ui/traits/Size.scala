@@ -26,11 +26,13 @@ trait LayoutHeight extends Height {
 
 trait LayoutSize extends Size with LayoutWidth with LayoutHeight
 
-trait ExplicitWidth extends LayoutWidth {
+trait PartialExplicitSize
+
+trait ExplicitWidth extends LayoutWidth with PartialExplicitSize {
 	override def width_=(value: Double) = super.width_=(value)(RestrictedAccess)
 }
 
-trait ExplicitHeight extends LayoutHeight {
+trait ExplicitHeight extends LayoutHeight with PartialExplicitSize {
 	override def height_=(value: Double) = super.height_=(value)(RestrictedAccess)
 }
 

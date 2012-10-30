@@ -7,8 +7,14 @@ import ee.ui.traits.RestrictedAccess
 import scala.collection.immutable.Vector
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
+import ee.ui.traits.ExplicitHeight
+import ee.ui.traits.ExplicitSize
+import ee.ui.traits.PartialExplicitSize
+import ee.ui.traits.ExplicitWidth
 
-//TODO build something so that only shizzle is measured if something has changed, also use LayoutClient.includeInLayout
+//TODO build something so that only shizzle is measured if something has changed, 
+//     also use LayoutClient.includeInLayout
+//TODO maybe implement the commands as streams?
 class DefaultResizeEngine {
 
   def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit = {
@@ -27,21 +33,24 @@ class DefaultResizeEngine {
 
   def determineSizeCommands(node: Node): Vector[Command] =
     node match {
-      case both: PartialParentRelatedSize => noCommands
+      case explicit: PartialExplicitSize => noCommands
+      case parentRelated: PartialParentRelatedSize => noCommands
       case group: Group => groupDetermineSizeCommands(group)
       case node => noCommands
     }
 
   def determineWidthCommands(node: Node): Vector[Command] =
     node match {
-      case both: ParentRelatedWidth => noCommands
+      case explicit: ExplicitWidth => noCommands
+      case parentRelated: ParentRelatedWidth => noCommands
       case group: Group => groupDetermineWidthCommands(group)(dontDetermineHeightCommands)
       case node => noCommands
     }
 
   def determineHeightCommands(node: Node): Vector[Command] =
     node match {
-      case group: ParentRelatedHeight => noCommands
+      case explicit: ExplicitHeight => noCommands
+      case parentRelated: ParentRelatedHeight => noCommands
       case group: Group => groupDetermineHeightCommands(group)(dontDetermineWidthCommands)
       case node => noCommands
     }
@@ -118,7 +127,7 @@ class DefaultResizeEngine {
     ResizeBothCommand(group, parent) +:
       //since we have resized the group it's safe to create commands for all children
       (group.children foldLeft Vector[Command]()) { (commands, child) =>
-        commands ++ parentSizeKnownCommands(parent, child, determineSizeCommands)
+        commands ++ parentSizeKnownCommands(group, child, determineSizeCommands)
       }
   }
 
