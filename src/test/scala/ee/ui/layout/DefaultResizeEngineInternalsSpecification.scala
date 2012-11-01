@@ -27,7 +27,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
   def show =
     "Unit tests on methods" ^
-      """ accumulation methods
+      """ accumulator methods
       
       	These methods are used to determine the size of a group based on it's 
       	children. The initial call is like acc(totalHeight = 0, nodeHeight = 100).
@@ -35,51 +35,53 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       	When a Layout is present however, that should be used to determine the outcome.
       """ ^
       br ^
-      { widthAccumulation(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
-      { widthAccumulation(new TestGroup with TestLayout)(1, 2) must_== 4 } ^
-      { heightAccumulation(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
-      { heightAccumulation(new TestGroup with TestLayout)(1, 2) must_== 5 } ^
-      { sizeAccumulation(new TestGroup)((1, 2), (3, 4)) must_== (math.max(1, 3), math.max(2, 4)) } ^
-      { sizeAccumulation(new TestGroup with TestLayout)((2, 1), (1, 2)) must_== (4, 5) } ^
+      { determineWidthAccumulator(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
+      { determineWidthAccumulator(new TestGroup with TestLayout)(1, 2) must_== 4 } ^
+      { determineHeightAccumulator(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
+      { determineHeightAccumulator(new TestGroup with TestLayout)(1, 2) must_== 5 } ^
+      { determineSizeAccumulator(new TestGroup)((1, 2), (3, 4)) must_== (math.max(1, 3), math.max(2, 4)) } ^
+      { determineSizeAccumulator(new TestGroup with TestLayout)((2, 1), (1, 2)) must_== (4, 5) } ^
       p ^
       """ Determine child size methods
       
       	If a child depends on it's parent for size, we use it's minimal size
       """ ^
       br ^
-      { determineChildSize(new TestNode { width = 1; height = 2 }) must_== (1, 2) } ^
-      { determineChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
-      { determineChildWidth(new TestNode { width = 1 }) must_== 1 } ^
-      { determineChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
-      { determineChildHeight(new TestNode { height = 1 }) must_== 1 } ^
-      { determineChildHeight(new TestNode with ParentRelatedSize { minHeight = 1 }) must_== 1 } ^
+      { getChildSize(new TestNode { width = 1; height = 2 }) must_== (1, 2) } ^
+      { getChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
+      { getChildSize(new TestNode with ParentRelatedWidth { minWidth = 1; height = 2 }) must_== (1, 2) } ^
+      { getChildSize(new TestNode with ParentRelatedHeight { width = 1; minHeight = 2 }) must_== (1, 2) } ^
+      { getChildWidth(new TestNode { width = 1 }) must_== 1 } ^
+      { getChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
+      { getChildHeight(new TestNode { height = 1 }) must_== 1 } ^
+      { getChildHeight(new TestNode with ParentRelatedSize { minHeight = 1 }) must_== 1 } ^
       p ^
-      """ Determine size command gathering
+      """ Determine size methods
       
       	These commands are called with nodes as arguments, they however react only to 
       	groups. On top of that, they only react to groups that are not dependent on 
       	their parents for size. In short they resize groups to their children.
       """ ^
       br ^
-      { determineSizeCommands(new TestNode) must be empty } ^
-      { determineSizeCommands(new TestGroup) must be empty } ^
-      { determineSizeCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineSizeCommands(new TestGroup with ParentRelatedSize { children(new TestNode) }) must be empty } ^
-      { determineSizeCommands(new TestGroup with ExplicitSize { children(new TestNode) }) must be empty } ^
-      { determineWidthCommands(new TestNode) must be empty } ^
-      { determineWidthCommands(new TestGroup) must be empty } ^
-      { determineWidthCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineWidthCommands(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must not be empty } ^
-      { determineWidthCommands(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must be empty } ^
-      { determineWidthCommands(new TestGroup with ExplicitHeight { children(new TestNode) }) must not be empty } ^
-      { determineWidthCommands(new TestGroup with ExplicitWidth { children(new TestNode) }) must be empty } ^
-      { determineHeightCommands(new TestNode) must be empty } ^
-      { determineHeightCommands(new TestGroup) must be empty } ^
-      { determineHeightCommands(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineHeightCommands(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must not be empty } ^
-      { determineHeightCommands(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must be empty } ^
-      { determineHeightCommands(new TestGroup with ExplicitWidth { children(new TestNode) }) must not be empty } ^
-      { determineHeightCommands(new TestGroup with ExplicitHeight { children(new TestNode) }) must be empty } ^
+      { determineSize(new TestNode) must be empty } ^
+      { determineSize(new TestGroup) must be empty } ^
+      { determineSize(new TestGroup { children(new TestNode) }) must not be empty } ^
+      { determineSize(new TestGroup with ParentRelatedSize { children(new TestNode) }) must be empty } ^
+      { determineSize(new TestGroup with ExplicitSize { children(new TestNode) }) must be empty } ^
+      { determineWidth(new TestNode) must be empty } ^
+      { determineWidth(new TestGroup) must be empty } ^
+      { determineWidth(new TestGroup { children(new TestNode) }) must not be empty } ^
+      { determineWidth(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must not be empty } ^
+      { determineWidth(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must be empty } ^
+      { determineWidth(new TestGroup with ExplicitHeight { children(new TestNode) }) must not be empty } ^
+      { determineWidth(new TestGroup with ExplicitWidth { children(new TestNode) }) must be empty } ^
+      { determineHeight(new TestNode) must be empty } ^
+      { determineHeight(new TestGroup) must be empty } ^
+      { determineHeight(new TestGroup { children(new TestNode) }) must not be empty } ^
+      { determineHeight(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must not be empty } ^
+      { determineHeight(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must be empty } ^
+      { determineHeight(new TestGroup with ExplicitWidth { children(new TestNode) }) must not be empty } ^
+      { determineHeight(new TestGroup with ExplicitHeight { children(new TestNode) }) must be empty } ^
       p ^
       """ Commands
       
@@ -101,22 +103,22 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         ResizeHeightCommand(node, new TestGroup { width = 2; height = 4; }).execute
         (node.width.value must_== 0) and (node.height.value must_== 2)
       } ^
-      { //AccumulatorEntry
+      { //DetermineChildSize
         var result = false
 
         val command = TestCommand({ result = true })
 
-        val value = AccumulatorEntry(commands = Vector(command), retrieveValue = () => 0).value
+        val value = DetermineChildSize(commands = Vector(command), retrieveSize = () => 0).size
 
         (result must_== true) and (value must_== 0)
       } ^
-      { //AccumulatorCommand
-        val entries = Seq(AccumulatorEntry(commands = Vector.empty, retrieveValue = () => 2),
-          AccumulatorEntry(commands = Vector.empty, retrieveValue = () => 3))
+      { //ResizeToChildrenCommand
+        val entries = Seq(DetermineChildSize(commands = Vector.empty, retrieveSize = () => 2),
+          DetermineChildSize(commands = Vector.empty, retrieveSize = () => 3))
 
         var result = 0
 
-        AccumulatorCommand[Int](accumulatorEntries = entries,
+        ResizeToChildrenCommand[Int](childSizeDeterminationEntries = entries,
           start = 1,
           accumulationFunction = { _ + _ },
           applyResult = { result = _ }).execute
@@ -130,19 +132,19 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       	an empty vector.
       """ ^
       br ^
-      { dontDetermineSizeCommands(new TestNode) must be empty } ^
-      { dontDetermineWidthCommands(new TestGroup, new TestNode) must be empty } ^
-      { dontDetermineHeightCommands(new TestGroup, new TestNode) must be empty } ^
-      { parentSizeUnknownCommands(new TestGroup, new TestNode) must be empty } ^
+      { dontDetermineSize(new TestNode) must be empty } ^
+      { dontDetermineWidth(new TestGroup, new TestNode) must be empty } ^
+      { dontDetermineHeight(new TestGroup, new TestNode) must be empty } ^
+      { dontResizeChildren(new TestGroup, new TestNode) must be empty } ^
       p ^
-      """ Group determine size commands
+      """ Determine group size
       
-      	The underlying method they use is `resizeToChildrenCommands`. This is quite a complex 
-      	method. In order for me to keep sane the `groupDetermineXCommands` handle all use 
-      	cases and `resizeToChildrenCommands` is never called outside of those methods. 
+      	The underlying method they use is `resizeToChildren`. This is quite a complex 
+      	method. In order for me to keep sane the `determineGroupX` handle all use 
+      	cases and `resizeToChildren` is never called outside of those methods. 
       """ ^
       br ^
-      { //resizeToChildrenCommands
+      { //resizeToChildren
         val group = new TestGroup { children(new TestNode) }
 
         val childSize = 2
@@ -150,25 +152,25 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         val Def2 = (n: Node) => childSize
         val Def3 = (i: Int) => {}
 
-        val commands = resizeToChildrenCommands[Int](group)(
+        val commands = resizeToChildren[Int](group)(
           start = 1,
           accumulator = Def1,
           childSize = Def2,
           applyResult = Def3)(
-            directChildSizeCommands = { (g, n) => Vector(NamedCommand("directChildSize")) },
-            accumulatorSizeCommands = { n => Vector(NamedCommand("accumulateSizeCommand")) },
-            delayedSizeCommands = { (g, n) => Vector(NamedCommand("delayedSizeCommand")) })
+            directChildSizeModifications = { (g, n) => Vector(NamedCommand("directChildSize")) },
+            determineChildSizeFunction = { n => Vector(NamedCommand("accumulateSizeCommand")) },
+            delayedChildSizeModifications = { (g, n) => Vector(NamedCommand("delayedSizeCommand")) })
 
         commands must beLike {
           case Vector(
             NamedCommand("directChildSize"),
-            AccumulatorCommand(Seq(
-              AccumulatorEntry(Vector(NamedCommand("accumulateSizeCommand")), def0)),
+            ResizeToChildrenCommand(Seq(
+              DetermineChildSize(Vector(NamedCommand("accumulateSizeCommand")), def0)),
               1, Def1, Def3),
             NamedCommand("delayedSizeCommand")) => def0() must_== childSize
         }
       } ^
-      { //groupDetermineSizeCommands
+      { //determineGroupSize
 
         val group = new TestGroup {
           children(
@@ -176,18 +178,18 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
             new TestNode with ParentRelatedSize)
         }
 
-        val commands = groupDetermineSizeCommands(group)
+        val commands = determineGroupSize(group)
 
         commands must beLike {
           case Vector(
-            AccumulatorCommand(Seq(
-              AccumulatorEntry(Vector(), _), AccumulatorEntry(Vector(), _)),
+            ResizeToChildrenCommand(Seq(
+              DetermineChildSize(Vector(), _), DetermineChildSize(Vector(), _)),
               _, _, _),
-            ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
+              ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
         }
       } ^
-      { //groupDetermineWidthCommands
+      { //determineGroupWidth
 
         val group = new TestGroup {
           children(
@@ -195,12 +197,12 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
             new TestNode with ParentRelatedSize)
         }
 
-        val commands = groupDetermineWidthCommands(group)(dontDetermineHeightCommands)
+        val commands = determineGroupWidth(group)(dontDetermineHeight)
 
         commands must beLike {
           case Vector(
-            AccumulatorCommand(Seq(
-              AccumulatorEntry(Vector(), _), AccumulatorEntry(Vector(), _)),
+            ResizeToChildrenCommand(Seq(
+              DetermineChildSize(Vector(), _), DetermineChildSize(Vector(), _)),
               _, _, _),
             ResizeWidthCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok

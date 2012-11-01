@@ -109,6 +109,88 @@ object DefaultResizeEngineSpecification extends Specification {
             new TestGroup with TestLayout {
               val name = "group11"
               expectedSize(0, 0)
+            },
+            new TestGroup {
+              val name = "groep12"
+
+              expectedSize(60, 40)
+
+              children(
+                new TestNode {
+                  val name = "node1"
+                  expectedSize(0, 0)
+                },
+                new TestNode with ParentRelatedSize {
+                  val name = "node2"
+                  expectedSize(30, 20)
+                },
+                new TestNode with ParentRelatedWidth {
+                  val name = "node3"
+                  expectedSize(30, 0)
+                },
+                new TestNode with ParentRelatedHeight {
+                  val name = "node4"
+                  expectedSize(0, 20)
+                },
+                new TestNode with ExplicitSize {
+                  val name = "node5"
+                  width = 50
+                  height = 30
+                  expectedSize(50, 30)
+                },
+                new TestNode with ExplicitWidth {
+                  val name = "node6"
+                  width = 60
+                  expectedSize(60, 0)
+                },
+                new TestNode with ExplicitHeight {
+                  val name = "node7"
+                  height = 40
+                  expectedSize(0, 40)
+                })
+
+            },
+            new TestGroup with TestLayout {
+              val name = "groep13"
+              expectedSize(140, 84)
+              children(
+                new TestNode {
+                  val name = "node1"
+                  expectedSize(0, 0)
+                },
+                new TestNode with ParentRelatedSize {
+                  val name = "node2"
+                  minWidth = 20
+                  minHeight = 10
+                  expectedSize(70, 42)
+                },
+                new TestNode with ParentRelatedWidth {
+                  val name = "node3"
+                  minWidth = 10
+                  expectedSize(70, 0)
+                },
+                new TestNode with ParentRelatedHeight {
+                  val name = "node4"
+                  minHeight = 4
+                  expectedSize(0, 42)
+                },
+                new TestNode with ExplicitSize {
+                  val name = "node5"
+                  width = 50
+                  height = 30
+                  expectedSize(50, 30)
+                },
+                new TestNode with ExplicitWidth {
+                  val name = "node6"
+                  width = 60
+                  expectedSize(60, 0)
+                },
+                new TestNode with ExplicitHeight {
+                  val name = "node7"
+                  height = 40
+                  expectedSize(0, 40)
+                })
+
             })
 
         }
@@ -117,7 +199,6 @@ object DefaultResizeEngineSpecification extends Specification {
 
         checkResults(root)
       } ^
-      //TODO make this one example that captures all aspects
       end
 
   trait ExpectedSize { self: Node with LayoutSize =>
