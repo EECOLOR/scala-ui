@@ -108,13 +108,13 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
         val command = TestCommand({ result = true })
 
-        val value = DetermineChildSize(commands = Vector(command), retrieveSize = () => 0).size
+        val value = DetermineChildSize(commands = Stream(command), retrieveSize = () => 0).size
 
         (result must_== true) and (value must_== 0)
       } ^
       { //ResizeToChildrenCommand
-        val entries = Seq(DetermineChildSize(commands = Vector.empty, retrieveSize = () => 2),
-          DetermineChildSize(commands = Vector.empty, retrieveSize = () => 3))
+        val entries = Stream(DetermineChildSize(commands = Stream.empty, retrieveSize = () => 2),
+          DetermineChildSize(commands = Stream.empty, retrieveSize = () => 3))
 
         var result = 0
 
@@ -157,15 +157,15 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
           accumulator = Def1,
           childSize = Def2,
           applyResult = Def3)(
-            directChildSizeModifications = { (g, n) => Vector(NamedCommand("directChildSize")) },
-            determineChildSizeFunction = { n => Vector(NamedCommand("accumulateSizeCommand")) },
-            delayedChildSizeModifications = { (g, n) => Vector(NamedCommand("delayedSizeCommand")) })
+            directChildSizeModifications = { (g, n) => Stream(NamedCommand("directChildSize")) },
+            determineChildSizeFunction = { n => Stream(NamedCommand("accumulateSizeCommand")) },
+            delayedChildSizeModifications = { (g, n) => Stream(NamedCommand("delayedSizeCommand")) })
 
         commands must beLike {
-          case Vector(
+          case Stream(
             NamedCommand("directChildSize"),
             ResizeToChildrenCommand(Seq(
-              DetermineChildSize(Vector(NamedCommand("accumulateSizeCommand")), def0)),
+              DetermineChildSize(Stream(NamedCommand("accumulateSizeCommand")), def0)),
               1, Def1, Def3),
             NamedCommand("delayedSizeCommand")) => def0() must_== childSize
         }
@@ -181,9 +181,9 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         val commands = determineGroupSize(group)
 
         commands must beLike {
-          case Vector(
+          case Stream(
             ResizeToChildrenCommand(Seq(
-              DetermineChildSize(Vector(), _), DetermineChildSize(Vector(), _)),
+              DetermineChildSize(Stream(), _), DetermineChildSize(Stream(), _)),
               _, _, _),
               ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
@@ -200,9 +200,9 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         val commands = determineGroupWidth(group)(dontDetermineHeight)
 
         commands must beLike {
-          case Vector(
+          case Stream(
             ResizeToChildrenCommand(Seq(
-              DetermineChildSize(Vector(), _), DetermineChildSize(Vector(), _)),
+              DetermineChildSize(Stream(), _), DetermineChildSize(Stream(), _)),
               _, _, _),
             ResizeWidthCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok

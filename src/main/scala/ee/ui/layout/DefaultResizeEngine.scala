@@ -4,7 +4,7 @@ import ee.ui.traits.LayoutSize
 import ee.ui.Node
 import ee.ui.Group
 import ee.ui.traits.RestrictedAccess
-import scala.collection.immutable.Vector
+import scala.collection.immutable.Stream
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
 import ee.ui.traits.ExplicitHeight
@@ -14,7 +14,6 @@ import ee.ui.traits.ExplicitWidth
 
 //TODO build something so that only shizzle is measured if something has changed, 
 //     also use LayoutClient.includeInLayout
-//TODO maybe implement the commands as streams?
 class DefaultResizeEngine {
 
   def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit = {
@@ -25,13 +24,13 @@ class DefaultResizeEngine {
 
   type ParentRelatedSize = ParentRelatedWidth with ParentRelatedHeight
 
-  val noCommands = Vector.empty[Command]
+  val noCommands = Stream.empty[Command]
   @inline def dontDetermineSize(node: Node) = noCommands
   @inline def dontDetermineWidth(parent: Group, node: Node) = noCommands
   @inline def dontDetermineHeight(parent: Group, node: Node) = noCommands
-  @inline def dontResizeChildren(parent: Group, node: Node): Vector[Command] = noCommands
+  @inline def dontResizeChildren(parent: Group, node: Node): Stream[Command] = noCommands
 
-  def determineSize(node: Node): Vector[Command] =
+  def determineSize(node: Node): Stream[Command] =
     node match {
       case explicit: PartialExplicitSize => noCommands
       case parentRelated: PartialParentRelatedSize => noCommands
@@ -39,7 +38,7 @@ class DefaultResizeEngine {
       case node => noCommands
     }
 
-  def determineWidth(node: Node): Vector[Command] =
+  def determineWidth(node: Node): Stream[Command] =
     node match {
       case explicit: ExplicitWidth => noCommands
       case parentRelated: ParentRelatedWidth => noCommands
@@ -47,7 +46,7 @@ class DefaultResizeEngine {
       case node => noCommands
     }
 
-  def determineHeight(node: Node): Vector[Command] =
+  def determineHeight(node: Node): Stream[Command] =
     node match {
       case explicit: ExplicitHeight => noCommands
       case parentRelated: ParentRelatedHeight => noCommands
@@ -55,28 +54,28 @@ class DefaultResizeEngine {
       case node => noCommands
     }
 
-  def resizeWithParentSizeKnown(parent: LayoutSize, node: Node, determineSizeFunction: Node => Vector[Command]): Vector[Command] =
+  def resizeWithParentSizeKnown(parent: LayoutSize, node: Node, determineSizeFunction: Node => Stream[Command]): Stream[Command] =
     node match {
       case group: Group with ParentRelatedSize => resizeGroup(group, parent)
       case group: Group with ParentRelatedWidth => resizeGroup(group, parent)
       case group: Group with ParentRelatedHeight => resizeGroup(group, parent)
-      case node: ParentRelatedSize => Vector(ResizeBothCommand(node, parent))
-      case node: ParentRelatedWidth => Vector(ResizeWidthCommand(node, parent))
-      case node: ParentRelatedHeight => Vector(ResizeHeightCommand(node, parent))
+      case node: ParentRelatedSize => Stream(ResizeBothCommand(node, parent))
+      case node: ParentRelatedWidth => Stream(ResizeWidthCommand(node, parent))
+      case node: ParentRelatedHeight => Stream(ResizeHeightCommand(node, parent))
       case nodeOrGroup => determineSizeFunction(nodeOrGroup)
     }
 
-  def resizeWithParentWidthKnown(parent: LayoutWidth, node: Node, determineWidthFunction: Node => Vector[Command]): Vector[Command] =
+  def resizeWithParentWidthKnown(parent: LayoutWidth, node: Node, determineWidthFunction: Node => Stream[Command]): Stream[Command] =
     node match {
       case group: Group with ParentRelatedWidth => resizeGroup(group, parent)
-      case node: ParentRelatedWidth => Vector(ResizeWidthCommand(node, parent))
+      case node: ParentRelatedWidth => Stream(ResizeWidthCommand(node, parent))
       case nodeOrGroup => determineWidthFunction(nodeOrGroup)
     }
 
-  def resizeWithParentHeightKnown(parent: LayoutHeight, node: Node, determineHeightFunction: Node => Vector[Command]): Vector[Command] =
+  def resizeWithParentHeightKnown(parent: LayoutHeight, node: Node, determineHeightFunction: Node => Stream[Command]): Stream[Command] =
     node match {
       case group: Group with ParentRelatedHeight => resizeGroup(group, parent)
-      case node: ParentRelatedHeight => Vector(ResizeHeightCommand(node, parent))
+      case node: ParentRelatedHeight => Stream(ResizeHeightCommand(node, parent))
       case nodeOrGroup => determineHeightFunction(nodeOrGroup)
     }
 
@@ -100,7 +99,7 @@ class DefaultResizeEngine {
   }
 
   case class ResizeToChildrenCommand[T](
-    childSizeDeterminationEntries: Seq[DetermineChildSize[T]],
+    childSizeDeterminationEntries: Stream[DetermineChildSize[T]],
     start: T,
     accumulationFunction: (T, T) => T,
     applyResult: T => Unit) extends Command {
@@ -116,30 +115,30 @@ class DefaultResizeEngine {
     }
   }
 
-  case class DetermineChildSize[T](val commands: Vector[Command], retrieveSize: () => T) {
+  case class DetermineChildSize[T](val commands: Stream[Command], retrieveSize: () => T) {
     def size: T = {
       commands foreach (_.execute)
       retrieveSize()
     }
   }
 
-  def resizeGroup(group: Group with ParentRelatedSize, parent: LayoutSize): Vector[Command] = {
-    ResizeBothCommand(group, parent) +:
+  def resizeGroup(group: Group with ParentRelatedSize, parent: LayoutSize): Stream[Command] = {
+    ResizeBothCommand(group, parent) #::
       //since we have resized the group it's safe to create commands for all children
-      (group.children foldLeft Vector[Command]()) { (commands, child) =>
+      (group.children foldLeft Stream[Command]()) { (commands, child) =>
         commands ++ resizeWithParentSizeKnown(group, child, determineSize)
       }
   }
 
-  def resizeGroup(group: Group with ParentRelatedWidth, parent: LayoutWidth): Vector[Command] = {
+  def resizeGroup(group: Group with ParentRelatedWidth, parent: LayoutWidth): Stream[Command] = {
 
-    ResizeWidthCommand(group, parent) +:
+    ResizeWidthCommand(group, parent) #::
       determineGroupHeight(group)(resizeWithParentWidthKnown(_: LayoutWidth, _: Node, determineWidth))
   }
 
-  def resizeGroup(group: Group with ParentRelatedHeight, parent: LayoutHeight): Vector[Command] = {
+  def resizeGroup(group: Group with ParentRelatedHeight, parent: LayoutHeight): Stream[Command] = {
 
-    ResizeHeightCommand(group, parent) +:
+    ResizeHeightCommand(group, parent) #::
       determineGroupWidth(group: Group)(resizeWithParentHeightKnown(_: LayoutHeight, _: Node, determineHeight))
   }
 
@@ -163,7 +162,7 @@ class DefaultResizeEngine {
       case node => node.height
     }
 
-  def determineGroupSize(group: Group): Vector[Command] = {
+  def determineGroupSize(group: Group): Stream[Command] = {
     implicit val access = RestrictedAccess
 
     resizeToChildren[Size](group)(
@@ -180,7 +179,7 @@ class DefaultResizeEngine {
         delayedChildSizeModifications = resizeWithParentSizeKnown(_: LayoutSize, _: Node, dontDetermineSize))
   }
 
-  def determineGroupWidth(group: Group)(directChildHeightModifications: (Group, Node) => Vector[Command]): Vector[Command] = {
+  def determineGroupWidth(group: Group)(directChildHeightModifications: (Group, Node) => Stream[Command]): Stream[Command] = {
     implicit val access = RestrictedAccess
 
     resizeToChildren[Width](group)(
@@ -194,7 +193,7 @@ class DefaultResizeEngine {
 
   }
 
-  def determineGroupHeight(group: Group)(directChildWidthModifications: (Group, Node) => Vector[Command]): Vector[Command] = {
+  def determineGroupHeight(group: Group)(directChildWidthModifications: (Group, Node) => Stream[Command]): Stream[Command] = {
     implicit val access = RestrictedAccess
 
     resizeToChildren[Height](group)(
@@ -209,15 +208,15 @@ class DefaultResizeEngine {
 
   def resizeToChildren[T](group: Group)(
     start: T, accumulator: (T, T) => T, childSize: Node => T, applyResult: T => Unit)(
-      directChildSizeModifications: (Group, Node) => Vector[Command], 
-      determineChildSizeFunction: (Node) => Vector[Command], 
-      delayedChildSizeModifications: (Group, Node) => Vector[Command]): Vector[Command] = {
+      directChildSizeModifications: (Group, Node) => Stream[Command],
+      determineChildSizeFunction: (Node) => Stream[Command],
+      delayedChildSizeModifications: (Group, Node) => Stream[Command]): Stream[Command] = {
 
     val children = group.children
     if (children.isEmpty) noCommands
     else {
-      // these are the vectors we use to gather information while looping over the children
-      val startInformation = (Vector[Command](), Vector[DetermineChildSize[T]](), Vector[Command]())
+      // these are the Streams we use to gather information while looping over the children
+      val startInformation = (Stream[Command](), Stream[DetermineChildSize[T]](), Stream[Command]())
 
       val (directCommands, childSizeDeterminationEntries, afterSelfResizeCommands) =
         (children foldLeft startInformation) { (information, child) =>
@@ -226,9 +225,13 @@ class DefaultResizeEngine {
 
           def childSizeWrapper() = childSize(child)
 
-          (directCommands ++ directChildSizeModifications(group, child),
-            childSizeDeterminationEntries :+ DetermineChildSize[T](determineChildSizeFunction(child), childSizeWrapper),
-            afterSelfResizeCommands ++ delayedChildSizeModifications(group, child))
+          val newDirectCommands = directCommands ++ directChildSizeModifications(group, child)
+          val newChildSizeDeterminationEntries =
+            DetermineChildSize[T](determineChildSizeFunction(child), childSizeWrapper) #::
+              childSizeDeterminationEntries
+          val newAfterSelfResizeCommands = afterSelfResizeCommands ++ delayedChildSizeModifications(group, child)
+
+          (newDirectCommands, newChildSizeDeterminationEntries, newAfterSelfResizeCommands)
         }
 
       implicit val access = RestrictedAccess
@@ -239,7 +242,7 @@ class DefaultResizeEngine {
         accumulator,
         applyResult)
 
-      (directCommands :+ resizeToChildrenCommand) ++ afterSelfResizeCommands
+      directCommands ++ (resizeToChildrenCommand #:: afterSelfResizeCommands)
     }
   }
 
