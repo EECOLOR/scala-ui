@@ -115,19 +115,29 @@ class DefaultResizeEngine {
     }
   }
 
-  case class DetermineChildSize[T](val commands: Stream[Command], retrieveSize: () => T) {
+  case class DetermineChildSize[T](retrieveSize: () => T) {
     def size: T = {
-      commands foreach (_.execute)
       retrieveSize()
     }
   }
+
+  case class ChildrenResizedCommand(layout: Layout) extends Command {
+    def execute() = layout.childrenResized
+  }
+
+  def groupChildrenResizedCommand(group: Group): Stream[Command] =
+    group match {
+      case layout: Layout => Stream(ChildrenResizedCommand(layout))
+      case group => Stream.empty
+    }
 
   def resizeGroup(group: Group with ParentRelatedSize, parent: LayoutSize): Stream[Command] = {
     ResizeBothCommand(group, parent) #::
       //since we have resized the group it's safe to create commands for all children
       (group.children foldLeft Stream[Command]()) { (commands, child) =>
         commands ++ resizeWithParentSizeKnown(group, child, determineSize)
-      }
+      } ++
+      groupChildrenResizedCommand(group)
   }
 
   def resizeGroup(group: Group with ParentRelatedWidth, parent: LayoutWidth): Stream[Command] = {
@@ -144,36 +154,48 @@ class DefaultResizeEngine {
 
   @inline def getChildSize(node: Node): Size =
     node match {
-      case node: ParentRelatedSize => (node.minWidth, node.minHeight)
-      case node: ParentRelatedWidth => (node.minWidth, node.height)
-      case node: ParentRelatedHeight => (node.width, node.minHeight)
+      case node: ParentRelatedSize => (node.minRequiredWidth, node.minRequiredHeight)
+      case node: ParentRelatedWidth => (node.minRequiredWidth, node.height)
+      case node: ParentRelatedHeight => (node.width, node.minRequiredHeight)
       case node => (node.width, node.height)
     }
 
   @inline def getChildWidth(node: Node): Width =
     node match {
-      case node: ParentRelatedWidth => node.minWidth
+      case node: ParentRelatedWidth => node.minRequiredWidth
       case node => node.width
     }
 
   @inline def getChildHeight(node: Node): Height =
     node match {
-      case node: ParentRelatedHeight => node.minHeight
+      case node: ParentRelatedHeight => node.minRequiredHeight
       case node => node.height
     }
 
-  def determineGroupSize(group: Group): Stream[Command] = {
+  def updateGroupSize(group: Group)(size: Size): Unit = {
     implicit val access = RestrictedAccess
+    val (width, height) = size
+    group.width = width
+    group.height = height
+  }
+
+  def updateGroupWidth(group: Group)(width: Width): Unit = {
+    implicit val access = RestrictedAccess
+    group.width = width
+  }
+
+  def updateGroupHeight(group: Group)(height: Height): Unit = {
+    implicit val access = RestrictedAccess
+    group.height = height
+  }
+
+  def determineGroupSize(group: Group): Stream[Command] = {
 
     resizeToChildren[Size](group)(
       start = (0d, 0d),
       accumulator = determineSizeAccumulator(group),
       childSize = getChildSize,
-      applyResult = {
-        case (width, height) =>
-          group.width = width
-          group.height = height
-      })(
+      applyResult = updateGroupSize(group))(
         directChildSizeModifications = dontResizeChildren,
         determineChildSizeFunction = determineSize,
         delayedChildSizeModifications = resizeWithParentSizeKnown(_: LayoutSize, _: Node, dontDetermineSize))
@@ -186,7 +208,7 @@ class DefaultResizeEngine {
       start = 0d,
       accumulator = determineWidthAccumulator(group),
       childSize = getChildWidth,
-      applyResult = group.width_=)(
+      applyResult = updateGroupWidth(group))(
         directChildSizeModifications = directChildHeightModifications,
         determineChildSizeFunction = determineWidth,
         delayedChildSizeModifications = resizeWithParentWidthKnown(_: LayoutWidth, _: Node, dontDetermineSize))
@@ -200,7 +222,7 @@ class DefaultResizeEngine {
       start = 0d,
       accumulator = determineHeightAccumulator(group),
       childSize = getChildHeight,
-      applyResult = group.height_=)(
+      applyResult = updateGroupHeight(group))(
         directChildSizeModifications = directChildWidthModifications,
         determineChildSizeFunction = determineHeight,
         delayedChildSizeModifications = resizeWithParentHeightKnown(_: LayoutHeight, _: Node, dontDetermineSize))
@@ -225,10 +247,11 @@ class DefaultResizeEngine {
 
           def childSizeWrapper() = childSize(child)
 
-          val newDirectCommands = directCommands ++ directChildSizeModifications(group, child)
+          val newDirectCommands = directCommands ++
+            directChildSizeModifications(group, child) ++
+            determineChildSizeFunction(child)
           val newChildSizeDeterminationEntries =
-            DetermineChildSize[T](determineChildSizeFunction(child), childSizeWrapper) #::
-              childSizeDeterminationEntries
+            DetermineChildSize[T](childSizeWrapper) #:: childSizeDeterminationEntries
           val newAfterSelfResizeCommands = afterSelfResizeCommands ++ delayedChildSizeModifications(group, child)
 
           (newDirectCommands, newChildSizeDeterminationEntries, newAfterSelfResizeCommands)
@@ -242,7 +265,9 @@ class DefaultResizeEngine {
         accumulator,
         applyResult)
 
-      directCommands ++ (resizeToChildrenCommand #:: afterSelfResizeCommands)
+      directCommands ++
+        groupChildrenResizedCommand(group) ++
+        (resizeToChildrenCommand #:: afterSelfResizeCommands)
     }
   }
 
@@ -261,13 +286,13 @@ class DefaultResizeEngine {
   @inline def determineWidthAccumulator(group: Group): (Width, Width) => Width =
     group match {
       case layout: Layout => layout.determineTotalChildWidth
-      case group => math.max
+      case group => Layout.defaultSizeAccumulator
     }
 
   @inline def determineHeightAccumulator(group: Group): (Height, Height) => Height =
     group match {
       case layout: Layout => layout.determineTotalChildHeight
-      case group => math.max
+      case group => Layout.defaultSizeAccumulator
     }
 
 }

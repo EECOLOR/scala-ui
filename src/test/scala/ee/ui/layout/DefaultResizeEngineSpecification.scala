@@ -241,6 +241,8 @@ object DefaultResizeEngineSpecification extends Specification {
   trait TestGroup extends Group with ExpectedSize
 
   trait TestLayout extends Layout { self: Group =>
+    def childrenResized():Unit = {}
+    
     def calculateChildWidth(node: Node with ParentRelatedWidth): Width = node calculateWidth this
     def calculateChildHeight(node: Node with ParentRelatedHeight): Height = node calculateHeight this
 

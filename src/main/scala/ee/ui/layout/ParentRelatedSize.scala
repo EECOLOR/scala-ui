@@ -11,6 +11,8 @@ import ee.ui.traits.LayoutHeight
 trait PartialParentRelatedSize
 
 trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
+  
+  def minRequiredWidth:Width = minWidth
   def calculateWidth(parent: LayoutWidth): Width
 
   def adjustWidthTo(parent: LayoutWidth): Unit = {
@@ -32,6 +34,7 @@ trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
 
 trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =>
 
+  def minRequiredHeight:Height = minHeight
   def calculateHeight(parent: LayoutHeight): Height
 
   def adjustHeightTo(parent: LayoutHeight): Unit = {
@@ -53,6 +56,7 @@ trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =>
 
 trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 
+  override def minRequiredWidth = minWidth
   override def calculateWidth(parent: LayoutWidth): Width =
     (percentWidth / 100d) * parent.width
 
@@ -63,6 +67,7 @@ trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 
 trait PercentageBasedHeight extends ParentRelatedHeight { self: Node =>
 
+  override def minRequiredHeight = minHeight
   override def calculateHeight(parent: LayoutHeight): Height =
     (percentHeight / 100d) * parent.height
 
@@ -75,6 +80,9 @@ trait PercentageBasedSize extends PercentageBasedWidth with PercentageBasedHeigh
 
 trait AnchorBasedWidth extends ParentRelatedWidth { self: Node =>
 
+  override def minRequiredWidth = 
+    0d + minWidth + left + right
+    
   override def calculateWidth(parent: LayoutWidth): Width =
     parent.width - left - right
 
@@ -89,6 +97,9 @@ trait AnchorBasedWidth extends ParentRelatedWidth { self: Node =>
 
 trait AnchorBasedHeight extends ParentRelatedHeight { self: Node =>
 
+  override def minRequiredHeight = 
+    0d + minHeight + top + bottom
+  
   override def calculateHeight(parent: LayoutHeight): Height =
     parent.height - top - bottom
 

@@ -20,8 +20,8 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
   import engine._
 
   def is = "DefaultResizeEngine internals Specification".title ^
-  //hide ^ end
-  show ^ end
+    //hide ^ end
+    show ^ end
 
   def hide = "Specification is hidden" ^ end
 
@@ -51,6 +51,12 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       { getChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
       { getChildSize(new TestNode with ParentRelatedWidth { minWidth = 1; height = 2 }) must_== (1, 2) } ^
       { getChildSize(new TestNode with ParentRelatedHeight { width = 1; minHeight = 2 }) must_== (1, 2) } ^
+      { getChildSize(new TestNode with ParentRelatedSize { 
+    	  minWidth = 1
+    	  minHeight = 2
+    	  override def minRequiredWidth = 1d + minWidth
+    	  override def minRequiredHeight = 2d + minHeight
+        }) must_== (2, 4) } ^
       { getChildWidth(new TestNode { width = 1 }) must_== 1 } ^
       { getChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
       { getChildHeight(new TestNode { height = 1 }) must_== 1 } ^
@@ -104,17 +110,14 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         (node.width.value must_== 0) and (node.height.value must_== 2)
       } ^
       { //DetermineChildSize
-        var result = false
 
-        val command = TestCommand({ result = true })
+        val value = DetermineChildSize(retrieveSize = () => 0).size
 
-        val value = DetermineChildSize(commands = Stream(command), retrieveSize = () => 0).size
-
-        (result must_== true) and (value must_== 0)
+        value must_== 0
       } ^
       { //ResizeToChildrenCommand
-        val entries = Stream(DetermineChildSize(commands = Stream.empty, retrieveSize = () => 2),
-          DetermineChildSize(commands = Stream.empty, retrieveSize = () => 3))
+        val entries = Stream(DetermineChildSize(retrieveSize = () => 2),
+          DetermineChildSize(retrieveSize = () => 3))
 
         var result = 0
 
@@ -164,8 +167,9 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         commands must beLike {
           case Stream(
             NamedCommand("directChildSize"),
+            NamedCommand("accumulateSizeCommand"),
             ResizeToChildrenCommand(Seq(
-              DetermineChildSize(Stream(NamedCommand("accumulateSizeCommand")), def0)),
+              DetermineChildSize(def0)),
               1, Def1, Def3),
             NamedCommand("delayedSizeCommand")) => def0() must_== childSize
         }
@@ -183,9 +187,9 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         commands must beLike {
           case Stream(
             ResizeToChildrenCommand(Seq(
-              DetermineChildSize(Stream(), _), DetermineChildSize(Stream(), _)),
+              DetermineChildSize(_), DetermineChildSize(_)),
               _, _, _),
-              ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
+            ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
         }
       } ^
@@ -202,7 +206,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         commands must beLike {
           case Stream(
             ResizeToChildrenCommand(Seq(
-              DetermineChildSize(Stream(), _), DetermineChildSize(Stream(), _)),
+              DetermineChildSize(_), DetermineChildSize(_)),
               _, _, _),
             ResizeWidthCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
@@ -232,6 +236,8 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
   }
 
   trait TestLayout extends Layout { self: Group =>
+    def childrenResized(): Unit = {}
+
     def calculateChildWidth(node: Node with ee.ui.layout.ParentRelatedWidth): Width = 2
     def calculateChildHeight(node: Node with ee.ui.layout.ParentRelatedHeight): Height = 3
     def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width = 4
