@@ -27,20 +27,54 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
   def show =
     "Unit tests on methods" ^
-      """ accumulator methods
+      """ total child sizes
       
       	These methods are used to determine the size of a group based on it's 
-      	children. The initial call is like acc(totalHeight = 0, nodeHeight = 100).
-      	The default implementation simply returns the the largest of the two. 
-      	When a Layout is present however, that should be used to determine the outcome.
+      	children. The default implementation simply returns the size of the largest 
+    	child. When a Layout is present however, that should be used to determine 
+    	the outcome.
       """ ^
       br ^
-      { determineWidthAccumulator(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
-      { determineWidthAccumulator(new TestGroup with TestLayout)(1, 2) must_== 4 } ^
-      { determineHeightAccumulator(new TestGroup)(1, 2) must_== math.max(1, 2) } ^
-      { determineHeightAccumulator(new TestGroup with TestLayout)(1, 2) must_== 5 } ^
-      { determineSizeAccumulator(new TestGroup)((1, 2), (3, 4)) must_== (math.max(1, 3), math.max(2, 4)) } ^
-      { determineSizeAccumulator(new TestGroup with TestLayout)((2, 1), (1, 2)) must_== (4, 5) } ^
+      {
+        val group = new TestGroup {
+          children(new TestNode { width = 1 }, new TestNode { width = 2 })
+        }
+        determineTotalChildWidth(group)() must_== math.max(1, 2)
+      } ^
+      {
+        val group = new TestGroup with TestLayout {
+          children(new TestNode { width = 1 }, new TestNode { width = 2 })
+        }
+        determineTotalChildWidth(group)() must_== 4
+      } ^
+      {
+        val group = new TestGroup {
+          children(new TestNode { height = 1 }, new TestNode { height = 2 })
+        }
+        determineTotalChildHeight(group)() must_== math.max(1, 2)
+      } ^
+      {
+        val group = new TestGroup with TestLayout {
+          children(new TestNode { height = 1 }, new TestNode { height = 2 })
+        }
+        determineTotalChildHeight(group)() must_== 5
+      } ^
+      {
+        val group = new TestGroup {
+          children(
+            new TestNode { width = 1; height = 3 },
+            new TestNode { width = 2; height = 4 })
+        }
+        determineTotalChildSize(group)() must_== (math.max(1, 2), math.max(3, 4))
+      } ^
+      {
+        val group = new TestGroup with TestLayout {
+          children(
+            new TestNode { width = 1; height = 3 },
+            new TestNode { width = 2; height = 4 })
+        }
+        determineTotalChildSize(group)() must_== (4, 5)
+      } ^
       p ^
       """ Determine child size methods
       
@@ -51,12 +85,14 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       { getChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
       { getChildSize(new TestNode with ParentRelatedWidth { minWidth = 1; height = 2 }) must_== (1, 2) } ^
       { getChildSize(new TestNode with ParentRelatedHeight { width = 1; minHeight = 2 }) must_== (1, 2) } ^
-      { getChildSize(new TestNode with ParentRelatedSize { 
-    	  minWidth = 1
-    	  minHeight = 2
-    	  override def minRequiredWidth = 1d + minWidth
-    	  override def minRequiredHeight = 2d + minHeight
-        }) must_== (2, 4) } ^
+      {
+        getChildSize(new TestNode with ParentRelatedSize {
+          minWidth = 1
+          minHeight = 2
+          override def minRequiredWidth = 1d + minWidth
+          override def minRequiredHeight = 2d + minHeight
+        }) must_== (2, 4)
+      } ^
       { getChildWidth(new TestNode { width = 1 }) must_== 1 } ^
       { getChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
       { getChildHeight(new TestNode { height = 1 }) must_== 1 } ^
@@ -109,24 +145,17 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         ResizeHeightCommand(node, new TestGroup { width = 2; height = 4; }).execute
         (node.width.value must_== 0) and (node.height.value must_== 2)
       } ^
-      { //DetermineChildSize
-
-        val value = DetermineChildSize(retrieveSize = () => 0).size
-
-        value must_== 0
-      } ^
       { //ResizeToChildrenCommand
-        val entries = Stream(DetermineChildSize(retrieveSize = () => 2),
-          DetermineChildSize(retrieveSize = () => 3))
 
+        val determineChildSizeFunction = () => 8
         var result = 0
 
-        ResizeToChildrenCommand[Int](childSizeDeterminationEntries = entries,
-          start = 1,
-          accumulationFunction = { _ + _ },
+        ResizeToChildrenCommand[Int](
+          determineChildSizeFunction,
           applyResult = { result = _ }).execute
 
-        result must_== 6
+        result must_== 8
+
       } ^
       p ^
       """ Helper methods
@@ -151,27 +180,20 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         val group = new TestGroup { children(new TestNode) }
 
         val childSize = 2
-        val Def1 = (a: Int, b: Int) => 0
-        val Def2 = (n: Node) => childSize
-        val Def3 = (i: Int) => {}
+        val Def1 = () => childSize
+        val Def2 = (i: Int) => {}
 
         val commands = resizeToChildren[Int](group)(
-          start = 1,
-          accumulator = Def1,
-          childSize = Def2,
-          applyResult = Def3)(
+          determineChildSizeFunction = Def1,
+          applyResult = Def2)(
             directChildSizeModifications = { (g, n) => Stream(NamedCommand("directChildSize")) },
-            determineChildSizeFunction = { n => Stream(NamedCommand("accumulateSizeCommand")) },
             delayedChildSizeModifications = { (g, n) => Stream(NamedCommand("delayedSizeCommand")) })
 
         commands must beLike {
           case Stream(
             NamedCommand("directChildSize"),
-            NamedCommand("accumulateSizeCommand"),
-            ResizeToChildrenCommand(Seq(
-              DetermineChildSize(def0)),
-              1, Def1, Def3),
-            NamedCommand("delayedSizeCommand")) => def0() must_== childSize
+            ResizeToChildrenCommand(Def1, Def2),
+            NamedCommand("delayedSizeCommand")) => ok
         }
       } ^
       { //determineGroupSize
@@ -186,9 +208,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
         commands must beLike {
           case Stream(
-            ResizeToChildrenCommand(Seq(
-              DetermineChildSize(_), DetermineChildSize(_)),
-              _, _, _),
+            ResizeToChildrenCommand(_, _),
             ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
         }
@@ -205,9 +225,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
         commands must beLike {
           case Stream(
-            ResizeToChildrenCommand(Seq(
-              DetermineChildSize(_), DetermineChildSize(_)),
-              _, _, _),
+            ResizeToChildrenCommand(_, _),
             ResizeWidthCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
         }
@@ -240,8 +258,8 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
     def calculateChildWidth(node: Node with ee.ui.layout.ParentRelatedWidth): Width = 2
     def calculateChildHeight(node: Node with ee.ui.layout.ParentRelatedHeight): Height = 3
-    def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width = 4
-    def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height = 5
+    def determineTotalChildWidth(getChildWidth: Node => Width): Width = 4
+    def determineTotalChildHeight(getChildHeight: Node => Height): Height = 5
 
     def updateLayout: Unit = {}
   }

@@ -241,16 +241,16 @@ object DefaultResizeEngineSpecification extends Specification {
   trait TestGroup extends Group with ExpectedSize
 
   trait TestLayout extends Layout { self: Group =>
-    def childrenResized():Unit = {}
-    
+    def childrenResized(): Unit = {}
+
     def calculateChildWidth(node: Node with ParentRelatedWidth): Width = node calculateWidth this
     def calculateChildHeight(node: Node with ParentRelatedHeight): Height = node calculateHeight this
 
-    def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width =
-      totalWidth + nodeWidth
+    def determineTotalChildWidth(getChildWidth: Node => Width): Width =
+      (children foldLeft 0d) { (total, node) => total + getChildWidth(node) }
 
-    def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height =
-      totalHeight + nodeHeight
+    def determineTotalChildHeight(getChildHeight: Node => Height): Height =
+      (children foldLeft 0d) { (total, node) => total + getChildHeight(node) }
 
     def updateLayout: Unit = {}
   }

@@ -28,8 +28,8 @@ trait Layout extends Stylable { self: Group =>
   def calculateChildWidth(node: Node with ParentRelatedWidth): Width
   def calculateChildHeight(node: Node with ParentRelatedHeight): Height
 
-  def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width
-  def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height
+  def determineTotalChildWidth(getChildWidth: Node => Width): Width
+  def determineTotalChildHeight(getChildHeight: Node => Height): Height
 
   def updateLayout: Unit
 
@@ -53,5 +53,9 @@ trait Layout extends Stylable { self: Group =>
 }
 
 object Layout {
-  val defaultSizeAccumulator: (Double, Double) => Double = math.max
+  def determineTotalChildWidth(group:Group, getChildWidth:Node => Width):Width =
+    (group.children foldLeft 0d) { (total, node) => math max (total, getChildWidth(node)) }
+  
+  def determineTotalChildHeight(group:Group, getChildHeight:Node => Height):Height = 
+    (group.children foldLeft 0d) { (total, node) => math max (total, getChildHeight(node)) }
 }

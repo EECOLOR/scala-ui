@@ -85,18 +85,17 @@ trait HorizontalLayout extends Layout { self: Group =>
   def calculateChildHeight(node: Node with ParentRelatedHeight): Height =
     node calculateHeight this
 
-  def determineTotalChildWidth(totalWidth: Double, nodeWidth: Double): Width =
-    totalWidth + nodeWidth
-
-  def determineTotalChildHeight(totalHeight: Double, nodeHeight: Double): Height =
-    Layout.defaultSizeAccumulator(totalHeight, nodeHeight)
+  def determineTotalChildWidth(getChildWidth: Node => Width): Width = 
+    (children foldLeft 0d) { (total, node) => total + getChildWidth(node) }
+    
+  def determineTotalChildHeight(getChildHeight: Node => Height): Height =
+    Layout.determineTotalChildHeight(this, getChildHeight)
 
   def updateLayout: Unit = {
     // we need access to set x and y positions
     implicit val access = RestrictedAccess
 
     // start with x == 0
-    // TODO is there another method that does not return a value?
     (children foldLeft 0d) { (x, child) =>
       child match {
         case a: AnchorBasedWidth => {
