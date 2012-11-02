@@ -109,24 +109,12 @@ class DefaultResizeEngine {
     }
   }
 
-  case class ChildrenResizedCommand(layout: Layout) extends Command {
-    def execute() = layout.childrenResized
-  }
-
-  def groupChildrenResizedCommand(group: Group): Stream[Command] =
-    group match {
-      case layout: Layout => Stream(ChildrenResizedCommand(layout))
-      case group => Stream.empty
-    }
-
-  def resizeGroup(group: Group with ParentRelatedSize, parent: LayoutSize): Stream[Command] = {
+  def resizeGroup(group: Group with ParentRelatedSize, parent: LayoutSize): Stream[Command] =
     ResizeBothCommand(group, parent) #::
       //since we have resized the group it's safe to create commands for all children
       (group.children foldLeft Stream[Command]()) { (commands, child) =>
         commands ++ resizeWithParentSizeKnown(group, child, determineSize)
-      } ++
-      groupChildrenResizedCommand(group)
-  }
+      }
 
   def resizeGroup(group: Group with ParentRelatedWidth, parent: LayoutWidth): Stream[Command] = {
 
@@ -238,9 +226,7 @@ class DefaultResizeEngine {
         determineChildSizeFunction,
         applyResult)
 
-      directCommands ++
-        groupChildrenResizedCommand(group) ++
-        (resizeToChildrenCommand #:: afterSelfResizeCommands)
+      directCommands ++ (resizeToChildrenCommand #:: afterSelfResizeCommands)
     }
   }
 
