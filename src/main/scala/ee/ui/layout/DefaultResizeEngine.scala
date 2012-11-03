@@ -85,17 +85,17 @@ class DefaultResizeEngine {
 
   case class ResizeBothCommand(node: ParentRelatedSize, parent: LayoutSize) extends Command {
     def execute() = {
-      node adjustWidthTo parent
-      node adjustHeightTo parent
+      node adjustWidthTo parent.width
+      node adjustHeightTo parent.height
     }
   }
 
   case class ResizeWidthCommand(node: ParentRelatedWidth, parent: LayoutWidth) extends Command {
-    def execute() = node adjustWidthTo parent
+    def execute() = node adjustWidthTo parent.width
   }
 
   case class ResizeHeightCommand(node: ParentRelatedHeight, parent: LayoutHeight) extends Command {
-    def execute() = node adjustHeightTo parent
+    def execute() = node adjustHeightTo parent.height
   }
 
   case class ResizeToChildrenCommand[T](

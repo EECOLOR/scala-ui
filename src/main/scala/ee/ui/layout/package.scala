@@ -7,4 +7,7 @@ package object layout {
   type NodeWidth = Width
   type NodeHeight = Height
   type Size = (Width, Height)
+  type X = Double
+  type Y = Double
+  type Position = (X, Y)
 }

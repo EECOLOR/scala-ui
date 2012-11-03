@@ -20,14 +20,28 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
   import engine._
 
   def is = "DefaultResizeEngine internals Specification".title ^
-    //hide ^ end
-    show ^ end
+    hide ^ end
+    //show ^ end
 
   def hide = "Specification is hidden" ^ end
 
   def show =
     "Unit tests on methods" ^
-      """ total child sizes
+      totalChildSizesSpec ^
+      p ^
+      determineChildSizeSpec ^
+      p ^
+      determineSizeSpec ^
+      p ^
+      commandsSpec ^
+      p ^
+      helperMethodsSpec ^
+      p ^
+      determineGroupSizeSpec ^
+      end
+
+  val totalChildSizesSpec =
+    """ total child sizes
       
       	These methods are used to determine the size of a group based on it's 
       	children. The default implementation simply returns the size of the largest 
@@ -35,31 +49,31 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
     	the outcome.
       """ ^
       br ^
-      {
+      { //
         val group = new TestGroup {
           children(new TestNode { width = 1 }, new TestNode { width = 2 })
         }
         determineTotalChildWidth(group)() must_== math.max(1, 2)
       } ^
-      {
+      { //
         val group = new TestGroup with TestLayout {
           children(new TestNode { width = 1 }, new TestNode { width = 2 })
         }
         determineTotalChildWidth(group)() must_== 4
       } ^
-      {
+      { //
         val group = new TestGroup {
           children(new TestNode { height = 1 }, new TestNode { height = 2 })
         }
         determineTotalChildHeight(group)() must_== math.max(1, 2)
       } ^
-      {
+      { //
         val group = new TestGroup with TestLayout {
           children(new TestNode { height = 1 }, new TestNode { height = 2 })
         }
         determineTotalChildHeight(group)() must_== 5
       } ^
-      {
+      { //
         val group = new TestGroup {
           children(
             new TestNode { width = 1; height = 3 },
@@ -67,38 +81,38 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
         }
         determineTotalChildSize(group)() must_== (math.max(1, 2), math.max(3, 4))
       } ^
-      {
+      { //
         val group = new TestGroup with TestLayout {
           children(
             new TestNode { width = 1; height = 3 },
             new TestNode { width = 2; height = 4 })
         }
         determineTotalChildSize(group)() must_== (4, 5)
-      } ^
-      p ^
-      """ Determine child size methods
+      }
+
+  val determineChildSizeSpec = """ Determine child size methods
       
       	If a child depends on it's parent for size, we use it's minimal size
       """ ^
-      br ^
-      { getChildSize(new TestNode { width = 1; height = 2 }) must_== (1, 2) } ^
-      { getChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
-      { getChildSize(new TestNode with ParentRelatedWidth { minWidth = 1; height = 2 }) must_== (1, 2) } ^
-      { getChildSize(new TestNode with ParentRelatedHeight { width = 1; minHeight = 2 }) must_== (1, 2) } ^
-      {
-        getChildSize(new TestNode with ParentRelatedSize {
-          minWidth = 1
-          minHeight = 2
-          override def minRequiredWidth = 1d + minWidth
-          override def minRequiredHeight = 2d + minHeight
-        }) must_== (2, 4)
-      } ^
-      { getChildWidth(new TestNode { width = 1 }) must_== 1 } ^
-      { getChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
-      { getChildHeight(new TestNode { height = 1 }) must_== 1 } ^
-      { getChildHeight(new TestNode with ParentRelatedSize { minHeight = 1 }) must_== 1 } ^
-      p ^
-      """ Determine size methods
+    br ^
+    { getChildSize(new TestNode { width = 1; height = 2 }) must_== (1, 2) } ^
+    { getChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
+    { getChildSize(new TestNode with ParentRelatedWidth { minWidth = 1; height = 2 }) must_== (1, 2) } ^
+    { getChildSize(new TestNode with ParentRelatedHeight { width = 1; minHeight = 2 }) must_== (1, 2) } ^
+    { //
+      getChildSize(new TestNode with ParentRelatedSize {
+        minWidth = 1
+        minHeight = 2
+        override def minRequiredWidth = 1d + minWidth
+        override def minRequiredHeight = 2d + minHeight
+      }) must_== (2, 4)
+    } ^
+    { getChildWidth(new TestNode { width = 1 }) must_== 1 } ^
+    { getChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
+    { getChildHeight(new TestNode { height = 1 }) must_== 1 } ^
+    { getChildHeight(new TestNode with ParentRelatedSize { minHeight = 1 }) must_== 1 }
+  val determineSizeSpec =
+    """ Determine size methods
       
       	These commands are called with nodes as arguments, they however react only to 
       	groups. On top of that, they only react to groups that are not dependent on 
@@ -123,9 +137,10 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       { determineHeight(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must not be empty } ^
       { determineHeight(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must be empty } ^
       { determineHeight(new TestGroup with ExplicitWidth { children(new TestNode) }) must not be empty } ^
-      { determineHeight(new TestGroup with ExplicitHeight { children(new TestNode) }) must be empty } ^
-      p ^
-      """ Commands
+      { determineHeight(new TestGroup with ExplicitHeight { children(new TestNode) }) must be empty }
+
+  val commandsSpec =
+    """ Commands
       
       	These are the commands that will eventually be executed
       """ ^
@@ -156,9 +171,10 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
         result must_== 8
 
-      } ^
-      p ^
-      """ Helper methods
+      }
+
+  val helperMethodsSpec =
+    """ Helper methods
       
       	These methods help with the readability of the other code and should return 
       	an empty vector.
@@ -167,9 +183,10 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
       { dontDetermineSize(new TestNode) must be empty } ^
       { dontDetermineWidth(new TestGroup, new TestNode) must be empty } ^
       { dontDetermineHeight(new TestGroup, new TestNode) must be empty } ^
-      { dontResizeChildren(new TestGroup, new TestNode) must be empty } ^
-      p ^
-      """ Determine group size
+      { dontResizeChildren(new TestGroup, new TestNode) must be empty }
+
+  val determineGroupSizeSpec =
+    """ Determine group size
       
       	The underlying method they use is `resizeToChildren`. This is quite a complex 
       	method. In order for me to keep sane the `determineGroupX` handle all use 
@@ -229,7 +246,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
             ResizeWidthCommand(_: TestNode with ParentRelatedSize, _)
             ) => ok
         }
-      } ^ end
+      }
 
   case class NamedCommand(name: String) extends Command { def execute = {} }
 
@@ -244,10 +261,10 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
   class TestGroup extends Group with RestrictedAccess
 
   trait ParentRelatedWidth extends ee.ui.layout.ParentRelatedWidth { self: Node =>
-    def calculateWidth(parent: LayoutWidth): Width = parent.width / 2
+    override def calculateWidth(parentWidth: Width): Width = parentWidth / 2
   }
   trait ParentRelatedHeight extends ee.ui.layout.ParentRelatedHeight { self: Node =>
-    def calculateHeight(parent: LayoutHeight): Height = parent.height / 2
+    override def calculateHeight(parentHeight: Height): Height = parentHeight / 2
   }
 
   trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>

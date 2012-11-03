@@ -14,13 +14,13 @@ import ee.ui.traits.ExplicitHeight
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
 
-object DefaultResizeEngineSpecification extends Specification {
+object DefaultResizeEngineSpecification extends Specification with LayoutTestHelpers {
 
   val engine = new DefaultResizeEngine
 
   def is = "DefaultResizeEngine specification".title ^
-    //hide ^ end
-    show ^ end
+    hide ^ end
+    //show ^ end
 
   def hide = "Specification is hidden" ^ end
 
@@ -59,10 +59,10 @@ object DefaultResizeEngineSpecification extends Specification {
       br ^
       { //
         trait ParentRelatedWidth extends ee.ui.layout.ParentRelatedWidth { self: Node =>
-          def calculateWidth(parent: LayoutWidth): Width = parent.width / 2
+          override def calculateWidth(parentWidth: Width): Width = parentWidth / 2
         }
         trait ParentRelatedHeight extends ee.ui.layout.ParentRelatedHeight { self: Node =>
-          def calculateHeight(parent: LayoutHeight): Height = parent.height / 2
+          override def calculateHeight(parentHeight: Height): Height = parentHeight / 2
         }
 
         trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>
@@ -70,125 +70,125 @@ object DefaultResizeEngineSpecification extends Specification {
 
         val scene = new LayoutSize with ExplicitSize { width = 200; height = 100 }
 
-        val root = new TestGroup with ParentRelatedSize {
+        val root = new TestGroupS with ParentRelatedSize {
           val name = "root"
-          expectedSize(100, 50)
+          expectingSize(100, 50)
           children(
-            new TestGroup with ParentRelatedSize {
+            new TestGroupS with ParentRelatedSize {
               val name = "group0"
-              expectedSize(50, 25)
+              expectingSize(50, 25)
             },
-            new TestGroup with ParentRelatedWidth {
+            new TestGroupS with ParentRelatedWidth {
               val name = "group1"
-              expectedSize(50, 0)
+              expectingSize(50, 0)
             },
-            new TestGroup with ParentRelatedHeight {
+            new TestGroupS with ParentRelatedHeight {
               val name = "group2"
-              expectedSize(0, 25)
+              expectingSize(0, 25)
             },
-            new TestGroup with ExplicitSize {
+            new TestGroupS with ExplicitSize {
               val name = "group7"
               width = 70
               height = 20
-              expectedSize(70, 20)
+              expectingSize(70, 20)
             },
-            new TestGroup with ExplicitWidth {
+            new TestGroupS with ExplicitWidth {
               val name = "group8"
               width = 70
-              expectedSize(70, 0)
+              expectingSize(70, 0)
             },
-            new TestGroup with ExplicitHeight {
+            new TestGroupS with ExplicitHeight {
               val name = "group9"
               height = 20
-              expectedSize(0, 20)
+              expectingSize(0, 20)
             },
-            new TestGroup {
+            new TestGroupS {
               val name = "group10"
-              expectedSize(0, 0)
+              expectingSize(0, 0)
             },
-            new TestGroup with TestLayout {
+            new TestGroupS with TestLayout {
               val name = "group11"
-              expectedSize(0, 0)
+              expectingSize(0, 0)
             },
-            new TestGroup {
+            new TestGroupS {
               val name = "groep12"
 
-              expectedSize(60, 40)
+              expectingSize(60, 40)
 
               children(
-                new TestNode {
+                new TestNodeS {
                   val name = "node1"
-                  expectedSize(0, 0)
+                  expectingSize(0, 0)
                 },
-                new TestNode with ParentRelatedSize {
+                new TestNodeS with ParentRelatedSize {
                   val name = "node2"
-                  expectedSize(30, 20)
+                  expectingSize(30, 20)
                 },
-                new TestNode with ParentRelatedWidth {
+                new TestNodeS with ParentRelatedWidth {
                   val name = "node3"
-                  expectedSize(30, 0)
+                  expectingSize(30, 0)
                 },
-                new TestNode with ParentRelatedHeight {
+                new TestNodeS with ParentRelatedHeight {
                   val name = "node4"
-                  expectedSize(0, 20)
+                  expectingSize(0, 20)
                 },
-                new TestNode with ExplicitSize {
+                new TestNodeS with ExplicitSize {
                   val name = "node5"
                   width = 50
                   height = 30
-                  expectedSize(50, 30)
+                  expectingSize(50, 30)
                 },
-                new TestNode with ExplicitWidth {
+                new TestNodeS with ExplicitWidth {
                   val name = "node6"
                   width = 60
-                  expectedSize(60, 0)
+                  expectingSize(60, 0)
                 },
-                new TestNode with ExplicitHeight {
+                new TestNodeS with ExplicitHeight {
                   val name = "node7"
                   height = 40
-                  expectedSize(0, 40)
+                  expectingSize(0, 40)
                 })
 
             },
-            new TestGroup with TestLayout {
+            new TestGroupS with TestLayout {
               val name = "groep13"
-              expectedSize(140, 84)
+              expectingSize(140, 84)
               children(
-                new TestNode {
+                new TestNodeS {
                   val name = "node1"
-                  expectedSize(0, 0)
+                  expectingSize(0, 0)
                 },
-                new TestNode with ParentRelatedSize {
+                new TestNodeS with ParentRelatedSize {
                   val name = "node2"
                   minWidth = 20
                   minHeight = 10
-                  expectedSize(70, 42)
+                  expectingSize(70, 42)
                 },
-                new TestNode with ParentRelatedWidth {
+                new TestNodeS with ParentRelatedWidth {
                   val name = "node3"
                   minWidth = 10
-                  expectedSize(70, 0)
+                  expectingSize(70, 0)
                 },
-                new TestNode with ParentRelatedHeight {
+                new TestNodeS with ParentRelatedHeight {
                   val name = "node4"
                   minHeight = 4
-                  expectedSize(0, 42)
+                  expectingSize(0, 42)
                 },
-                new TestNode with ExplicitSize {
+                new TestNodeS with ExplicitSize {
                   val name = "node5"
                   width = 50
                   height = 30
-                  expectedSize(50, 30)
+                  expectingSize(50, 30)
                 },
-                new TestNode with ExplicitWidth {
+                new TestNodeS with ExplicitWidth {
                   val name = "node6"
                   width = 60
-                  expectedSize(60, 0)
+                  expectingSize(60, 0)
                 },
-                new TestNode with ExplicitHeight {
+                new TestNodeS with ExplicitHeight {
                   val name = "node7"
                   height = 40
-                  expectedSize(0, 40)
+                  expectingSize(0, 40)
                 })
 
             })
@@ -201,50 +201,11 @@ object DefaultResizeEngineSpecification extends Specification {
       } ^
       end
 
-  trait ExpectedSize { self: Node with LayoutSize =>
-    private var expectedWidth: Width = Double.NaN
-    private var expectedHeight: Height = Double.NaN
-
-    val name: String
-
-    def expectedSize(width: Width, height: Height) = {
-      expectedWidth = width
-      expectedHeight = height
-    }
-
-    def beExpected: Matcher[Size] = (size: Size) => {
-      val (width, height) = size
-
-      def displayName(node: Node with ExpectedSize): String =
-        node.parent.map(parent => displayName(parent.asInstanceOf[Node with ExpectedSize]) + " - ").getOrElse("") + node.name
-
-      val path = displayName(this)
-      (expectedWidth == width && expectedHeight == height, s"$path failed, expected ($expectedWidth,$expectedHeight), got $size")
-    }
-
-    def sizeExpected = (width.value, height.value) must beExpected
-  }
-
-  def checkResults(node: ExpectedSize): Result = {
-    node match {
-      case group: TestGroup => {
-        group.children.foldLeft(node.sizeExpected: Result) { (matcher, node) =>
-          matcher and checkResults(node.asInstanceOf[ExpectedSize])
-        }
-
-      }
-      case node => node.sizeExpected
-    }
-  }
-
-  trait TestNode extends Node with ExpectedSize
-  trait TestGroup extends Group with ExpectedSize
-
   trait TestLayout extends Layout { self: Group =>
     def childrenResized(): Unit = {}
 
-    def calculateChildWidth(node: Node with ParentRelatedWidth): Width = node calculateWidth this
-    def calculateChildHeight(node: Node with ParentRelatedHeight): Height = node calculateHeight this
+    def calculateChildWidth(node: Node with ParentRelatedWidth): Width = node calculateWidth node.width
+    def calculateChildHeight(node: Node with ParentRelatedHeight): Height = node calculateHeight node.height
 
     def determineTotalChildWidth(getChildWidth: Node => Width): Width =
       (children foldLeft 0d) { (total, node) => total + getChildWidth(node) }

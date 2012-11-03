@@ -10,6 +10,7 @@ import ee.ui.traits.RestrictedAccess
 trait DirectionalLayout extends Layout { self: Group =>
 
   case class ChildInformation(
+    calculatedMinimalSize: Double = 0,
     calculatedChildSizes: Double = 0,
     totalChildPercentages: Int = 0,
     minimalAnchorChildSizes: Double = 0,
@@ -20,8 +21,9 @@ trait DirectionalLayout extends Layout { self: Group =>
   def childInformation = _childInformation
   def childInformation_=(value: ChildInformation) = _childInformation = value
 
-  def calculateAvailableAnchorSpace(ownSize: Double, information: ChildInformation): Double = {
+  def calculateAvailableSpaces(ownSize: Double, information: ChildInformation): (Double, Double) = {
     val ChildInformation(
+      _,
       calculatedChildSizes,
       totalChildPercentages,
       minimalAnchorChildSizes,
@@ -43,69 +45,79 @@ trait DirectionalLayout extends Layout { self: Group =>
     // now we know what space is occupied by the anchor based nodes
     val availableAnchorBasedSpace = rest - occupiedPercentageBasedSpace
 
-    availableAnchorBasedSpace
+    (availableAnchorBasedSpace, occupiedPercentageBasedSpace)
   }
 
 }
 
 trait HorizontalLayout extends DirectionalLayout { self: Group =>
 
-  def calculateChildWidth(node: Node with ParentRelatedWidth): Width = {
+  override def calculateChildWidth(node: Node with ParentRelatedWidth): Width = {
 
     val information = childInformation
+
+    val ownWidth: Width = width
+
+    val (availableAnchorBasedSpace, occupiedPercentageBasedSpace) =
+      calculateAvailableSpaces(ownWidth, information)
 
     node match {
       case p: PercentageBasedWidth => {
         // if the percentage of all percentage based nodes is not 100, the percentage of 
         // this node has a different meaning, we need to normalize it
         val normalizedFactor = p.percentWidth / information.totalChildPercentages
-        width * normalizedFactor
+        occupiedPercentageBasedSpace * normalizedFactor
       }
       case a: AnchorBasedWidth => {
         val anchorChildCount = information.anchorChildCount
         // we devide the anchor based space evenly and use that to determine the size
         if (anchorChildCount < 1) throw new Error("This is weird, according to my records, this layout does not have any anchor based children")
-        (calculateAvailableAnchorSpace(width, information) / anchorChildCount) - a.left - a.right
+        (availableAnchorBasedSpace / anchorChildCount) - a.left - a.right
       }
       // we don't know, use the default
-      case unknown => unknown calculateWidth this
+      case unknown => unknown calculateWidth ownWidth
     }
   }
 
-  def calculateChildHeight(node: Node with ParentRelatedHeight): Height =
-    node calculateHeight this
+  override def calculateChildHeight(node: Node with ParentRelatedHeight): Height =
+    node calculateHeight this.width
 
-  def determineTotalChildWidth(getChildWidth: Node => Width): Width = {
+  override def determineTotalChildWidth(getChildWidth: Node => Width): Width = {
 
     val newChildInformation = gatherChildInformation(getChildWidth)
 
     //save the child information
     childInformation = newChildInformation
 
-    newChildInformation.calculatedChildSizes
+    newChildInformation.calculatedMinimalSize
   }
 
-  def determineTotalChildHeight(getChildHeight: Node => Height): Height =
+  override def determineTotalChildHeight(getChildHeight: Node => Height): Height =
     Layout.determineTotalChildHeight(this, getChildHeight)
 
   def gatherChildInformation(getChildWidth: Node => Width): ChildInformation =
     (children foldLeft ChildInformation()) {
-      case (c @ ChildInformation(widths, percentages, anchorWidths, anchorCount), node) =>
+      case (c @ ChildInformation(minWidths, widths, percentages, anchorWidths, anchorCount), node) => {
+
+        val childWidth = getChildWidth(node)
+        val cw = c copy (calculatedMinimalSize = minWidths + childWidth)
+
         node match {
           case p: PercentageBasedWidth =>
-            c copy (totalChildPercentages = percentages + p.percentWidth)
+            cw copy (totalChildPercentages = percentages + p.percentWidth)
 
           case a: AnchorBasedWidth =>
-            c copy (
-              minimalAnchorChildSizes = anchorWidths + a.minRequiredWidth,
+            cw copy (
+              minimalAnchorChildSizes = anchorWidths + childWidth,
               anchorChildCount = anchorCount + 1)
 
           case unknown =>
-            c copy (calculatedChildSizes = widths + getChildWidth(unknown))
+            cw copy (calculatedChildSizes = widths + childWidth)
         }
+      }
     }
 
-  def updateLayout: Unit = {
+  override def updateLayout: Unit = {
     // we need access to set x and y positions
     implicit val access = RestrictedAccess
 
@@ -130,62 +142,71 @@ trait HorizontalLayout extends DirectionalLayout { self: Group =>
 
 trait VerticalLayout extends DirectionalLayout { self: Group =>
 
-  def calculateChildHeight(node: Node with ParentRelatedHeight): Height = {
+  override def calculateChildHeight(node: Node with ParentRelatedHeight): Height = {
 
     val information = childInformation
+
+    val ownHeight: Height = height
+
+    val (availableAnchorBasedSpace, occupiedPercentageBasedSpace) =
+      calculateAvailableSpaces(ownHeight, information)
 
     node match {
       case p: PercentageBasedHeight => {
         // if the percentage of all percentage based nodes is not 100, the percentage of 
         // this node has a different meaning, we need to normalize it
         val normalizedFactor = p.percentHeight / information.totalChildPercentages
-        height * normalizedFactor
+        occupiedPercentageBasedSpace * normalizedFactor
       }
       case a: AnchorBasedHeight => {
         val anchorChildCount = information.anchorChildCount
         // we devide the anchor based space evenly and use that to determine the size
         if (anchorChildCount < 1) throw new Error("This is weird, according to my records, this layout does not have any anchor based children")
-        (calculateAvailableAnchorSpace(height, information) / anchorChildCount) - a.top - a.bottom
+        (availableAnchorBasedSpace / anchorChildCount) - a.top - a.bottom
       }
       // we don't know, use the default
-      case unknown => unknown calculateHeight this
+      case unknown => unknown calculateHeight ownHeight
     }
   }
 
-  def calculateChildWidth(node: Node with ParentRelatedWidth): Width =
-    node calculateWidth this
+  override def calculateChildWidth(node: Node with ParentRelatedWidth): Width =
+    node calculateWidth this.width
 
-  def determineTotalChildHeight(getChildHeight: Node => Height): Height = {
+  override def determineTotalChildHeight(getChildHeight: Node => Height): Height = {
 
     val newChildInformation = gatherChildInformation(getChildHeight)
 
     //save the child information
     childInformation = newChildInformation
 
-    newChildInformation.calculatedChildSizes
+    newChildInformation.calculatedMinimalSize
   }
 
-  def determineTotalChildWidth(getChildWidth: Node => Width): Width =
+  override def determineTotalChildWidth(getChildWidth: Node => Width): Width =
     Layout.determineTotalChildWidth(this, getChildWidth)
 
   def gatherChildInformation(getChildHeight: Node => Height): ChildInformation =
     (children foldLeft ChildInformation()) {
-      case (c @ ChildInformation(heights, percentages, anchorHeights, anchorCount), node) =>
+      case (c @ ChildInformation(minHeights, heights, percentages, anchorHeights, anchorCount), node) =>
+
+        val childHeight = getChildHeight(node)
+        val ch = c copy (calculatedMinimalSize = minHeights + childHeight)
+
         node match {
           case p: PercentageBasedHeight =>
-            c copy (totalChildPercentages = percentages + p.percentHeight)
+            ch copy (totalChildPercentages = percentages + p.percentHeight)
 
           case a: AnchorBasedHeight =>
-            c copy (
-              minimalAnchorChildSizes = anchorHeights + a.minRequiredHeight,
+            ch copy (
+              minimalAnchorChildSizes = anchorHeights + childHeight,
               anchorChildCount = anchorCount + 1)
 
           case unknown =>
-            c copy (calculatedChildSizes = heights + getChildHeight(unknown))
+            ch copy (calculatedChildSizes = heights + childHeight)
         }
     }
 
-  def updateLayout: Unit = {
+  override def updateLayout: Unit = {
     // we need access to set x and y positions
     implicit val access = RestrictedAccess
 
