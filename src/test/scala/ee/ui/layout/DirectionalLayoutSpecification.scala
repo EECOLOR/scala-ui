@@ -71,6 +71,11 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
 
         (availableAnchorBasedSpace === 30) and (occupiedPercentageBasedSpace === 10) 
       } ^
+      { //calculateAvailableSpaces, take minWidth into account
+        
+        //add minimalPercentageChildSizes
+        todo
+      } ^
   p ^
     " Horizontal layout " ^
     { //Simple layout
@@ -148,8 +153,8 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
     def calculateChildWidth(node: Node with ParentRelatedWidth): Width = ???
     def calculateChildHeight(node: Node with ParentRelatedHeight): Height = ???
 
-    def determineTotalChildWidth(getChildWidth: Node => Width): Width = ???
-    def determineTotalChildHeight(getChildHeight: Node => Height): Height = ???
+     def determineTotalChildWidth(getChildWidth: Node => Width): SizeInformationType = ???
+	 def determineTotalChildHeight(getChildWidth: Node => Width): SizeInformationType = ???
 
     def updateLayout: Unit = ???
   }

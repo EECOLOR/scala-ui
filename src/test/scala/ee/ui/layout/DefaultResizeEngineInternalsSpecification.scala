@@ -13,9 +13,9 @@ import ee.ui.traits.ExplicitWidth
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
 /**/
-object DefaultResizeEngineInternalsSpecification extends Specification {
+object DefaultResizeEngineInternalsSpecification extends Specification with LayoutTestHelpers {
 
-  val engine = new DefaultResizeEngine
+  val engine = DefaultResizeEngine
 
   import engine._
 
@@ -27,258 +27,279 @@ object DefaultResizeEngineInternalsSpecification extends Specification {
 
   def show =
     "Unit tests on methods" ^
-      totalChildSizesSpec ^
-      p ^
-      determineChildSizeSpec ^
-      p ^
-      determineSizeSpec ^
-      p ^
-      commandsSpec ^
-      p ^
-      helperMethodsSpec ^
-      p ^
-      determineGroupSizeSpec ^
+      updateSpecs ^
       end
 
-  val totalChildSizesSpec =
-    """ total child sizes
-      
-      	These methods are used to determine the size of a group based on it's 
-      	children. The default implementation simply returns the size of the largest 
-    	child. When a Layout is present however, that should be used to determine 
-    	the outcome.
-      """ ^
+  val updateSpecs =
+    "update" ^
+      "width" ^
       br ^
-      { //
-        val group = new TestGroup {
-          children(new TestNode { width = 1 }, new TestNode { width = 2 })
+      { // update.width ofChild node
+        val node = new TestNodeS with TestParentRelatedWidth {
+          val name = "node"
+          expectingSize(1, 0)
         }
-        determineTotalChildWidth(group)() must_== math.max(1, 2)
+        implicit val p = new TestParentWidthInformation(childWidth = 1)
+
+        update.width ofChild node
+
+        checkResults(node)
       } ^
-      { //
-        val group = new TestGroup with TestLayout {
-          children(new TestNode { width = 1 }, new TestNode { width = 2 })
+      { // update.width of group
+        val group = new TestGroupS {
+          val name = "group"
+          expectingSize(1, 0)
         }
-        determineTotalChildWidth(group)() must_== 4
+        implicit val p = new TestParentWidthInformation(parentWidth = 1)
+
+        update.width of group
+
+        checkResults(group)
       } ^
-      { //
-        val group = new TestGroup {
-          children(new TestNode { height = 1 }, new TestNode { height = 2 })
+      p ^
+      "height" ^
+      br ^
+      { // update.height ofChild node
+        val node = new TestNodeS with TestParentRelatedHeight {
+          val name = "node"
+          expectingSize(0, 1)
         }
-        determineTotalChildHeight(group)() must_== math.max(1, 2)
+        implicit val p = new TestParentHeightInformation(childHeight = 1)
+
+        update.height ofChild node
+
+        checkResults(node)
       } ^
-      { //
-        val group = new TestGroup with TestLayout {
-          children(new TestNode { height = 1 }, new TestNode { height = 2 })
+      { // update.height of group
+        val group = new TestGroupS {
+          val name = "group"
+          expectingSize(0, 1)
         }
-        determineTotalChildHeight(group)() must_== 5
+        implicit val p = new TestParentHeightInformation(parentHeight = 1)
+
+        update.height of group
+
+        checkResults(group)
       } ^
-      { //
-        val group = new TestGroup {
+      end ^
+      "retrieve" ^
+      "sizeInformation" ^
+      { // retrieve.sizeInformation of group
+        val group = new Group {
+          children(new Node with ExplicitSize { width = 2; height = 4 })
+        }
+
+        val sizeInformation = retrieve.sizeInformation of group
+
+        val testNode = new Node with ParentRelatedSize {}
+
+        (sizeInformation.width === 2) and
+          (sizeInformation.height === 4) and
+          (sizeInformation.childWidthFunction(testNode) === 1) and
+          (sizeInformation.childHeightFunction(testNode) === 2)
+      } ^
+      { // retrieve.sizeInformation of group - with explicit size
+        val group = new Group with ExplicitSize {
+          width = 8
+          height = 16
+          children(new Node with ExplicitSize { width = 2; height = 4 })
+        }
+
+        val sizeInformation = retrieve.sizeInformation of group
+
+        val testNode = new Node with ParentRelatedSize {}
+
+        (sizeInformation.width === 8) and
+          (sizeInformation.height === 16) and
+          (sizeInformation.childWidthFunction(testNode) === 4) and
+          (sizeInformation.childHeightFunction(testNode) === 8)
+      } ^
+      { // retrieve.sizeInformation of group - with parent related size
+        val group = new Group with ParentRelatedSize {
+          //we need to fake that the size has been set already
+          implicit val access = RestrictedAccess
+          width = 8
+          height = 16
+          children(new Node with ExplicitSize { width = 2; height = 4 })
+        }
+
+        val sizeInformation = retrieve.sizeInformation of group
+
+        val testNode = new Node with ParentRelatedSize {}
+
+        (sizeInformation.width === 8) and
+          (sizeInformation.height === 16) and
+          (sizeInformation.childWidthFunction(testNode) === 4) and
+          (sizeInformation.childHeightFunction(testNode) === 8)
+      } ^
+      { // retrieve.sizeInformation of layoutSize
+        val layoutSize = new LayoutSize with ExplicitSize { width = 2; height = 4 }
+
+        val sizeInformation = retrieve.sizeInformation of layoutSize
+
+        val testNode = new Node with ParentRelatedSize {}
+
+        (sizeInformation.width === 2) and
+          (sizeInformation.height === 4) and
+          (sizeInformation.childWidthFunction(testNode) === 1) and
+          (sizeInformation.childHeightFunction(testNode) === 2)
+      } ^
+      end ^
+      "adjust" ^
+      "size" ^
+      br ^
+      { // adjust.size of group - one deep
+        val group = new TestGroupS {
+          val name = "group"
+          expectingSize(1, 2)
           children(
-            new TestNode { width = 1; height = 3 },
-            new TestNode { width = 2; height = 4 })
+            new TestNodeS with ExplicitSize {
+              val name = "node1"
+              expectingSize(1, 2)
+              width = 1
+              height = 2
+            })
         }
-        determineTotalChildSize(group)() must_== (math.max(1, 2), math.max(3, 4))
+
+        val actions = adjust.size of group
+        actions.force
+
+        checkResults(group)
       } ^
-      { //
-        val group = new TestGroup with TestLayout {
+      { // adjust.size of group - two deep
+        val group = new TestGroupS {
+          val name = "group"
+          expectingSize(1, 2)
           children(
-            new TestNode { width = 1; height = 3 },
-            new TestNode { width = 2; height = 4 })
+            new TestGroupS {
+              val name = "innerGroup"
+              expectingSize(1, 2)
+              children(
+                new TestNodeS with ExplicitSize {
+                  val name = "node1"
+                  expectingSize(1, 2)
+                  width = 1
+                  height = 2
+                })
+            })
         }
-        determineTotalChildSize(group)() must_== (4, 5)
-      }
 
-  val determineChildSizeSpec = """ Determine child size methods
-      
-      	If a child depends on it's parent for size, we use it's minimal size
-      """ ^
-    br ^
-    { getChildSize(new TestNode { width = 1; height = 2 }) must_== (1, 2) } ^
-    { getChildSize(new TestNode with ParentRelatedSize { minWidth = 1; minHeight = 2 }) must_== (1, 2) } ^
-    { getChildSize(new TestNode with ParentRelatedWidth { minWidth = 1; height = 2 }) must_== (1, 2) } ^
-    { getChildSize(new TestNode with ParentRelatedHeight { width = 1; minHeight = 2 }) must_== (1, 2) } ^
-    { //
-      getChildSize(new TestNode with ParentRelatedSize {
-        minWidth = 1
-        minHeight = 2
-        override def minRequiredWidth = 1d + minWidth
-        override def minRequiredHeight = 2d + minHeight
-      }) must_== (2, 4)
-    } ^
-    { getChildWidth(new TestNode { width = 1 }) must_== 1 } ^
-    { getChildWidth(new TestNode with ParentRelatedSize { minWidth = 1 }) must_== 1 } ^
-    { getChildHeight(new TestNode { height = 1 }) must_== 1 } ^
-    { getChildHeight(new TestNode with ParentRelatedSize { minHeight = 1 }) must_== 1 }
-  val determineSizeSpec =
-    """ Determine size methods
-      
-      	These commands are called with nodes as arguments, they however react only to 
-      	groups. On top of that, they only react to groups that are not dependent on 
-      	their parents for size. In short they resize groups to their children.
-      """ ^
-      br ^
-      { determineSize(new TestNode) must be empty } ^
-      { determineSize(new TestGroup) must be empty } ^
-      { determineSize(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineSize(new TestGroup with ParentRelatedSize { children(new TestNode) }) must be empty } ^
-      { determineSize(new TestGroup with ExplicitSize { children(new TestNode) }) must be empty } ^
-      { determineWidth(new TestNode) must be empty } ^
-      { determineWidth(new TestGroup) must be empty } ^
-      { determineWidth(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineWidth(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must not be empty } ^
-      { determineWidth(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must be empty } ^
-      { determineWidth(new TestGroup with ExplicitHeight { children(new TestNode) }) must not be empty } ^
-      { determineWidth(new TestGroup with ExplicitWidth { children(new TestNode) }) must be empty } ^
-      { determineHeight(new TestNode) must be empty } ^
-      { determineHeight(new TestGroup) must be empty } ^
-      { determineHeight(new TestGroup { children(new TestNode) }) must not be empty } ^
-      { determineHeight(new TestGroup with ParentRelatedWidth { children(new TestNode) }) must not be empty } ^
-      { determineHeight(new TestGroup with ParentRelatedHeight { children(new TestNode) }) must be empty } ^
-      { determineHeight(new TestGroup with ExplicitWidth { children(new TestNode) }) must not be empty } ^
-      { determineHeight(new TestGroup with ExplicitHeight { children(new TestNode) }) must be empty }
+        val actions = adjust.size of group
+        actions.force
 
-  val commandsSpec =
-    """ Commands
-      
-      	These are the commands that will eventually be executed
-      """ ^
-      br ^
-      { //ResizeBothCommand
-        val node = new TestNode with ParentRelatedSize
-        ResizeBothCommand(node, new TestGroup { width = 2; height = 4; }).execute
-        (node.width.value must_== 1) and (node.height.value must_== 2)
+        checkResults(group)
       } ^
-      { //ResizeWidthCommand
-        val node = new TestNode with ParentRelatedSize
-        ResizeWidthCommand(node, new TestGroup { width = 2; height = 4; }).execute
-        (node.width.value must_== 1) and (node.height.value must_== 0)
-      } ^
-      { //ResizeHeightCommand
-        val node = new TestNode with ParentRelatedSize
-        ResizeHeightCommand(node, new TestGroup { width = 2; height = 4; }).execute
-        (node.width.value must_== 0) and (node.height.value must_== 2)
-      } ^
-      { //ResizeToChildrenCommand
-
-        val determineChildSizeFunction = () => 8
-        var result = 0
-
-        ResizeToChildrenCommand[Int](
-          determineChildSizeFunction,
-          applyResult = { result = _ }).execute
-
-        result must_== 8
-
-      }
-
-  val helperMethodsSpec =
-    """ Helper methods
-      
-      	These methods help with the readability of the other code and should return 
-      	an empty vector.
-      """ ^
-      br ^
-      { dontDetermineSize(new TestNode) must be empty } ^
-      { dontDetermineWidth(new TestGroup, new TestNode) must be empty } ^
-      { dontDetermineHeight(new TestGroup, new TestNode) must be empty } ^
-      { dontResizeChildren(new TestGroup, new TestNode) must be empty }
-
-  val determineGroupSizeSpec =
-    """ Determine group size
-      
-      	The underlying method they use is `resizeToChildren`. This is quite a complex 
-      	method. In order for me to keep sane the `determineGroupX` handle all use 
-      	cases and `resizeToChildren` is never called outside of those methods. 
-      """ ^
-      br ^
-      { //resizeToChildren
-        val group = new TestGroup { children(new TestNode) }
-
-        val childSize = 2
-        val Def1 = () => childSize
-        val Def2 = (i: Int) => {}
-
-        val commands = resizeToChildren[Int](group)(
-          determineChildSizeFunction = Def1,
-          applyResult = Def2)(
-            directChildSizeModifications = { (g, n) => Stream(NamedCommand("directChildSize")) },
-            delayedChildSizeModifications = { (g, n) => Stream(NamedCommand("delayedSizeCommand")) })
-
-        commands must beLike {
-          case Stream(
-            NamedCommand("directChildSize"),
-            ResizeToChildrenCommand(Def1, Def2),
-            NamedCommand("delayedSizeCommand")) => ok
-        }
-      } ^
-      { //determineGroupSize
-
-        val group = new TestGroup {
+      { // adjust.size of group - two deep - parent related
+        val group = new TestGroupS with ExplicitSize {
+          val name = "group"
+          width = 10
+          height = 30
+          expectingSize(10, 30)
           children(
-            new TestNode,
-            new TestNode with ParentRelatedSize)
+            new TestGroupS with ParentRelatedSize {
+              val name = "innerGroup"
+              expectingSize(5, 15)
+              children(
+                new TestNodeS with ExplicitSize {
+                  val name = "node1"
+                  expectingSize(1, 2)
+                  width = 1
+                  height = 2
+                })
+            })
         }
 
-        val commands = determineGroupSize(group)
+        val actions = adjust.size of group
+        actions.force
 
-        commands must beLike {
-          case Stream(
-            ResizeToChildrenCommand(_, _),
-            ResizeBothCommand(_: TestNode with ParentRelatedSize, _)
-            ) => ok
-        }
+        checkResults(group)
       } ^
-      { //determineGroupWidth
+      { // adjust.size ofChild group - two deep - parent related
 
-        val group = new TestGroup {
+        val group = new TestGroupS with ParentRelatedSize {
+          val name = "group"
+          expectingSize(10, 30)
           children(
-            new TestNode,
-            new TestNode with ParentRelatedSize)
+            new TestGroupS with ParentRelatedSize {
+              val name = "innerGroup"
+              expectingSize(5, 15)
+              children(
+                new TestNodeS with ExplicitSize {
+                  val name = "node1"
+                  expectingSize(1, 2)
+                  width = 1
+                  height = 2
+                })
+            })
         }
 
-        val commands = determineGroupWidth(group)(dontDetermineHeight)
-
-        commands must beLike {
-          case Stream(
-            ResizeToChildrenCommand(_, _),
-            ResizeWidthCommand(_: TestNode with ParentRelatedSize, _)
-            ) => ok
+        implicit val sizeInformation = retrieve.sizeInformation of new LayoutSize with ExplicitSize {
+          width = 20
+          height = 60
         }
-      }
 
-  case class NamedCommand(name: String) extends Command { def execute = {} }
+        val actions = adjust.size ofChild group
+        actions.force
 
-  class TestCommand(command: => Unit) extends Command {
-    def execute = command
+        checkResults(group)
+      } ^ end
+
+  class TestParentWidthInformation(
+    val parentWidth: Double = 0,
+    val childWidth: Double = 0) extends ParentWidthInformation {
+
+    override val width = parentWidth
+    override val childWidthFunction = { n: Node with ParentRelatedWidth => childWidth }
   }
-  object TestCommand {
-    def apply(command: => Unit) = new TestCommand(command)
+
+  class TestParentHeightInformation(
+    val parentHeight: Double = 0,
+    val childHeight: Double = 0) extends ParentHeightInformation {
+
+    override val height = parentHeight
+    override val childHeightFunction = { n: Node with ParentRelatedHeight => childHeight }
   }
 
-  class TestNode extends Node with RestrictedAccess
-  class TestGroup extends Group with RestrictedAccess
+  class TestParentSizeInformation(
+    val parentWidth: Double = 0,
+    val parentHeight: Double = 0,
+    val childWidth: Double = 0,
+    val childHeight: Double = 0) extends ParentSizeInformation {
 
-  trait ParentRelatedWidth extends ee.ui.layout.ParentRelatedWidth { self: Node =>
+    override val width = parentWidth
+    override val childWidthFunction = { n: Node with ParentRelatedWidth => childWidth }
+    override val height = parentHeight
+    override val childHeightFunction = { n: Node with ParentRelatedHeight => childHeight }
+  }
+
+  trait TestParentRelatedWidth extends ParentRelatedWidth { self: Node =>
     override def calculateWidth(parentWidth: Width): Width = parentWidth / 2
   }
-  trait ParentRelatedHeight extends ee.ui.layout.ParentRelatedHeight { self: Node =>
+  trait TestParentRelatedHeight extends ParentRelatedHeight { self: Node =>
     override def calculateHeight(parentHeight: Height): Height = parentHeight / 2
   }
 
-  trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>
+  trait ParentRelatedSize extends TestParentRelatedWidth with TestParentRelatedHeight { self: Node =>
   }
 
   trait TestLayout extends Layout { self: Group =>
-    def childrenResized(): Unit = {}
+    type SizeInformationType = TestInternalSizeInformation
+    case class TestInternalSizeInformation(val size: Double) extends SizeInformation
 
-    def calculateChildWidth(node: Node with ee.ui.layout.ParentRelatedWidth): Width = 2
-    def calculateChildHeight(node: Node with ee.ui.layout.ParentRelatedHeight): Height = 3
-    def determineTotalChildWidth(getChildWidth: Node => Width): Width = 4
-    def determineTotalChildHeight(getChildHeight: Node => Height): Height = 5
+    override def calculateChildWidth(
+      node: Node with ParentRelatedWidth, groupWidth: Width, sizeInformation: SizeInformationType): Width =
+      2
 
-    def updateLayout: Unit = {}
+    override def calculateChildHeight(
+      node: Node with ParentRelatedHeight, groupHeight: Height, sizeInformation: SizeInformationType): Height =
+      3
+
+    override def determineTotalChildWidth(getChildWidth: Node => Width): SizeInformationType =
+      new TestInternalSizeInformation(4)
+
+    override def determineTotalChildHeight(getChildHeight: Node => Height): SizeInformationType =
+      new TestInternalSizeInformation(5)
+
+    override def updateLayout: Unit = {}
   }
 }
-/**/

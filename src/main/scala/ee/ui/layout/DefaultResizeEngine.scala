@@ -4,251 +4,305 @@ import ee.ui.traits.LayoutSize
 import ee.ui.Node
 import ee.ui.Group
 import ee.ui.traits.RestrictedAccess
-import scala.collection.immutable.Stream
-import ee.ui.traits.LayoutWidth
-import ee.ui.traits.LayoutHeight
-import ee.ui.traits.ExplicitHeight
-import ee.ui.traits.ExplicitSize
 import ee.ui.traits.PartialExplicitSize
+import ee.ui.traits.ExplicitSize
+import ee.ui.traits.ExplicitHeight
 import ee.ui.traits.ExplicitWidth
 
-//TODO build something so that only shizzle is measured if something has changed, 
-//     also use LayoutClient.includeInLayout
-class DefaultResizeEngine {
+//TODO build something so that only shizzle is measured if something has changed
+//TODO introduce LayoutClient.includeInLayout
+object DefaultResizeEngine {
 
   def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit = {
-    val commands = resizeWithParentSizeKnown(parent, node, determineSize)
 
-    commands foreach (_.execute)
+    implicit val sizeInformation = retrieve.sizeInformation of parent
+
+    val actions = adjust.size ofChild node
+    //perform the actions
+    actions.force
   }
 
-  type ParentRelatedSize = ParentRelatedWidth with ParentRelatedHeight
+  /*
+   * We end up with a stream of functions that do not return anything and only 
+   * perform side effects. If we would type the stream as Stream[Unit] we might 
+   * end up with functions that do not perform the actual side effect.
+   * 
+   * We prevent that by creating the Action type. This allows us to have a 
+   * return type of Stream[Action]
+   */
+  private type Action = Action.type
+  private object Action
+  private type ParentRelatedSize = ParentRelatedWidth with ParentRelatedHeight
 
-  val noCommands = Stream.empty[Command]
-  @inline def dontDetermineSize(node: Node) = noCommands
-  @inline def dontDetermineWidth(parent: Group, node: Node) = noCommands
-  @inline def dontDetermineHeight(parent: Group, node: Node) = noCommands
-  @inline def dontResizeChildren(parent: Group, node: Node): Stream[Command] = noCommands
+  object update extends RestrictedAccess {
 
-  def determineSize(node: Node): Stream[Command] =
-    node match {
-      case explicit: PartialExplicitSize => noCommands
-      case parentRelated: PartialParentRelatedSize => noCommands
-      case group: Group => determineGroupSize(group)
-      case node => noCommands
-    }
+    object width {
 
-  def determineWidth(node: Node): Stream[Command] =
-    node match {
-      case explicit: ExplicitWidth => noCommands
-      case parentRelated: ParentRelatedWidth => noCommands
-      case group: Group => determineGroupWidth(group)(dontDetermineHeight)
-      case node => noCommands
-    }
-
-  def determineHeight(node: Node): Stream[Command] =
-    node match {
-      case explicit: ExplicitHeight => noCommands
-      case parentRelated: ParentRelatedHeight => noCommands
-      case group: Group => determineGroupHeight(group)(dontDetermineWidth)
-      case node => noCommands
-    }
-
-  def resizeWithParentSizeKnown(parent: LayoutSize, node: Node, determineSizeFunction: Node => Stream[Command]): Stream[Command] =
-    node match {
-      case group: Group with ParentRelatedSize => resizeGroup(group, parent)
-      case group: Group with ParentRelatedWidth => resizeGroup(group, parent)
-      case group: Group with ParentRelatedHeight => resizeGroup(group, parent)
-      case node: ParentRelatedSize => Stream(ResizeBothCommand(node, parent))
-      case node: ParentRelatedWidth => Stream(ResizeWidthCommand(node, parent))
-      case node: ParentRelatedHeight => Stream(ResizeHeightCommand(node, parent))
-      case nodeOrGroup => determineSizeFunction(nodeOrGroup)
-    }
-
-  def resizeWithParentWidthKnown(parent: LayoutWidth, node: Node, determineWidthFunction: Node => Stream[Command]): Stream[Command] =
-    node match {
-      case group: Group with ParentRelatedWidth => resizeGroup(group, parent)
-      case node: ParentRelatedWidth => Stream(ResizeWidthCommand(node, parent))
-      case nodeOrGroup => determineWidthFunction(nodeOrGroup)
-    }
-
-  def resizeWithParentHeightKnown(parent: LayoutHeight, node: Node, determineHeightFunction: Node => Stream[Command]): Stream[Command] =
-    node match {
-      case group: Group with ParentRelatedHeight => resizeGroup(group, parent)
-      case node: ParentRelatedHeight => Stream(ResizeHeightCommand(node, parent))
-      case nodeOrGroup => determineHeightFunction(nodeOrGroup)
-    }
-
-  trait Command {
-    def execute(): Unit
-  }
-
-  case class ResizeBothCommand(node: ParentRelatedSize, parent: LayoutSize) extends Command {
-    def execute() = {
-      node adjustWidthTo parent.width
-      node adjustHeightTo parent.height
-    }
-  }
-
-  case class ResizeWidthCommand(node: ParentRelatedWidth, parent: LayoutWidth) extends Command {
-    def execute() = node adjustWidthTo parent.width
-  }
-
-  case class ResizeHeightCommand(node: ParentRelatedHeight, parent: LayoutHeight) extends Command {
-    def execute() = node adjustHeightTo parent.height
-  }
-
-  case class ResizeToChildrenCommand[T](
-    determineChildSizeFunction: () => T,
-    applyResult: T => Unit) extends Command {
-
-    def execute() = {
-      val result =
-
-        applyResult(determineChildSizeFunction())
-    }
-  }
-
-  def resizeGroup(group: Group with ParentRelatedSize, parent: LayoutSize): Stream[Command] =
-    ResizeBothCommand(group, parent) #::
-      //since we have resized the group it's safe to create commands for all children
-      (group.children foldLeft Stream[Command]()) { (commands, child) =>
-        commands ++ resizeWithParentSizeKnown(group, child, determineSize)
+      def ofChild(n: Node with ParentRelatedWidth)(implicit p: ParentWidthInformation): Action = {
+        n.width = p.childWidthFunction(n); Action
       }
 
-  def resizeGroup(group: Group with ParentRelatedWidth, parent: LayoutWidth): Stream[Command] = {
-
-    ResizeWidthCommand(group, parent) #::
-      determineGroupHeight(group)(resizeWithParentWidthKnown(_: LayoutWidth, _: Node, determineWidth))
-  }
-
-  def resizeGroup(group: Group with ParentRelatedHeight, parent: LayoutHeight): Stream[Command] = {
-
-    ResizeHeightCommand(group, parent) #::
-      determineGroupWidth(group: Group)(resizeWithParentHeightKnown(_: LayoutHeight, _: Node, determineHeight))
-  }
-
-  @inline def getChildSize(node: Node): Size =
-    node match {
-      case node: ParentRelatedSize => (node.minRequiredWidth, node.minRequiredHeight)
-      case node: ParentRelatedWidth => (node.minRequiredWidth, node.height)
-      case node: ParentRelatedHeight => (node.width, node.minRequiredHeight)
-      case node => (node.width, node.height)
+      def of(g: Group)(implicit p: ParentWidthInformation): Action = {
+        g.width = p.width; Action
+      }
     }
 
-  @inline def getChildWidth(node: Node): Width =
-    node match {
-      case node: ParentRelatedWidth => node.minRequiredWidth
-      case node => node.width
+    object height {
+
+      def ofChild(n: Node with ParentRelatedHeight)(implicit p: ParentHeightInformation): Action = {
+        n.height = p.childHeightFunction(n); Action
+      }
+
+      def of(g: Group)(implicit p: ParentHeightInformation): Action = {
+        g.height = p.height; Action
+      }
+    }
+  }
+
+  object retrieve {
+
+    object sizeInformation {
+
+      def of(group: Group): ParentSizeInformation = {
+        val parentWidthInformation = retrieve.widthInformation of group
+        val parentHeightInformation = retrieve.heightInformation of group
+
+        new ParentSizeInformation {
+          val width = parentWidthInformation.width
+          val childWidthFunction = parentWidthInformation.childWidthFunction
+
+          val height = parentHeightInformation.height
+          val childHeightFunction = parentHeightInformation.childHeightFunction
+        }
+      }
+
+      def of(layoutSize: LayoutSize): ParentSizeInformation = {
+
+        new ParentSizeInformation {
+          val width: Double = layoutSize.width
+          val height: Double = layoutSize.height
+
+          val childWidthFunction =
+            { node: Node with ParentRelatedWidth => node calculateWidth width }
+
+          val childHeightFunction =
+            { node: Node with ParentRelatedHeight => node calculateHeight height }
+        }
+      }
     }
 
-  @inline def getChildHeight(node: Node): Height =
-    node match {
-      case node: ParentRelatedHeight => node.minRequiredHeight
-      case node => node.height
-    }
+    def getChildWidth(node: Node): Width =
+      node match {
+        case node: ExplicitWidth => node.width
+        case node: ParentRelatedWidth => node.minRequiredWidth
+        case group: Group =>
+          (group.children foldLeft 0d) { (result, child) =>
+            result + getChildWidth(child)
+          }
+        case node => node.width
+      }
 
-  def updateGroupSize(group: Group)(size: Size): Unit = {
-    implicit val access = RestrictedAccess
-    val (width, height) = size
-    group.width = width
-    group.height = height
-  }
+    def getChildHeight(node: Node): Height =
+      node match {
+        case node: ExplicitHeight => node.height
+        case node: ParentRelatedHeight => node.minRequiredHeight
+        case group: Group =>
+          (group.children foldLeft 0d) { (result, child) =>
+            result + getChildHeight(child)
+          }
+        case node => node.height
+      }
 
-  def updateGroupWidth(group: Group)(width: Width): Unit = {
-    implicit val access = RestrictedAccess
-    group.width = width
-  }
+    object widthInformation {
 
-  def updateGroupHeight(group: Group)(height: Height): Unit = {
-    implicit val access = RestrictedAccess
-    group.height = height
-  }
-
-  def determineGroupSize(group: Group): Stream[Command] = {
-
-    resizeToChildren[Size](group)(
-      determineChildSizeFunction = determineTotalChildSize(group),
-      applyResult = updateGroupSize(group))(
-        directChildSizeModifications = dontResizeChildren,
-        delayedChildSizeModifications = resizeWithParentSizeKnown(_: LayoutSize, _: Node, dontDetermineSize))
-  }
-
-  def determineGroupWidth(group: Group)(directChildHeightModifications: (Group, Node) => Stream[Command]): Stream[Command] = {
-    implicit val access = RestrictedAccess
-
-    resizeToChildren[Width](group)(
-      determineChildSizeFunction = determineTotalChildWidth(group),
-      applyResult = updateGroupWidth(group))(
-        directChildSizeModifications = directChildHeightModifications,
-        delayedChildSizeModifications = resizeWithParentWidthKnown(_: LayoutWidth, _: Node, dontDetermineSize))
-
-  }
-
-  def determineGroupHeight(group: Group)(directChildWidthModifications: (Group, Node) => Stream[Command]): Stream[Command] = {
-    implicit val access = RestrictedAccess
-
-    resizeToChildren[Height](group)(
-      determineChildSizeFunction = determineTotalChildHeight(group),
-      applyResult = updateGroupHeight(group))(
-        directChildSizeModifications = directChildWidthModifications,
-        delayedChildSizeModifications = resizeWithParentHeightKnown(_: LayoutHeight, _: Node, dontDetermineSize))
-  }
-
-  def resizeToChildren[T](group: Group)(
-    determineChildSizeFunction: () => T, applyResult: T => Unit)(
-      directChildSizeModifications: (Group, Node) => Stream[Command],
-      delayedChildSizeModifications: (Group, Node) => Stream[Command]): Stream[Command] = {
-
-    val children = group.children
-    if (children.isEmpty) noCommands
-    else {
-      // these are the Streams we use to gather information while looping over the children
-      val startInformation = (Stream[Command](), Stream[Command]())
-
-      val (directCommands, afterSelfResizeCommands) =
-        (children foldLeft startInformation) { (information, child) =>
-
-          val (directCommands, afterSelfResizeCommands) = information
-
-          val newDirectCommands =
-            directCommands ++ directChildSizeModifications(group, child)
-
-          val newAfterSelfResizeCommands =
-            afterSelfResizeCommands ++ delayedChildSizeModifications(group, child)
-
-          (newDirectCommands, newAfterSelfResizeCommands)
+      def toChildWidthCalculator(g: Group) =
+        g match {
+          case layout: Layout => layout
+          case g => new GroupChildWidthCalculator {
+            val group = g
+          }
         }
 
-      implicit val access = RestrictedAccess
+      def of(group: Group): ParentWidthInformation = {
+        val calculator = toChildWidthCalculator(group)
+        val sizeInformation = calculator determineTotalChildWidth getChildWidth
+        val groupWidth: Width =
+          group match {
+            case explicit: ExplicitWidth => group.width
+            case explicit: ParentRelatedWidth => group.width
+            case _ => sizeInformation.size
+          }
 
-      val resizeToChildrenCommand = ResizeToChildrenCommand[T](
-        determineChildSizeFunction,
-        applyResult)
+        new ParentWidthInformation {
+          val width = groupWidth
+          val childWidthFunction = calculator calculateChildWidth (_: Node with ParentRelatedWidth, groupWidth, sizeInformation)
+        }
+      }
+    }
 
-      directCommands ++ (resizeToChildrenCommand #:: afterSelfResizeCommands)
+    object heightInformation {
+
+      def toChildHeightCalculator(g: Group) =
+        g match {
+          case layout: Layout => layout
+          case g => new GroupChildHeightCalculator {
+            val group = g
+          }
+        }
+
+      def of(group: Group): ParentHeightInformation = {
+        val calculator = toChildHeightCalculator(group)
+        val sizeInformation = calculator determineTotalChildHeight getChildHeight
+        val groupHeight: Height =
+          group match {
+            case explicit: ExplicitHeight => group.height
+            case explicit: ParentRelatedHeight => group.height
+            case _ => sizeInformation.size
+          }
+
+        new ParentHeightInformation {
+          val height = groupHeight
+          val childHeightFunction = calculator calculateChildHeight (_: Node with ParentRelatedHeight, groupHeight, sizeInformation)
+        }
+      }
     }
   }
 
-  def determineTotalChildSize(group: Group): () => Size = {
-    val totalChildWidth = determineTotalChildWidth(group)
-    val totalChildHeight = determineTotalChildHeight(group)
+  object adjust {
 
-    { () => totalChildWidth() -> totalChildHeight() }
-  }
+    object size {
 
-  def determineTotalChildWidth(group: Group): () => Width = { () =>
-    group match {
-      case layout: Layout => layout.determineTotalChildWidth(getChildWidth)
-      case group => Layout.determineTotalChildWidth(group, getChildWidth)
+      def of(g: Group): Stream[Action] = {
+        implicit val sizeInformation = retrieve.sizeInformation of g
+
+        (update.width of g) #:: (update.height of g) #:: (adjust.size of g.children)
+      }
+
+      def ofChild(n: Node)(implicit p: ParentSizeInformation): Stream[Action] =
+
+        n match {
+          case g: Group with ParentRelatedSize => adjust.size ofChild g
+          case g: Group with ParentRelatedWidth => adjust.size ofChild g
+          case g: Group with ParentRelatedHeight => adjust.size ofChild g
+
+          case g: Group => adjust.size of g
+
+          case n: ParentRelatedSize => Stream(update.width ofChild n, update.height ofChild n)
+          case n: ParentRelatedWidth => Stream(update.width ofChild n)
+          case n: ParentRelatedHeight => Stream(update.height ofChild n)
+
+          case n => Stream.empty
+        }
+
+      def ofChild(g: Group with ParentRelatedSize)(implicit p: ParentSizeInformation): Stream[Action] =
+        (update.width ofChild g) #:: (update.height ofChild g) #:: (adjust.children.size of g)
+
+      def ofChild(g: Group with ParentRelatedWidth)(implicit p: ParentWidthInformation): Stream[Action] =
+        (update.width ofChild g) #:: (adjust.children.width of g) #::: (adjust.height of g)
+
+      def ofChild(g: Group with ParentRelatedHeight)(implicit p: ParentHeightInformation): Stream[Action] =
+        (update.height ofChild g) #:: (adjust.children.height of g) #::: (adjust.width of g)
+
+      def of(children: Group#Children)(implicit p: ParentSizeInformation): Stream[Action] =
+        (children foldLeft Stream[Action]()) { (actions, child) =>
+          actions ++ (adjust.size ofChild child)
+        }
+    }
+
+    object width {
+
+      def of(g: Group): Stream[Action] = {
+        implicit val sizeInformation = retrieve.widthInformation of g
+
+        (update.width of g) #:: (adjust.width of g.children)
+      }
+
+      def ofChild(n: Node)(implicit p: ParentWidthInformation): Stream[Action] =
+
+        n match {
+
+          case g: Group with ParentRelatedWidth => adjust.width ofChild g
+
+          case g: Group => adjust.width of g
+
+          case n: ParentRelatedWidth => Stream(update.width ofChild n)
+
+          case n => Stream.empty
+        }
+
+      def of(children: Group#Children)(implicit p: ParentWidthInformation): Stream[Action] =
+        (children foldLeft Stream[Action]()) { (actions, child) =>
+          actions ++ (adjust.width ofChild child)
+        }
+    }
+
+    object height {
+
+      def of(g: Group): Stream[Action] = {
+        implicit val sizeInformation = retrieve.heightInformation of g
+
+        (update.height of g) #:: (adjust.height of g.children)
+      }
+
+      def ofChild(n: Node)(implicit p: ParentHeightInformation): Stream[Action] =
+
+        n match {
+
+          case g: Group with ParentRelatedHeight => adjust.size ofChild g
+
+          case g: Group => adjust.height of g
+
+          case n: ParentRelatedHeight => Stream(update.height ofChild n)
+
+          case n => Stream.empty
+        }
+
+      def of(children: Group#Children)(implicit p: ParentHeightInformation): Stream[Action] =
+        (children foldLeft Stream[Action]()) { (actions, child) =>
+          actions ++ (adjust.height ofChild child)
+        }
+    }
+
+    object children {
+
+      object size {
+
+        def of(g: Group): Stream[Action] = {
+          implicit val sizeInformation = retrieve.sizeInformation of g
+
+          adjust.size of g.children
+        }
+      }
+
+      object width {
+
+        def of(g: Group): Stream[Action] = {
+          implicit val sizeInformation = retrieve.widthInformation of g
+
+          adjust.width of g.children
+        }
+      }
+
+      object height {
+
+        def of(g: Group): Stream[Action] = {
+          implicit val sizeInformation = retrieve.heightInformation of g
+
+          adjust.height of g.children
+        }
+      }
     }
   }
 
-  def determineTotalChildHeight(group: Group): () => Height = { () =>
-    group match {
-      case layout: Layout => layout.determineTotalChildHeight(getChildHeight)
-      case group => Layout.determineTotalChildHeight(group, getChildHeight)
-    }
+  trait ParentSizeInformation extends ParentWidthInformation with ParentHeightInformation
+
+  trait ParentWidthInformation {
+    val width: Width
+    val childWidthFunction: Node with ParentRelatedWidth => Width
   }
 
+  trait ParentHeightInformation {
+    val height: Height
+    val childHeightFunction: Node with ParentRelatedHeight => Height
+  }
 }

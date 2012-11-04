@@ -7,51 +7,35 @@ import ee.ui.traits.RestrictedAccess
 import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
+import ee.ui.traits.AccessRestriction
 
 trait PartialParentRelatedSize
 
-trait ParentRelatedWidth extends PartialParentRelatedSize { self: Node =>
+trait ParentRelatedWidth extends PartialParentRelatedSize with LayoutWidth { self: Node =>
 
   def minRequiredWidth: Width = minWidth
   def calculateWidth(parentWidth: Width): Width
 
-  def adjustWidthTo(parentWidth: Width): Unit = {
-    val newWidth =
-      parent match {
-        case layout: Layout => layout calculateChildWidth this
-        case parent => calculateWidth(parentWidth)
-      }
-
-    implicit val access = RestrictedAccess
-
-    width = newWidth
-  }
-
   private val _minWidth = new Property(0d)
   def minWidth = _minWidth
   def minWidth_=(value: Double) = _minWidth.value = value
+  
+  override def width_=(value:Double)(implicit ev: AccessRestriction) = 
+    super.width_=(math.max(value, minWidth))
 }
 
-trait ParentRelatedHeight extends PartialParentRelatedSize { self: Node =>
+trait ParentRelatedHeight extends PartialParentRelatedSize with LayoutHeight { self: Node =>
 
   def minRequiredHeight: Height = minHeight
   def calculateHeight(parentHeight: Height): Height
 
-  def adjustHeightTo(parentHeight: Height): Unit = {
-    val newHeight =
-      parent match {
-        case layout: Layout => layout calculateChildHeight this
-        case parent => calculateHeight(parentHeight)
-      }
-
-    implicit val access = RestrictedAccess
-
-    height = newHeight
-  }
-
   private val _minHeight = new Property(0d)
   def minHeight = _minHeight
   def minHeight_=(value: Double) = _minHeight.value = value
+  
+  override def height_=(value:Double)(implicit ev: AccessRestriction) = 
+    super.height_=(math.max(value, minHeight))
+
 }
 
 trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>

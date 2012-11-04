@@ -9,27 +9,9 @@ import ee.ui.properties.Remove
 import ee.ui.properties.Clear
 import scala.collection.mutable.ListBuffer
 
-trait Layout extends Stylable { self: Group =>
-  
-  /**
-   * At this point the size of the group and the size of the non parent related 
-   * nodes is known. These methods are used to calculate the size of the remaining 
-   * nodes.
-   */
-  def calculateChildWidth(node: Node with ParentRelatedWidth): Width
-  def calculateChildHeight(node: Node with ParentRelatedHeight): Height
-
-  def determineTotalChildWidth(getChildWidth: Node => Width): Width
-  def determineTotalChildHeight(getChildHeight: Node => Height): Height
-
+trait Layout extends ChildWidthCalculator with ChildHeightCalculator with Stylable { self: Group =>
+    
   def updateLayout: Unit
 
 }
 
-object Layout {
-  def determineTotalChildWidth(group:Group, getChildWidth:Node => Width):Width =
-    (group.children foldLeft 0d) { (total, node) => math max (total, getChildWidth(node)) }
-  
-  def determineTotalChildHeight(group:Group, getChildHeight:Node => Height):Height = 
-    (group.children foldLeft 0d) { (total, node) => math max (total, getChildHeight(node)) }
-}

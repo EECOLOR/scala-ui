@@ -8,7 +8,10 @@ import ee.ui.properties.Clear
 import ee.ui.traits.RestrictedAccess
 
 trait DirectionalLayout extends Layout { self: Group =>
-
+  type SizeInformationType = TestInternalSizeInformation
+  
+  class TestInternalSizeInformation(val size: Double) extends SizeInformation  
+  
   case class ChildInformation(
     calculatedMinimalSize: Double = 0,
     calculatedChildSizes: Double = 0,
@@ -52,11 +55,11 @@ trait DirectionalLayout extends Layout { self: Group =>
 
 trait HorizontalLayout extends DirectionalLayout { self: Group =>
 
-  override def calculateChildWidth(node: Node with ParentRelatedWidth): Width = {
+  override def calculateChildWidth(node: Node with ParentRelatedWidth, groupWidth:Width, sizeInformation: SizeInformationType): Width = {
 
     val information = childInformation
 
-    val ownWidth: Width = width
+    val ownWidth: Width = groupWidth
 
     val (availableAnchorBasedSpace, occupiedPercentageBasedSpace) =
       calculateAvailableSpaces(ownWidth, information)
@@ -79,21 +82,21 @@ trait HorizontalLayout extends DirectionalLayout { self: Group =>
     }
   }
 
-  override def calculateChildHeight(node: Node with ParentRelatedHeight): Height =
-    node calculateHeight this.width
+  override def calculateChildHeight(node: Node with ParentRelatedHeight, groupHeight:Height, sizeInformation: SizeInformationType): Height =
+    node calculateHeight groupHeight
 
-  override def determineTotalChildWidth(getChildWidth: Node => Width): Width = {
+  override def determineTotalChildWidth(getChildWidth: Node => Width): SizeInformationType = {
 
     val newChildInformation = gatherChildInformation(getChildWidth)
 
     //save the child information
     childInformation = newChildInformation
 
-    newChildInformation.calculatedMinimalSize
+    new TestInternalSizeInformation(newChildInformation.calculatedMinimalSize)
   }
 
-  override def determineTotalChildHeight(getChildHeight: Node => Height): Height =
-    Layout.determineTotalChildHeight(this, getChildHeight)
+  override def determineTotalChildHeight(getChildHeight: Node => Height): SizeInformationType =
+    new TestInternalSizeInformation(ChildHeightCalculator.determineTotalChildHeight(this, getChildHeight))
 
   def gatherChildInformation(getChildWidth: Node => Width): ChildInformation =
     (children foldLeft ChildInformation()) {
@@ -142,11 +145,11 @@ trait HorizontalLayout extends DirectionalLayout { self: Group =>
 
 trait VerticalLayout extends DirectionalLayout { self: Group =>
 
-  override def calculateChildHeight(node: Node with ParentRelatedHeight): Height = {
+  override def calculateChildHeight(node: Node with ParentRelatedHeight, groupHeight:Height, sizeInformation: SizeInformationType): Height = {
 
     val information = childInformation
 
-    val ownHeight: Height = height
+    val ownHeight: Height = groupHeight
 
     val (availableAnchorBasedSpace, occupiedPercentageBasedSpace) =
       calculateAvailableSpaces(ownHeight, information)
@@ -169,21 +172,21 @@ trait VerticalLayout extends DirectionalLayout { self: Group =>
     }
   }
 
-  override def calculateChildWidth(node: Node with ParentRelatedWidth): Width =
-    node calculateWidth this.width
+  override def calculateChildWidth(node: Node with ParentRelatedWidth, groupWidth:Width, sizeInformation: SizeInformationType): Width =
+    node calculateWidth groupWidth
 
-  override def determineTotalChildHeight(getChildHeight: Node => Height): Height = {
+  override def determineTotalChildHeight(getChildHeight: Node => Height): SizeInformationType = {
 
     val newChildInformation = gatherChildInformation(getChildHeight)
 
     //save the child information
     childInformation = newChildInformation
 
-    newChildInformation.calculatedMinimalSize
+    new TestInternalSizeInformation(newChildInformation.calculatedMinimalSize)
   }
 
-  override def determineTotalChildWidth(getChildWidth: Node => Width): Width =
-    Layout.determineTotalChildWidth(this, getChildWidth)
+  override def determineTotalChildWidth(getChildWidth: Node => Width): SizeInformationType =
+     new TestInternalSizeInformation(ChildWidthCalculator.determineTotalChildWidth(this, getChildWidth))
 
   def gatherChildInformation(getChildHeight: Node => Height): ChildInformation =
     (children foldLeft ChildInformation()) {

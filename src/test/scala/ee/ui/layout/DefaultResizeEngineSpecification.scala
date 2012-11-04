@@ -16,7 +16,7 @@ import ee.ui.traits.LayoutHeight
 
 object DefaultResizeEngineSpecification extends Specification with LayoutTestHelpers {
 
-  val engine = new DefaultResizeEngine
+  val engine = DefaultResizeEngine
 
   def is = "DefaultResizeEngine specification".title ^
     hide ^ end
@@ -195,23 +195,29 @@ object DefaultResizeEngineSpecification extends Specification with LayoutTestHel
 
         }
 
+        val time = System.currentTimeMillis
         engine.adjustSizeWithParent(scene, root)
-
-        checkResults(root)
+        val elapsedTime = System.currentTimeMillis - time
+                
+        checkResults(root) and (elapsedTime must beLessThan(2l))
       } ^
       end
 
   trait TestLayout extends Layout { self: Group =>
+    
+    type SizeInformationType = InternalSizeInformation
+    case class InternalSizeInformation(val size: Double) extends SizeInformation
+  
     def childrenResized(): Unit = {}
 
     def calculateChildWidth(node: Node with ParentRelatedWidth): Width = node calculateWidth node.width
     def calculateChildHeight(node: Node with ParentRelatedHeight): Height = node calculateHeight node.height
 
-    def determineTotalChildWidth(getChildWidth: Node => Width): Width =
-      (children foldLeft 0d) { (total, node) => total + getChildWidth(node) }
+    def determineTotalChildWidth(getChildWidth: Node => Width): InternalSizeInformation =
+      InternalSizeInformation((children foldLeft 0d) { (total, node) => total + getChildWidth(node) })
 
-    def determineTotalChildHeight(getChildHeight: Node => Height): Height =
-      (children foldLeft 0d) { (total, node) => total + getChildHeight(node) }
+    def determineTotalChildHeight(getChildHeight: Node => Height): InternalSizeInformation =
+      InternalSizeInformation((children foldLeft 0d) { (total, node) => total + getChildHeight(node) })
 
     def updateLayout: Unit = {}
   }

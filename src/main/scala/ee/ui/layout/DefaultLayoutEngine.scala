@@ -9,7 +9,7 @@ import ee.ui.traits.RestrictedAccess
 
 class DefaultLayoutEngine extends LayoutEngine {
 
-  val resizeEngine = new DefaultResizeEngine
+  val resizeEngine = DefaultResizeEngine
 
   def layout(stage: Stage): Unit = {
     stage.scene foreach layout
