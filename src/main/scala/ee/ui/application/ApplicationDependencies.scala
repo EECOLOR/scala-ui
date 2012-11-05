@@ -11,7 +11,7 @@ trait ApplicationDependencies {
     val applicationConstructor:() => Application
     val nativeManager:NativeManager
     val pulseEvent:PulseEvent
-    lazy val layoutEngine:LayoutEngine = new DefaultLayoutEngine
+    lazy val layoutEngine:LayoutEngine = DefaultLayoutEngine
 }
 
 object ApplicationDependencies extends Dependencies[ApplicationDependencies]

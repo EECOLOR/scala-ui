@@ -125,6 +125,7 @@ trait HorizontalLayout extends DirectionalLayout { self: Group =>
       a.y = a.top
     }
     def otherPosX(x: X, other: Node): X = {
+      println("setting x to ", x, "for", other)
       other.x = x
       x + other.width
     }

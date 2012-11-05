@@ -7,8 +7,9 @@ import ee.ui.Node
 import ee.ui.Group
 import ee.ui.layout.Layout
 import ee.ui.nativeElements.Window
+import ee.ui.layout.LayoutEngine
 
-class PulseHandler(application:Application) extends ImplicitNativeManager {
+class PulseHandler(application:Application) extends ImplicitNativeManager with ImplicitLayoutEngine {
 
   def nativeManager(implicit nativeManager: NativeManager) = nativeManager
 
@@ -22,7 +23,11 @@ class PulseHandler(application:Application) extends ImplicitNativeManager {
     nativeManager updateImplementationOf window
   }
 
-  def notify(scene: Scene): Unit = {
+  def notify(scene: Scene)(implicit layoutManager:LayoutEngine): Unit = {
+    scene.pulse.fire
+    
+    layoutEngine layout scene
+    
     scene.root foreach notify _
     
     nativeManager updateImplementationOf scene

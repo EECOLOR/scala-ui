@@ -1,7 +1,7 @@
 package ee.ui.layout
 
-import ee.ui.nativeElements.Stage
+import ee.ui.nativeElements.Scene
 
 trait LayoutEngine {
-	def layout(stage:Stage):Unit
+	def layout(scene:Scene):Unit
 }

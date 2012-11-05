@@ -7,13 +7,7 @@ import ee.ui.Node
 import ee.ui.traits.LayoutSize
 import ee.ui.traits.RestrictedAccess
 
-class DefaultLayoutEngine extends LayoutEngine {
-
-  val resizeEngine = DefaultResizeEngine
-
-  def layout(stage: Stage): Unit = {
-    stage.scene foreach layout
-  }
+object DefaultLayoutEngine extends LayoutEngine {
 
   def layout(scene: Scene): Unit = {
     scene.root foreach layoutWithParent(scene)
@@ -22,7 +16,7 @@ class DefaultLayoutEngine extends LayoutEngine {
   def layoutWithParent(parent: LayoutSize)(node: Node): Unit = {
 
     //before we try to do any layout we need to resize the node (and possibly it's children)
-    resizeEngine.adjustSizeWithParent(parent, node)
+    DefaultResizeEngine.adjustSizeWithParent(parent, node)
 
     //now we can do the layout
     layout(node)

@@ -12,8 +12,8 @@ trait Rotation {
   def rotation = _rotation
   def rotation_=(value: Double) = _rotation.value = value
 
-  private val _axis = new Property(Rotate.Z_AXIS)
-  def axis = _axis
-  def axis_=(value: Point3D) = _axis.value = value
+  private val _rotationAxis = new Property(Rotate.Z_AXIS)
+  def rotationAxis = _rotationAxis
+  def rotationAxis_=(value: Point3D) = _rotationAxis.value = value
 }
 

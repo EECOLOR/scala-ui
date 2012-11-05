@@ -7,7 +7,7 @@ import ee.ui.Group
 import ee.ui.Node
 
 object DirectionalLayoutSpecification extends Specification with LayoutTestHelpers {
-  val engine = new DefaultLayoutEngine
+  val engine = DefaultLayoutEngine
 
   def is = "Directional layout specification".title ^
     //hide ^ end

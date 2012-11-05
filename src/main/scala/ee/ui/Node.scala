@@ -6,8 +6,16 @@ import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutPosition
 import ee.ui.layout.LayoutClient
 import language.implicitConversions
+import ee.ui.traits.Translation
+import ee.ui.traits.Scale
+import ee.ui.traits.Rotation
+import ee.ui.traits.Transforms
 
-abstract class Node extends LayoutClient with LayoutPosition with LayoutSize {
+abstract class Node extends 
+	LayoutClient with LayoutPosition with LayoutSize with 
+	Translation with Scale with Rotation with
+	Transforms {
+  
   private val writeableParent = new Property[Option[Group]](None) with ParentProperty
   val parent:ParentProperty = writeableParent
 }
