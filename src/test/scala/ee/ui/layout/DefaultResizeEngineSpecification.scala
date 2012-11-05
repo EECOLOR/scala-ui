@@ -206,7 +206,7 @@ object DefaultResizeEngineSpecification extends Specification with LayoutTestHel
   trait TestLayout extends Layout { self: Group =>
     
     type SizeInformationType = InternalSizeInformation
-    case class InternalSizeInformation(val size: Double) extends SizeInformation
+    case class InternalSizeInformation(val calculatedMinimalSize: Double) extends SizeInformation
   
     def childrenResized(): Unit = {}
 

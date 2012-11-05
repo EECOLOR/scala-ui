@@ -5,12 +5,12 @@ import ee.ui.Group
 
 trait PartialChildSizeCalculator {
   trait SizeInformation {
-    def size: Double
+    def calculatedMinimalSize: Double
   }
 
   type SizeInformationType <: SizeInformation
 
-  case class DefaultSizeInformation(size: Double) extends SizeInformation
+  case class DefaultSizeInformation(calculatedMinimalSize: Double) extends SizeInformation
 }
 
 trait ChildWidthCalculator extends PartialChildSizeCalculator {

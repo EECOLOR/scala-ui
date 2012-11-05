@@ -284,7 +284,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification with Layo
 
   trait TestLayout extends Layout { self: Group =>
     type SizeInformationType = TestInternalSizeInformation
-    case class TestInternalSizeInformation(val size: Double) extends SizeInformation
+    case class TestInternalSizeInformation(val calculatedMinimalSize: Double) extends SizeInformation
 
     override def calculateChildWidth(
       node: Node with ParentRelatedWidth, groupWidth: Width, sizeInformation: SizeInformationType): Width =

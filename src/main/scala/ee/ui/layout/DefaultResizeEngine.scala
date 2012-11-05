@@ -130,7 +130,7 @@ object DefaultResizeEngine {
           group match {
             case explicit: ExplicitWidth => group.width
             case explicit: ParentRelatedWidth => group.width
-            case _ => sizeInformation.size
+            case _ => sizeInformation.calculatedMinimalSize
           }
 
         new ParentWidthInformation {
@@ -157,7 +157,7 @@ object DefaultResizeEngine {
           group match {
             case explicit: ExplicitHeight => group.height
             case explicit: ParentRelatedHeight => group.height
-            case _ => sizeInformation.size
+            case _ => sizeInformation.calculatedMinimalSize
           }
 
         new ParentHeightInformation {

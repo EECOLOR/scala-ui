@@ -69,83 +69,94 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
         val (availableAnchorBasedSpace, occupiedPercentageBasedSpace) =
           testLayout.calculateAvailableSpaces(ownSize, information): (Double, Double)
 
-        (availableAnchorBasedSpace === 30) and (occupiedPercentageBasedSpace === 10) 
+        (availableAnchorBasedSpace === 30) and (occupiedPercentageBasedSpace === 10)
       } ^
-      { //calculateAvailableSpaces, take minWidth into account
-        
-        //add minimalPercentageChildSizes
-        todo
+      { //calculateAvailableSpaces, take minSize into account
+
+        val testLayout = new Group with TestLayout
+
+        val ownSize = 100
+        val information = testLayout.ChildInformation(
+          calculatedChildSizes = 50,
+          totalChildPercentages = 50,
+          minimalPercentageChildSizes = 20,
+          minimalAnchorChildSizes = 30)
+
+        val (availableAnchorBasedSpace, occupiedPercentageBasedSpace) =
+          testLayout.calculateAvailableSpaces(ownSize, information): (Double, Double)
+
+        (availableAnchorBasedSpace === 30) and (occupiedPercentageBasedSpace === 20)
       } ^
-  p ^
-    " Horizontal layout " ^
-    { //Simple layout
-      val scene = new LayoutSize with ExplicitSize { width = 800; height = 600 }
+      p ^
+      " Horizontal layout " ^
+      { //Simple layout
+        val scene = new LayoutSize with ExplicitSize { width = 800; height = 600 }
 
-      val group = new TestGroupS with HorizontalLayout {
-        val name = "group"
-        children(
-          new TestNodeP with ExplicitSize {
-            val name = "node1"
-            width = 10
-            height = 30
-            expectingPosition(0, 0)
-          },
-          new TestNodeP with ExplicitSize {
-            val name = "node2"
-            width = 20
-            height = 60
-            expectingPosition(10, 0)
-          })
-        expectingSize(30, 60)
-      }
+        val group = new TestGroupS with HorizontalLayout {
+          val name = "group"
+          children(
+            new TestNodeP with ExplicitSize {
+              val name = "node1"
+              width = 10
+              height = 30
+              expectingPosition(0, 0)
+            },
+            new TestNodeP with ExplicitSize {
+              val name = "node2"
+              width = 20
+              height = 60
+              expectingPosition(10, 0)
+            })
+          expectingSize(30, 60)
+        }
 
-      engine.layoutWithParent(scene)(group)
+        engine.layoutWithParent(scene)(group)
 
-      checkResults(group)
-    } ^
-    { //Complex layout, minWidths
-      val scene = new LayoutSize with ExplicitSize { width = 800; height = 600 }
+        checkResults(group)
+      } ^
+      { //Complex layout, minWidths
+        val scene = new LayoutSize with ExplicitSize { width = 800; height = 600 }
 
-      val group = new TestGroupS with HorizontalLayout {
-        val name = "group"
-        children(
-          new TestNode with PercentageBasedSize {
-            val name = "node1"
-            percentWidth = 20
-            percentHeight = 100
-            minWidth = 10
+        val group = new TestGroupS with HorizontalLayout {
+          val name = "group"
+          children(
+            new TestNode with PercentageBasedSize {
+              val name = "node1"
+              percentWidth = 20
+              percentHeight = 100
+              minWidth = 10
 
-            expecting(0, 0)(minWidth, 60)
-          },
-          new TestNodeP with ExplicitSize {
-            val name = "node2"
-            width = 20
-            height = 30
-            expectingPosition(10, 0)
-          },
-          new TestNode with AnchorBasedSize {
-            val name = "node3"
-            left = 10
-            top = 20
-            right = 30
-            bottom = 40
-            minWidth = 30
+              expecting(0, 0)(minWidth, 60)
+            },
+            new TestNodeP with ExplicitSize {
+              val name = "node2"
+              width = 20
+              height = 30
+              expectingPosition(10, 0)
+            },
+            new TestNode with AnchorBasedSize {
+              val name = "node3"
+              left = 10
+              top = 20
+              bottom = 30
+              right = 40
+              minWidth = 30
 
-            expecting(30, 0)(minWidth, 10)
-          },
-          new TestNodeP with ExplicitSize {
-            val name = "node4"
-            width = 40
-            height = 60
-            expectingPosition(70, 0)
-          })
-        expectingSize(140, 60)
-      }
+              expecting(40, 20)(minWidth, 10)
+            },
+            new TestNodeP with ExplicitSize {
+              val name = "node4"
+              width = 40
+              height = 60
+              expectingPosition(110, 0)
+            })
+          expectingSize(150, 60)
+        }
 
-      engine.layoutWithParent(scene)(group)
+        engine.layoutWithParent(scene)(group)
 
-      checkResults(group)
-    } ^ end
+        checkResults(group)
+      } ^ end
 
   trait TestLayout extends DirectionalLayout { self: Group =>
     def childrenResized(): Unit = ???
@@ -153,8 +164,8 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
     def calculateChildWidth(node: Node with ParentRelatedWidth): Width = ???
     def calculateChildHeight(node: Node with ParentRelatedHeight): Height = ???
 
-     def determineTotalChildWidth(getChildWidth: Node => Width): SizeInformationType = ???
-	 def determineTotalChildHeight(getChildWidth: Node => Width): SizeInformationType = ???
+    def determineTotalChildWidth(getChildWidth: Node => Width): SizeInformationType = ???
+    def determineTotalChildHeight(getChildWidth: Node => Width): SizeInformationType = ???
 
     def updateLayout: Unit = ???
   }
