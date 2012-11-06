@@ -24,7 +24,7 @@ class PulseHandler(application:Application) extends ImplicitNativeManager with I
   }
 
   def notify(scene: Scene)(implicit layoutManager:LayoutEngine): Unit = {
-    scene.pulse.fire
+    scene.onPulse.fire
     
     layoutEngine layout scene
     
@@ -34,6 +34,7 @@ class PulseHandler(application:Application) extends ImplicitNativeManager with I
   }
 
   def notify(node: Node): Unit = {
+    node.onPulse.fire
     
     node match {
       case group: Group => {

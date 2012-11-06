@@ -16,38 +16,75 @@ import ee.ui.primitives.Translate
 import ee.ui.primitives.Rotate
 import ee.ui.primitives.Scale
 import ee.ui.primitives.Translate
-import Predef.{ any2stringadd => _, _ }
+import ee.ui.primitives.Bounds
+import ee.ui.properties.PropertyChangeCollector
+import ee.ui.properties.PropertyChangeCollector._
+import ee.ui.traits.Pulse
 
-abstract class Node extends LayoutClient with LayoutPosition with LayoutSize with Translation with Scaling with Rotation with Transformations {
+abstract class Node extends LayoutClient with LayoutPosition with LayoutSize 
+	with Translation with Scaling with Rotation with Transformations with Pulse {
 
-  private val writeableParent = new Property[Option[Group]](None) with ParentProperty
-  val parent: ParentProperty = writeableParent
+  private val writableParent = new Property[Option[Group]](None) with ParentProperty
+  val parent: ParentProperty = writableParent
 
-  def totalTransformation: Transformation = {
+  private val writableTotalTransformation = new Property[Transformation](Translate(x, y, 0))
+  val totalTransformation: ReadOnlyProperty[Transformation] = writableTotalTransformation
 
-    val newX = translateX + x
-    val newY = translateY + y
-
-    val nodeTransformations =
-      if (scaleX.isChanged || scaleY.isChanged || scaleZ.isChanged || rotation.isChanged) {
-        val pivotX = width / 2d + newX
-        val pivotY = height / 2d + newY
-
-        Translate(newX, newY, translateZ) ++
-          Rotate(rotation, rotationAxis, pivotX, pivotY) ++
-          Scale(scaleX, scaleY, scaleZ)
-
-      } else
-        Translate(newX, newY, translateZ)
-
-    (transformations foldLeft nodeTransformations)(_ ++ _)
+  private val writableBounds = new Property[Bounds](Bounds(x, y, width, height))
+  val bounds: ReadOnlyProperty[Bounds] = writableBounds
+  
+  onPulse {
+    transformationPropertiesChangeCollector.applyChanges
+    boundsPropertiesChangeCollector.applyChanges
   }
+  
+  def scaleOrRotationChanged =
+    scaleX.isChanged || scaleY.isChanged || scaleZ.isChanged ||
+      rotation.isChanged || rotationAxis.isChanged
+
+  private val transformationPropertiesChangeCollector = new PropertyChangeCollector(
+    (x, y, translateX, translateY, translateZ,
+      rotation, rotationAxis,
+      scaleX, scaleY, scaleZ) ~> {
+        (x, y, translateX, translateY, translateZ,
+        rotation, rotationAxis,
+        scaleX, scaleY, scaleZ) =>
+
+          val newX = translateX + x
+          val newY = translateY + y
+
+          val nodeTransformations =
+            if (scaleOrRotationChanged) {
+              val pivotX = width / 2d + newX
+              val pivotY = height / 2d + newY
+
+              Translate(newX, newY, translateZ) ++
+                Rotate(rotation, rotationAxis, pivotX, pivotY) ++
+                Scale(scaleX, scaleY, scaleZ)
+
+            } else
+              Translate(newX, newY, translateZ)
+
+          val totalTransformation =
+            (transformations foldLeft nodeTransformations)(_ ++ _)
+
+          writableTotalTransformation.value = totalTransformation
+      })
+
+  private val boundsPropertiesChangeCollector = new PropertyChangeCollector(
+    (width, height, totalTransformation) ~> {
+      (width, height, totalTransformation) =>
+
+        val bounds = Bounds(0, 0, width, height) transform totalTransformation
+        
+        writableBounds.value = bounds
+    })
 
 }
 
 object Node {
   def setParent(node: Node, parent: Option[Group]) =
-    node.writeableParent.value = parent
+    node.writableParent.value = parent
 }
 
 trait ParentProperty extends ReadOnlyProperty[Option[Group]]

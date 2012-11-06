@@ -1,7 +1,7 @@
 package ee.ui.primitives
 
 sealed trait Transformation {
-  
+
   val xx: Double = 1
   val xy: Double = 0
   val xz: Double = 0
@@ -16,6 +16,15 @@ sealed trait Transformation {
   val zy: Double = 0
   val zz: Double = 1
   val zt: Double = 0
+
+  def transform(p: Point3D): Point3D = {
+
+    val Point3D(x, y, z) = p
+    Point3D(
+      xx * x + xy * y + xz * z + xt,
+      yx * x + yy * y + yz * z + yt,
+      zx * x + zy * y + zz * z + zt)
+  }
 
   def ++(t: Transformation) = {
 
@@ -39,6 +48,14 @@ sealed trait Transformation {
       myx, myy, myz, myt,
       mzx, mzy, mzz, mzt)
   }
+}
+
+object Transformation {
+  def unapply(t: Transformation): Option[(Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double)] =
+    Some((
+      t.xx, t.xy, t.xz, t.xt,
+      t.yx, t.yy, t.yz, t.yt,
+      t.zx, t.zy, t.zz, t.zt))
 }
 
 case class Affine(

@@ -12,8 +12,9 @@ import ee.ui.traits.Fill
 import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutPosition
 import ee.ui.Node
+import ee.ui.traits.Pulse
 
-class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with LayoutSize with Fill {
+class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with LayoutSize with Fill with Pulse {
 	
   def defaultFill = Color.WHITE
   
@@ -31,6 +32,4 @@ class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with Layo
   
   val onMouseClicked = new Event[MouseEvent]
   val onMouseMoved = new Event[MouseEvent]
-  val pulse = new NullEvent
-  
 }
