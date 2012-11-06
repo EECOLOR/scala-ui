@@ -2,6 +2,14 @@ package ee.ui.primitives
 
 case class Bounds(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double) {
 
+  lazy val x = minX
+  lazy val y = minY
+  lazy val z = minZ
+  
+  lazy val width = maxX - minX
+  lazy val height = maxY - minY
+  lazy val depth = maxZ - minZ
+
   def this(minX: Double, minY: Double, maxX: Double, maxY: Double) =
     this(minX, minY, 0, maxX, maxY, 0)
 

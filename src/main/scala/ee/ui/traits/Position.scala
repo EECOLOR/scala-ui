@@ -17,3 +17,8 @@ trait LayoutPosition extends Position {
   def x_=(value: Double)(implicit ev: AccessRestriction) = super.x = value
   def y_=(value: Double)(implicit ev: AccessRestriction) = super.y = value
 }
+
+trait ExplicitPosition extends LayoutPosition {
+  override def x_=(value: Double) = super.x_=(value)(RestrictedAccess)
+  override def y_=(value: Double) = super.y_=(value)(RestrictedAccess)
+}
