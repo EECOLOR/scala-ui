@@ -10,6 +10,7 @@ class Property[T](default: T) extends Bindable[T] with Equals {
 
   def reset = value = default
   def isDefault = value == default
+  def isChanged = value != default
   
   def canEqual(other: Any) = {
     other.isInstanceOf[Property[T]]

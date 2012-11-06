@@ -2,7 +2,7 @@ package ee.ui.traits
 
 import ee.ui.properties.Property
 
-trait Scale {
+trait Scaling {
   private val _scaleX = new Property(1d)
   def scaleX = _scaleX
   def scaleX_=(value: Double) = _scaleX.value = value
