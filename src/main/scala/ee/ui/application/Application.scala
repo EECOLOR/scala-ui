@@ -33,8 +33,8 @@ object Application extends ImplicitPulseEvent {
     }
     
     def createPulseHandler(application:Application)(implicit pulseEvent:PulseEvent) = {
-      println("Application.createPulseHandler")
       val pulseHandler = new PulseHandler(application)
       pulseEvent(pulseHandler.pulse)
+      pulseEvent.fire
     }
 }

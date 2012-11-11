@@ -12,9 +12,8 @@ import ee.ui.traits.Fill
 import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutPosition
 import ee.ui.Node
-import ee.ui.traits.Pulse
 
-class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with LayoutSize with Fill with Pulse {
+class Scene(defaultDepthBuffer:Boolean = false) extends LayoutPosition with LayoutSize with Fill {
 	
   def defaultFill = Color.WHITE
   

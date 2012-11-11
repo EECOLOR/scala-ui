@@ -5,7 +5,6 @@ import ee.ui.Node
 import ee.ui.properties.Add
 import ee.ui.properties.Remove
 import ee.ui.properties.Clear
-import ee.ui.traits.RestrictedAccess
 
 trait DirectionalLayout extends Layout { self: Group =>
   type SizeInformationType = ChildInformation
@@ -113,21 +112,18 @@ trait HorizontalLayout extends DirectionalLayout { self: Group =>
     }
 
   override def updateLayout: Unit = {
-    // we need access to set x and y positions
-    implicit val access = RestrictedAccess
 
     def anchorPosX(x: X, a: Node with AnchorBasedWidth): X = {
       val left: Double = a.left
-      a.x = x + left
-      x + left + a.width + a.right
+      updateX(a, x + left)
+      x + left + a.bounds.width + a.right
     }
     def anchorPosY(a: Node with AnchorBasedHeight) = {
-      a.y = a.top
+      updateY(a, a.top)
     }
     def otherPosX(x: X, other: Node): X = {
-      println("setting x to ", x, "for", other)
-      other.x = x
-      x + other.width
+      updateX(other, x)
+      x + other.bounds.width
     }
 
     // start with x == 0
@@ -137,14 +133,20 @@ trait HorizontalLayout extends DirectionalLayout { self: Group =>
           anchorPosY(a)
           anchorPosX(x, a)
         }
-        case a: AnchorBasedWidth => anchorPosX(x, a)
+        case a: AnchorBasedWidth => {
+          updateY(a, 0)
+          anchorPosX(x, a)
+        }
         case a: AnchorBasedHeight => {
           anchorPosY(a)
           otherPosX(x, a)
         }
 
         //Note that percentage based nodes can now be handled in a similar fashion
-        case other => otherPosX(x, other)
+        case other => {
+          updateY(other, 0)
+          otherPosX(x, other)
+        }
 
       }
     }
@@ -213,20 +215,18 @@ trait VerticalLayout extends DirectionalLayout { self: Group =>
     }
 
   override def updateLayout: Unit = {
-    // we need access to set x and y positions
-    implicit val access = RestrictedAccess
 
     def anchorPosY(y: Y, a: Node with AnchorBasedHeight): Y = {
       val top: Double = a.top
-      a.y = y + top
-      y + top + a.height + a.bottom
+      updateY(a, y + top)
+      y + top + a.bounds.height + a.bottom
     }
     def anchorPosX(a: Node with AnchorBasedWidth) = {
-      a.x = a.left
+      updateX(a, a.left)
     }
     def otherPosY(y: Y, other: Node): Y = {
-      other.y = y
-      y + other.height
+      updateY(other, y)
+      y + other.bounds.height
     }
 
     // start with y == 0
@@ -240,26 +240,14 @@ trait VerticalLayout extends DirectionalLayout { self: Group =>
           anchorPosX(a)
           otherPosY(y, a)
         }
-        case a: AnchorBasedHeight => anchorPosY(y, a)
-
-        //Note that percentage based nodes can now be handled in a similar fashion
-        case other => otherPosY(y, other)
-
-      }
-    }
-
-    // start with y == 0
-    (children foldLeft 0d) { (y, child) =>
-      child match {
         case a: AnchorBasedHeight => {
-          val top: Double = a.top
-          a.y = y + top
-          y + top + a.height + a.bottom
+          updateX(a, 0)
+          anchorPosY(y, a)
         }
         //Note that percentage based nodes can now be handled in a similar fashion
         case other => {
-          other.y = y
-          y + other.height
+          updateX(other, 0)
+          otherPosY(y, other)
         }
 
       }

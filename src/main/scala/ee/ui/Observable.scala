@@ -33,13 +33,11 @@ trait Observable[T] {
       if (listener isDefinedAt i) listener(i)
     }
 
-  protected def notify(information: T, apply: => Unit): Unit = {
-    //println("Observable notify " + information + " -- " + this)
+  protected def notify(information: T, apply: => Unit): Unit =
     if (notifyHandlers(information)) {
       apply
       notifyListeners(information)
     }
-  }
 
   protected def notify(information: T): Unit = notify(information, {})
 

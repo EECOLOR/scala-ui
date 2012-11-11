@@ -8,9 +8,11 @@ import ee.ui.traits.PartialExplicitSize
 import ee.ui.traits.ExplicitSize
 import ee.ui.traits.ExplicitHeight
 import ee.ui.traits.ExplicitWidth
+import ee.ui.primitives.Bounds
 
 //TODO build something so that only shizzle is measured if something has changed
 //TODO introduce LayoutClient.includeInLayout
+//TODO add a form of cache for things like size calculators
 object DefaultResizeEngine {
 
   def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit = {
@@ -91,37 +93,46 @@ object DefaultResizeEngine {
       }
     }
 
+    def toChildWidthCalculator(g: Group) =
+      g match {
+        case layout: Layout => layout
+        case g => new GroupChildWidthCalculator {
+          val group = g
+        }
+      }
+
+    def toChildHeightCalculator(g: Group) =
+      g match {
+        case layout: Layout => layout
+        case g => new GroupChildHeightCalculator {
+          val group = g
+        }
+      }
+
     def getChildWidth(node: Node): Width =
       node match {
-        case node: ExplicitWidth => node.width
+        case node: ExplicitWidth => node.bounds.width
         case node: ParentRelatedWidth => node.minRequiredWidth
         case group: Group =>
-          (group.children foldLeft 0d) { (result, child) =>
-            result + getChildWidth(child)
-          }
-        case node => node.width
+          toChildWidthCalculator(group)
+            .determineTotalChildWidth(getChildWidth)
+            .calculatedMinimalSize
+        case node => node.bounds.width
       }
 
     def getChildHeight(node: Node): Height =
       node match {
-        case node: ExplicitHeight => node.height
+        case node: ExplicitHeight => node.bounds.height
         case node: ParentRelatedHeight => node.minRequiredHeight
         case group: Group =>
-          (group.children foldLeft 0d) { (result, child) =>
-            result + getChildHeight(child)
-          }
-        case node => node.height
+          toChildHeightCalculator(group)
+            .determineTotalChildHeight(getChildHeight)
+            .calculatedMinimalSize
+
+        case node => node.bounds.height
       }
 
     object widthInformation {
-
-      def toChildWidthCalculator(g: Group) =
-        g match {
-          case layout: Layout => layout
-          case g => new GroupChildWidthCalculator {
-            val group = g
-          }
-        }
 
       def of(group: Group): ParentWidthInformation = {
         val calculator = toChildWidthCalculator(group)
@@ -141,14 +152,6 @@ object DefaultResizeEngine {
     }
 
     object heightInformation {
-
-      def toChildHeightCalculator(g: Group) =
-        g match {
-          case layout: Layout => layout
-          case g => new GroupChildHeightCalculator {
-            val group = g
-          }
-        }
 
       def of(group: Group): ParentHeightInformation = {
         val calculator = toChildHeightCalculator(group)

@@ -8,39 +8,88 @@ import ee.ui.traits.LayoutSize
 import ee.ui.traits.LayoutWidth
 import ee.ui.traits.LayoutHeight
 import ee.ui.traits.AccessRestriction
+import ee.ui.primitives.Bounds
+import ee.ui.primitives.Identity
+import ee.ui.primitives.Transformation
+import ee.ui.traits.Rotation
+import ee.ui.traits.Scaling
+import ee.ui.traits.RuntimeError
+import ee.ui.primitives.Point
 
-trait PartialParentRelatedSize
+trait PartialParentRelatedSize extends NoTransformations
+
+/**
+ * This trait helps prevent the use of rotation and scaling which does 
+ * not make a lot of sense for parent related size
+ * 
+ * In theory we could allow transformations, parent related size elements 
+ * would then scale if it's not a pure translation. I wonder if there ever 
+ * comes a compelling use case
+ */
+trait NoTransformations extends Scaling with Rotation {
+
+  def scaleX_=(value: Double)(implicit ev: RuntimeError) = super.scaleX_=(value)
+  def scaleY_=(value: Double)(implicit ev: RuntimeError) = super.scaleY_=(value)
+  def scaleZ_=(value: Double)(implicit ev: RuntimeError) = super.scaleZ_=(value)
+
+  def rotation_=(value: Double)(implicit ev: RuntimeError) = super.rotation_=(value)
+  def rotationAxis_=(value: Point)(implicit ev: RuntimeError) = super.rotationAxis_=(value)
+
+}
+
+object PartialParentRelatedSize {
+  val transformationAppliedError =
+    new Error(
+      "Parent related size can not be calculated for nodes that have transformations " +
+        "applied. Note that things like rotation and scaling are also performed with " +
+        "transformations.")
+
+  def ifIsPureTranslation(transformation: Transformation)(body: => Unit) =
+    if (transformation.isPureTranslation) {
+      body
+    } else {
+      throw transformationAppliedError
+    }
+}
 
 trait ParentRelatedWidth extends PartialParentRelatedSize with LayoutWidth { self: Node =>
 
   def minRequiredWidth: Width = minWidth
+
   def calculateWidth(parentWidth: Width): Width
 
   private val _minWidth = new Property(0d)
   def minWidth = _minWidth
   def minWidth_=(value: Double) = _minWidth.value = value
-  
-  override def width_=(value:Double)(implicit ev: AccessRestriction) = 
-    super.width_=(math.max(value, minWidth))
+
+  override def width_=(value: Double)(implicit ev: AccessRestriction) =
+    (PartialParentRelatedSize ifIsPureTranslation totalTransformation) {
+
+      super.width_=(math.max(value, minWidth))
+    }
+
 }
 
 trait ParentRelatedHeight extends PartialParentRelatedSize with LayoutHeight { self: Node =>
 
   def minRequiredHeight: Height = minHeight
+
   def calculateHeight(parentHeight: Height): Height
 
   private val _minHeight = new Property(0d)
   def minHeight = _minHeight
   def minHeight_=(value: Double) = _minHeight.value = value
-  
-  override def height_=(value:Double)(implicit ev: AccessRestriction) = 
-    super.height_=(math.max(value, minHeight))
+
+  override def height_=(value: Double)(implicit ev: AccessRestriction) =
+    (PartialParentRelatedSize ifIsPureTranslation totalTransformation) {
+
+      super.height_=(math.max(value, minHeight))
+    }
 
 }
 
 trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 
-  override def minRequiredWidth = minWidth
   override def calculateWidth(parentWidth: Width): Width =
     (percentWidth / 100d) * parentWidth
 
@@ -51,7 +100,6 @@ trait PercentageBasedWidth extends ParentRelatedWidth { self: Node =>
 
 trait PercentageBasedHeight extends ParentRelatedHeight { self: Node =>
 
-  override def minRequiredHeight = minHeight
   override def calculateHeight(parentHeight: Height): Height =
     (percentHeight / 100d) * parentHeight
 

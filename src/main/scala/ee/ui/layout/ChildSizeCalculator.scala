@@ -15,7 +15,7 @@ trait PartialChildSizeCalculator {
 
 trait ChildWidthCalculator extends PartialChildSizeCalculator {
 
-  def calculateChildWidth(node: Node with ParentRelatedWidth, parentWidth:Width, sizeInformation: SizeInformationType): Width =
+  def calculateChildWidth(node: Node with ParentRelatedWidth, parentWidth: Width, sizeInformation: SizeInformationType): Width =
     node calculateWidth parentWidth
 
   def determineTotalChildWidth(getChildWidth: Node => Width): SizeInformationType
@@ -28,8 +28,8 @@ object ChildWidthCalculator {
 }
 
 trait ChildHeightCalculator extends PartialChildSizeCalculator {
-  
-  def calculateChildHeight(node: Node with ParentRelatedHeight, parentHeight:Width, sizeInformation: SizeInformationType): Height =
+
+  def calculateChildHeight(node: Node with ParentRelatedHeight, parentHeight: Width, sizeInformation: SizeInformationType): Height =
     node calculateHeight parentHeight
 
   def determineTotalChildHeight(getChildHeight: Node => Height): SizeInformationType
@@ -37,7 +37,9 @@ trait ChildHeightCalculator extends PartialChildSizeCalculator {
 
 object ChildHeightCalculator {
   def determineTotalChildHeight(group: Group, getChildHeight: Node => Height): Height =
-    (group.children foldLeft 0d) { (total, node) => math max (total, getChildHeight(node)) }
+    (group.children foldLeft 0d) {
+      (total, node) => math max (total, getChildHeight(node))
+    }
 }
 
 trait GroupChildWidthCalculator extends ChildWidthCalculator {
@@ -64,7 +66,5 @@ trait GroupChildHeightCalculator extends ChildHeightCalculator {
     DefaultSizeInformation(totalChildHeight)
   }
 }
-
-trait GroupChildSizeCalculator extends ChildWidthCalculator with ChildHeightCalculator
 
 

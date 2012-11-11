@@ -11,7 +11,6 @@ trait ObservableProperty[T] extends Observable[(T, T)] {
   def onChanged(listener: (T, T) => Unit): Unit = listen(listener.tupled)
   def onChangedIn = listenIn _
   
-  def ~> = forNewValue _
   def forNewValue(listener: T => Unit): Unit = listenIn { case (o, n) => listener(n) }
   def forNewValueIn(listener: PartialFunction[T, Unit]): Unit =
     listenIn { case (o, n) =>

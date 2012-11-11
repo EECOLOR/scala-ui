@@ -1,8 +1,8 @@
 package ee.ui.traits
 
 import ee.ui.properties.Property
-import ee.ui.primitives.Point3D
 import ee.ui.primitives.Rotate
+import ee.ui.primitives.Point
 
 trait Rotation {
   /**
@@ -14,7 +14,7 @@ trait Rotation {
 
   private val _rotationAxis = new Property(Rotate.Z_AXIS)
   def rotationAxis = _rotationAxis
-  def rotationAxis_=(value: Point3D) = _rotationAxis.value = value
+  def rotationAxis_=(value: Point) = _rotationAxis.value = value
   
 }
 
