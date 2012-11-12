@@ -1,10 +1,11 @@
 package ee.ui.primitives
 
+//TODO create an optimized version for 2D
 case class Bounds(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double) {
 
-   def this(minX: Double, minY: Double, maxX: Double, maxY: Double) =
+  def this(minX: Double, minY: Double, maxX: Double, maxY: Double) =
     this(minX, minY, 0, maxX, maxY, 0)
-  
+
   lazy val x = minX
   lazy val y = minY
   lazy val z = minZ
@@ -15,7 +16,7 @@ case class Bounds(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: 
 
   lazy val position = Point(x, y, z)
   lazy val size = Point(width, height, depth)
-  
+
   def transform(transformation: Transformation): Bounds = {
 
     @inline def t(x: Double, y: Double, z: Double): Point =
@@ -24,7 +25,6 @@ case class Bounds(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: 
     val firstTransformation = t(minX, minY, minZ)
 
     val transformations = Seq(
-      t(minX, minY, maxZ),
       t(minX, maxY, minZ),
       t(minX, maxY, maxZ),
       t(maxX, minY, minZ),
@@ -42,6 +42,12 @@ case class Bounds(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: 
 
     Bounds(newMinX, newMinY, newMinZ, newMaxX, newMaxY, newMaxZ)
   }
+
+  def contains(point: Point): Boolean = {
+    val Point(x, y, z) = point
+    x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ
+  }
+
 }
 
 object Bounds {
@@ -59,6 +65,6 @@ object Bounds {
 
     apply(min, max)
   }
-  
+
   val ZERO = new Bounds(0, 0, 0, 0)
 }

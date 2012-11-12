@@ -29,6 +29,14 @@ abstract class Node extends LayoutClient with LayoutPosition with LayoutSize
   private val writableParent = new Property[Option[Group]](None) with ParentProperty
   val parent: ParentProperty = writableParent
 
+  //for testing purposes
+  var id = "unknown"
+  
+  parent forNewValue { p =>
+    id = p 
+    	.map(p => p.id + ".node" + p.children.indexOf(this)) 
+    	.getOrElse("root")
+  }
 }
 
 object Node {

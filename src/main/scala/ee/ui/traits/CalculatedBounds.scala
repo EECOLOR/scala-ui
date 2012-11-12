@@ -23,29 +23,28 @@ trait CalculatedBounds extends LayoutPosition with LayoutSize
   private val writableTotalTransformation = new Property[Transformation](Identity)
   val totalTransformation: ReadOnlyProperty[Transformation] = writableTotalTransformation
 
-  private val writableBounds = new Property[Bounds](Bounds.ZERO)
+  private val writableUntransformedBounds = new Property(Bounds.ZERO)
+  val untransformedBounds: ReadOnlyProperty[Bounds] = writableUntransformedBounds
+
+  private val writableBounds = new Property(Bounds.ZERO)
   val bounds: ReadOnlyProperty[Bounds] = writableBounds
 
-  private val writableShapeBounds = new Property[Bounds](Bounds.ZERO)
+  private val writableShapeBounds = new Property(Bounds.ZERO)
   val shapeBounds: ReadOnlyProperty[Bounds] = writableShapeBounds
 
-  def calculateTotalTransformation(
-    shapeTransformation: Transformation,
-    positionTransformation: Transformation) = {
+  private val totalTransformationProperties =
+    PropertyGroup(shapeTransformation, positionTransformation) ~> {
+      (shapeTransformation, positionTransformation) =>
 
-    val propertyDerivedTransformation: Transformation =
-      positionTransformation ++ shapeTransformation
+        val propertyDerivedTransformation: Transformation =
+          positionTransformation ++ shapeTransformation
 
-    //TODO, this should not be done here but in a listener of transformations, that would also solve the problem that shapeTransformation is not updated if the transformations contain a shape related transformation
-    val totalTransformation =
-      (transformations foldLeft propertyDerivedTransformation)(_ ++ _)
+        //TODO, this should not be done here but in a listener of transformations, that would also solve the problem that shapeTransformation is not updated if the transformations contain a shape related transformation
+        val totalTransformation =
+          (transformations foldLeft propertyDerivedTransformation)(_ ++ _)
 
-    writableTotalTransformation.value = totalTransformation
-  }
-
-  private val totalTransformationProperties = PropertyGroup(
-    shapeTransformation,
-    positionTransformation) ~> calculateTotalTransformation
+        writableTotalTransformation.value = totalTransformation
+    }
 
   private val shapeTransformationProperties = PropertyGroup(
     rotation, rotationAxis,
@@ -65,29 +64,30 @@ trait CalculatedBounds extends LayoutPosition with LayoutSize
 
     }
 
-  private val positionTransformationProperties = PropertyGroup(
-    x, translateX, y, translateY, translateZ) ~> {
+  private val positionTransformationProperties =
+    PropertyGroup(x, translateX, y, translateY, translateZ) ~> {
       (x, translateX, y, translateY, translateZ) =>
-        
+
         writablePositionTransformation.value =
           Translate(x + translateX, y + translateY, translateZ)
     }
 
-  private val boundsProperties = PropertyGroup(
-    totalTransformation, width, height) ~> {
-      (totalTransformation, width, height) =>
-
-        val bounds = Bounds(0, 0, width, height) transform totalTransformation
-
-        writableBounds.value = bounds
+  private val untransformedBoundsProperties =
+    PropertyGroup(width, height) ~> {
+      (width, height) => writableUntransformedBounds.value = Bounds(0, 0, width, height)
     }
 
-  private val shapeBoundsProperties = PropertyGroup(
-    shapeTransformation, width, height) ~> {
-      (shapeTransformation, width, height) =>
+  private val boundsProperties =
+    PropertyGroup(totalTransformation, untransformedBounds) ~> {
+      (totalTransformation, untransformedBounds) =>
 
-        val bounds = Bounds(0, 0, width, height) transform shapeTransformation
+        writableBounds.value = untransformedBounds transform totalTransformation
+    }
 
-        writableShapeBounds.value = bounds
+  private val shapeBoundsProperties =
+    PropertyGroup(shapeTransformation, untransformedBounds) ~> {
+      (shapeTransformation, untransformedBounds) =>
+
+        writableShapeBounds.value = untransformedBounds transform shapeTransformation
     }
 }

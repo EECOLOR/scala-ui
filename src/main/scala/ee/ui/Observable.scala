@@ -41,4 +41,5 @@ trait Observable[T] {
 
   protected def notify(information: T): Unit = notify(information, {})
 
+  
 }

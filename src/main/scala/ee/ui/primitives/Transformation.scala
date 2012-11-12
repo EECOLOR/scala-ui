@@ -61,6 +61,49 @@ trait Transformation extends Equals {
       myx, myy, myz, myt,
       mzx, mzy, mzz, mzt)
   }
+
+  lazy val inverted: Option[Transformation] = {
+
+    val `without translation inverse` = {
+      val txx = yy * zz - yz * zy
+      val txy = xz * zy - xy * zz
+      val txz = xy * yz - xz * yy
+      val tyx = yz * zx - yx * zz
+      val tyy = xx * zz - xz * zx
+      val tyz = xz * yx - xx * yz
+      val tzx = yx * zy - yy * zx
+      val tzy = xy * zx - xx * zy
+      val tzz = xx * yy - xy * yx
+
+      // determinant
+      val d = xx * txx + xy * tyx + xz * tzx
+      if (d == 0) None
+      else {
+        val invD = 1 / d
+        Some((
+          invD * txx, invD * txy, invD * txz,
+          invD * tyx, invD * tyy, invD * tyz,
+          invD * tzx, invD * tzy, invD * tzz))
+
+      }
+    }
+
+    `without translation inverse` map { case (
+      mxx, mxy, mxz,
+      myx, myy, myz,
+      mzx, mzy, mzz) =>
+
+      val mxt = -(mxx * xt + mxy * yt + mxz * zt)
+      val myt = -(myx * xt + myy * yt + myz * zt)
+      val mzt = -(mzx * xt + mzy * yt + mzz * zt)
+
+      Affine(
+        mxx, mxy, mxz, mxt,
+        myx, myy, myz, myt,
+        mzx, mzy, mzz, mzt)
+    }
+  }
+
 }
 
 object Identity extends Transformation {
@@ -69,8 +112,8 @@ object Identity extends Transformation {
 
   override def transform(p: Point) = p
   override def ++(t: Transformation) = t
-  
-  def canEqual(that:Any) = that.isInstanceOf[Transformation]
+
+  def canEqual(that: Any) = that.isInstanceOf[Transformation]
 }
 
 case class Affine(
@@ -143,11 +186,11 @@ case class Rotate(
   private val pxt = pivotX
   private val pyt = pivotY
   private val pzt = pivotZ
-  
+
   // concatinate pivot translation to matrix (move to pivot)
   override val xt = xx * -pivotX + xy * -pivotY + xz * -pivotZ + pxt
   override val yt = yx * -pivotX + yy * -pivotY + yz * -pivotZ + pyt
-  override val zt = zx * -pivotX + zy * -pivotY + zz * -pivotZ + pzt 
+  override val zt = zx * -pivotX + zy * -pivotY + zz * -pivotZ + pzt
 
 }
 
@@ -203,7 +246,7 @@ case class Scale(
     val mzx = zz * t.zx
     val mzy = zz * t.zy
     val mzz = zz * t.zz
-    val mzt = zz * t.zt + zt    
+    val mzt = zz * t.zt + zt
 
     Affine(
       mxx, mxy, mxz, mxt,
@@ -240,7 +283,7 @@ case class Shear(
 
   override def ++(t: Transformation) = {
 
-	val mxx = t.xx + xy * t.yx
+    val mxx = t.xx + xy * t.yx
     val mxy = t.xy + xy * t.yy
     val mxz = t.xz + xy * t.yz
     val mxt = t.xt + xy * t.yt + xt
@@ -275,7 +318,7 @@ case class Translate(
     val mxt = t.xt + xt
     val myt = t.yt + yt
     val mzt = t.zt + zt
-    
+
     Affine(
       t.xx, t.xy, t.xz, mxt,
       t.yx, t.yy, t.yz, myt,
