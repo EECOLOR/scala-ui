@@ -15,6 +15,7 @@ import ee.ui.Node
 import ee.ui.primitives.Point
 import ee.ui.properties.Binding._
 import ee.ui.events.NullEvent
+import ee.ui.events.MouseEvent
 
 class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with LayoutSize with Fill with MouseHandling {
 
@@ -37,8 +38,14 @@ class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with Lay
 
 trait MouseHandling { self:Scene =>
   
-  val onMouseClicked = new Event[MouseEvent]
   val onMouseMoved = new Event[MouseEvent]
+  val onMouseClicked = new Event[MouseEvent]
+  
+  private val lastKnownMouseEvent = new Property[MouseEvent](null)
+  
+  lastKnownMouseEvent <== onMouseMoved
+  lastKnownMouseEvent <== onMouseClicked
+  
 
   private val writableMousePosition = new Property(Point(0, 0))
   val mousePosition:ReadOnlyProperty[Point] = writableMousePosition
@@ -52,6 +59,12 @@ trait MouseHandling { self:Scene =>
   
   writableNodeAtMousePosition <== mousePosition map { p =>
     root flatMap findNode(p)
+  }
+  
+  nodeAtMousePosition onChangedIn {
+    case (oldNode, newNode) => 
+      oldNode.foreach (_.onMouseOut fire lastKnownMouseEvent)
+      newNode.foreach (_.onMouseOver fire lastKnownMouseEvent)
   }
   
   private def findNode(point: Point)(node: Node): Option[Node] =

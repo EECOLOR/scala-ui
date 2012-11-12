@@ -7,8 +7,6 @@ case class MouseEvent(
     sceneY:Double,
     screenX:Double,
     screenY:Double,
-    x:Double,
-    y:Double,
     altDown:Boolean,
     controlDown:Boolean,
     metaDown:Boolean,

@@ -21,22 +21,15 @@ import ee.ui.properties.PropertyChangeCollector._
 import ee.ui.properties.PropertyGroup
 import ee.ui.primitives.Identity
 import ee.ui.traits.CalculatedBounds
+import ee.ui.traits.MouseTraits
 
 abstract class Node extends LayoutClient with LayoutPosition with LayoutSize
   with Translation with Scaling with Rotation with Transformations 
-  with CalculatedBounds {
+  with CalculatedBounds with MouseTraits {
 
   private val writableParent = new Property[Option[Group]](None) with ParentProperty
   val parent: ParentProperty = writableParent
 
-  //for testing purposes
-  var id = "unknown"
-  
-  parent forNewValue { p =>
-    id = p 
-    	.map(p => p.id + ".node" + p.children.indexOf(this)) 
-    	.getOrElse("root")
-  }
 }
 
 object Node {
