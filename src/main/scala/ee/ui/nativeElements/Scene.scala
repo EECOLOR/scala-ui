@@ -33,56 +33,67 @@ class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with Lay
   def camera_=(value: Camera) = camera.value = Some(value)
   def camera_=(value: Option[Camera]) = camera.value = value
 
-  
 }
 
-trait MouseHandling { self:Scene =>
-  
+trait MouseHandling { self: Scene =>
+
   val onMouseMoved = new Event[MouseEvent]
   val onMouseClicked = new Event[MouseEvent]
-  
+
   private val lastKnownMouseEvent = new Property[MouseEvent](null)
-  
+
   lastKnownMouseEvent <== onMouseMoved
   lastKnownMouseEvent <== onMouseClicked
-  
 
   private val writableMousePosition = new Property(Point(0, 0))
-  val mousePosition:ReadOnlyProperty[Point] = writableMousePosition
-  
+  val mousePosition: ReadOnlyProperty[Point] = writableMousePosition
+
+  private val writableNodesAtMousePosition = new Property[Seq[Node]](Seq.empty)
+  val nodesAtMousePosition: ReadOnlyProperty[Seq[Node]] = writableNodesAtMousePosition
+
   private val writableNodeAtMousePosition = new Property[Option[Node]](None)
-  val nodeAtMousePosition:ReadOnlyProperty[Option[Node]] = writableNodeAtMousePosition
-  
+  val nodeAtMousePosition: ReadOnlyProperty[Option[Node]] = writableNodeAtMousePosition
+
   writableMousePosition <== onMouseMoved map { e =>
     Point(e.sceneX, e.sceneY)
   }
+
+  writableNodesAtMousePosition <== mousePosition map { p =>
+    //TODO .value can be removed once we fix bindings and we do not import Binding._ anymore
+    root.value map findNodes(p) getOrElse Seq.empty
+  }
   
-  writableNodeAtMousePosition <== mousePosition map { p =>
-    root flatMap findNode(p)
+  writableNodeAtMousePosition <== writableNodesAtMousePosition map { _.headOption }
+  
+  //TODO think (my head won't allow me at this moment), should this happen before or after onMouseOut
+  nodesAtMousePosition onChangedIn {
+    case (oldSeq, newSeq) =>
+      (oldSeq diff newSeq) foreach (_.onRollOut fire lastKnownMouseEvent)
+      (newSeq diff oldSeq) foreach (_.onRollOver fire lastKnownMouseEvent)
+      //those of the oldSeq that are not in the newSeq should fire onRollOut
+      //those of the newSeq that are not in the oldSeq should fire onRolOver
   }
   
   nodeAtMousePosition onChangedIn {
-    case (oldNode, newNode) => 
-      oldNode.foreach (_.onMouseOut fire lastKnownMouseEvent)
-      newNode.foreach (_.onMouseOver fire lastKnownMouseEvent)
+    case (oldNode, newNode) =>
+      oldNode foreach (_.onMouseOut fire lastKnownMouseEvent)
+      newNode foreach (_.onMouseOver fire lastKnownMouseEvent)
   }
-  
-  private def findNode(point: Point)(node: Node): Option[Node] =
 
-      node.totalTransformation.inverted flatMap { inverted =>
-        val normalizedPoint = inverted transform point
+  private def findNodes(point: Point)(node: Node): Seq[Node] =
 
-        if (node.untransformedBounds contains normalizedPoint)
-          node match {
-            case group: Group => {
-              val childFinder = findNode(normalizedPoint) _
-              group.children.reverse.view.map(childFinder).collectFirst {
-                case Some(node) => node
-              } orElse Some(group)
-            }
-            case node => Some(node)
+    node.totalTransformation.inverted map { inverted =>
+      val normalizedPoint = inverted transform point
+
+      if (node.untransformedBounds contains normalizedPoint)
+        node match {
+          case group: Group => {
+            val childFinder = findNodes(normalizedPoint) _
+            group.children.reverse.flatMap(childFinder) :+ group
           }
-        else None
-      }
-  
+          case node => Seq(node)
+        }
+      else Seq.empty
+    } getOrElse Seq.empty
+
 }

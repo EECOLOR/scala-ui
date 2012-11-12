@@ -29,8 +29,11 @@ class SimpleBinding[T](observableValue: ObservableValue[T]) extends Binding[T] {
     new MappingBinding(observableValue, mapping)
 }
 
-object Binding {
-  implicit def observableValueToSimpleBinding[T](observableValue: ObservableValue[T]): SimpleBinding[T] = new SimpleBinding(observableValue)
+object Binding extends Test {
+}
+
+trait Test {
+	implicit def observableValueToSimpleBinding[T](observableValue: ObservableValue[T]): SimpleBinding[T] = new SimpleBinding(observableValue)
 }
 
 class ConditionalBinding[T](

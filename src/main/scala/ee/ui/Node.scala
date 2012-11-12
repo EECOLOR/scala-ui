@@ -23,6 +23,7 @@ import ee.ui.primitives.Identity
 import ee.ui.traits.CalculatedBounds
 import ee.ui.traits.MouseTraits
 
+//TODO should we mix all of these in or let the user (or component creator) mix them in
 abstract class Node extends LayoutClient with LayoutPosition with LayoutSize
   with Translation with Scaling with Rotation with Transformations 
   with CalculatedBounds with MouseTraits {
