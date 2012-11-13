@@ -22,11 +22,13 @@ import ee.ui.properties.PropertyGroup
 import ee.ui.primitives.Identity
 import ee.ui.traits.CalculatedBounds
 import ee.ui.traits.MouseTraits
+import ee.ui.traits.Focus
 
-//TODO should we mix all of these in or let the user (or component creator) mix them in
+//TODO should we mix all of these in or let the user (or component creator) 
+//mix them in (probably the last)
 abstract class Node extends LayoutClient with LayoutPosition with LayoutSize
   with Translation with Scaling with Rotation with Transformations 
-  with CalculatedBounds with MouseTraits {
+  with CalculatedBounds with MouseTraits with Focus {
 
   private val writableParent = new Property[Option[Group]](None) with ParentProperty
   val parent: ParentProperty = writableParent

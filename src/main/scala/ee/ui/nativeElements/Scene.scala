@@ -16,8 +16,10 @@ import ee.ui.primitives.Point
 import ee.ui.properties.Binding._
 import ee.ui.events.NullEvent
 import ee.ui.events.MouseEvent
+import ee.ui.events.MouseButton
 
-class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with LayoutSize with Fill with MouseHandling {
+class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with LayoutSize
+  with Fill with MouseHandling with FocusHandling {
 
   def defaultFill = Color.WHITE
 
@@ -35,15 +37,54 @@ class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with Lay
 
 }
 
-trait MouseHandling { self: Scene =>
+trait FocusHandling { self: Scene =>
+  protected val writableFocusedNode = new Property[Option[Node]](None)
+  val focusedNode: ReadOnlyProperty[Option[Node]] = writableFocusedNode
+  
+  focusedNode onChangedIn {
+    case (oldFocused, newFocused) => {
+    	oldFocused foreach (_.focused = false)
+    	newFocused foreach (_.focused = true)
+    }
+  }
+}
+
+trait MouseHandling { self: Scene with FocusHandling =>
 
   val onMouseMoved = new Event[MouseEvent]
-  val onMouseClicked = new Event[MouseEvent]
+  val onMouseDown = new Event[MouseEvent]
+  val onMouseUp = new Event[MouseEvent]
 
   private val lastKnownMouseEvent = new Property[MouseEvent](null)
 
+  //make sure these are registered first, we need them in other property handling
   lastKnownMouseEvent <== onMouseMoved
-  lastKnownMouseEvent <== onMouseClicked
+  lastKnownMouseEvent <== onMouseDown
+  lastKnownMouseEvent <== onMouseUp
+
+  private var lastMouseDownNode: Option[Node] = None
+
+  onMouseDown { e =>
+    nodeAtMousePosition foreach { n =>
+      writableFocusedNode.value = Some(n)
+      lastMouseDownNode = Some(n)
+      n.onMouseDown fire e
+    }
+    //TODO If we do not have a node at mouse position, reset focused node to None
+  }
+
+  onMouseUp { e =>
+    for {
+      n <- nodeAtMousePosition
+      ln <- lastMouseDownNode
+    } if (ln == n) {
+      n.onMouseUp fire e
+      n.onMouseClicked fire e
+    } else {
+      ln.onMouseUpOutside fire e
+      n.onMouseUp fire e
+    }
+  }
 
   private val writableMousePosition = new Property(Point(0, 0))
   val mousePosition: ReadOnlyProperty[Point] = writableMousePosition
@@ -62,18 +103,29 @@ trait MouseHandling { self: Scene =>
     //TODO .value can be removed once we fix bindings and we do not import Binding._ anymore
     root.value map findNodes(p) getOrElse Seq.empty
   }
-  
+
   writableNodeAtMousePosition <== writableNodesAtMousePosition map { _.headOption }
-  
+
   //TODO think (my head won't allow me at this moment), should this happen before or after onMouseOut
   nodesAtMousePosition onChangedIn {
-    case (oldSeq, newSeq) =>
-      (oldSeq diff newSeq) foreach (_.onRollOut fire lastKnownMouseEvent)
-      (newSeq diff oldSeq) foreach (_.onRollOver fire lastKnownMouseEvent)
-      //those of the oldSeq that are not in the newSeq should fire onRollOut
-      //those of the newSeq that are not in the oldSeq should fire onRolOver
+    case (oldSeq, newSeq) => {
+      val e: MouseEvent = lastKnownMouseEvent
+
+      val noDrag = e.button == MouseButton.NONE
+      val out = oldSeq diff newSeq
+      val over = newSeq diff oldSeq
+
+      def fireOut(n: Node) =
+        (if (noDrag) n.onRollOut else n.onMouseDragOut) fire e
+
+      def fireOver(n: Node) =
+        (if (noDrag) n.onRollOver else n.onMouseDragOver) fire e
+
+      out foreach fireOut
+      over foreach fireOver
+    }
   }
-  
+
   nodeAtMousePosition onChangedIn {
     case (oldNode, newNode) =>
       oldNode foreach (_.onMouseOut fire lastKnownMouseEvent)
