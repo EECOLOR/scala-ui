@@ -11,6 +11,7 @@ trait ApplicationDependencies {
     val applicationConstructor:() => Application
     val nativeManager:NativeManager
     val pulseEvent:PulseEvent
+    val systemClipBoard:ClipBoard
     lazy val layoutEngine:LayoutEngine = DefaultLayoutEngine
 }
 
@@ -27,6 +28,9 @@ trait ImplicitNativeManager {
 }
 trait ImplicitPulseEvent {
 	implicit def implicitPulseEvent:PulseEvent = ApplicationDependencies.di.pulseEvent
+}
+trait ImplicitSystemClipBoard {
+	implicit def implicitSystemClipBoard:ClipBoard = ApplicationDependencies.di.systemClipBoard
 }
 trait ImplicitLayoutEngine {
   implicit def layoutEngine:LayoutEngine = ApplicationDependencies.di.layoutEngine

@@ -3,7 +3,7 @@ package ee.ui.traits
 import ee.ui.primitives.KeyCode
 import ee.ui.primitives.KeyCode._
 
-trait KeyBindings { self: KeyTraits =>
+trait KeyBindings { self: KeyEvents =>
   val bindings: Map[KeyCombination, () => Unit]
 
   object CTRL extends CombinationBuilder(ctrl = true)
