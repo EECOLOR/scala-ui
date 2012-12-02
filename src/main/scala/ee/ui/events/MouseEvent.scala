@@ -1,5 +1,6 @@
 package ee.ui.events
 
+//TODO order properties, make sure KeyEvent and CharacterTypedEvent have the same ordering and that the ordering is logical
 case class MouseEvent(
     button:MouseButton, 
     clickCount:Int,
@@ -8,7 +9,7 @@ case class MouseEvent(
     screenX:Double,
     screenY:Double,
     altDown:Boolean,
-    controlDown:Boolean,
+    ctrlDown:Boolean,
     metaDown:Boolean,
     middleButtonDown:Boolean,
     primaryButtonDown:Boolean,

@@ -17,9 +17,11 @@ import ee.ui.properties.Binding._
 import ee.ui.events.NullEvent
 import ee.ui.events.MouseEvent
 import ee.ui.events.MouseButton
+import ee.ui.events.CharacterTypedEvent
+import ee.ui.events.KeyEvent
 
 class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with LayoutSize
-  with Fill with MouseHandling with FocusHandling {
+  with Fill with MouseHandling with FocusHandling with KeyHandling {
 
   def defaultFill = Color.WHITE
 
@@ -148,4 +150,13 @@ trait MouseHandling { self: Scene with FocusHandling =>
       else Seq.empty
     } getOrElse Seq.empty
 
+}
+
+trait KeyHandling { self: Scene =>
+  val onCharacterTyped = new Event[CharacterTypedEvent]
+  val onKeyDown = new Event[KeyEvent]
+  val onKeyUp = new Event[KeyEvent]
+  
+  onCharacterTyped { e => println(e)}
+  onKeyDown { e => println(e)}
 }
