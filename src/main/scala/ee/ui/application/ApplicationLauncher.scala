@@ -2,7 +2,7 @@ package ee.ui.application
 
 trait ApplicationLauncher extends ImplicitLauncher  {
     
-    def createApplication:Application
+    implicit def createApplication():Application
     def applicationDependencies:ApplicationDependencies
     
     ApplicationDependencies set applicationDependencies

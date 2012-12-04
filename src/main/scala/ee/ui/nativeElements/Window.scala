@@ -6,7 +6,7 @@ import ee.ui.traits.Size
 import ee.ui.traits.Position
 import ee.ui.traits.Focus
 import scala.collection.mutable.ListBuffer
-import ee.ui.nativeImplementation.NativeManager
+import ee.ui.nativeImplementation.ElementImplementationHandler
 import ee.ui.traits.OnCreate
 import ee.ui.application.ImplicitNativeManager
 import ee.ui.events.NullEvent
@@ -129,7 +129,7 @@ object Window extends ImplicitNativeManager {
   def windows = _windows.toSeq
 
   def show(window: Window): Unit = {
-    implicitly[NativeManager] windowCreated window
+    implicitly[ElementImplementationHandler] windowCreated window
     _windows += window
     window.writableShowing.value = true
   }

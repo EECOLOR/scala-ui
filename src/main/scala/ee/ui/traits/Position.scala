@@ -22,3 +22,12 @@ trait ExplicitPosition extends Position {
   def y_=(value: Double) = super.y_=(value)(RestrictedAccess)
 }
 
+trait PositionProxy extends ExplicitPosition {
+  val target:ReadOnlyPosition
+  
+  override def x: Property[Double] = target.writableX
+  override def x_=(value: Double) = target.writableX.value = value
+  
+  override def y: Property[Double] = target.writableX
+  override def y_=(value: Double) = target.writableY.value = value
+}

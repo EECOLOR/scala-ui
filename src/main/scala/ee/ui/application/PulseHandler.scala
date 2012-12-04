@@ -1,6 +1,6 @@
 package ee.ui.application
 
-import ee.ui.nativeImplementation.NativeManager
+import ee.ui.nativeImplementation.ElementImplementationHandler
 import ee.ui.nativeElements.Scene
 import ee.ui.Node
 import ee.ui.Group
@@ -10,7 +10,7 @@ import ee.ui.layout.LayoutEngine
 
 class PulseHandler(application:Application) extends ImplicitNativeManager with ImplicitLayoutEngine {
 
-  def nativeManager(implicit nativeManager: NativeManager) = nativeManager
+  def nativeManager(implicit nativeManager: ElementImplementationHandler) = nativeManager
 
   def pulse = application.windows foreach notify _
 

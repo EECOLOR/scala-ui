@@ -6,7 +6,7 @@ import ee.ui.events.Event
 import ee.ui.nativeElements.Window
 
 object DummyLauncher extends Launcher {
-  def launch(args: Array[String]): Unit = launchApplication
+  def launch(args: Array[String])(implicit a: () => Application): Unit = launchApplication
 
   val launchComplete = new Event[Application]
 

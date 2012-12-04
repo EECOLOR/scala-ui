@@ -15,8 +15,15 @@ class ReadOnlyEvent[T] extends Observable[T] with ObservableValue[T] {
   
   def onValueChange(listener: T => Unit): Unit = apply(listener)
   def onValueChangeIn(listener: PartialFunction[T, Unit]): Unit = in(listener)
+  
+  private[events] def fire(information: T):Unit = notify(information)
 }
 
 class Event[T] extends ReadOnlyEvent[T] {
-  def fire(information: T):Unit = notify(information)
+  override def fire(information: T):Unit = super.fire(information)
+}
+
+class EventProxy[T](target:ReadOnlyEvent[T]) extends Event[T] {
+  
+  override def fire(information:T ):Unit = target.fire(information)
 }

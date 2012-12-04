@@ -23,7 +23,7 @@ trait Application {
 
 object Application extends ImplicitPulseEvent {
     
-    def launch(args:Array[String])(implicit launcher:Launcher):Unit = {
+    def launch(args:Array[String])(implicit launcher:Launcher, createApplication: () => Application):Unit = {
     	launcher launchComplete {
     		println("launchComplete")
     	}

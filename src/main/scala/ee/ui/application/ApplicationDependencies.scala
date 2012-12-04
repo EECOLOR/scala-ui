@@ -1,35 +1,28 @@
 package ee.ui.application
 
-import ee.ui.nativeImplementation.NativeManager
+import ee.ui.nativeImplementation.ElementImplementationHandler
 import ee.ui.events.PulseEvent
 import ee.ui.layout.LayoutEngine
 import ee.ui.layout.DefaultLayoutEngine
 
 trait ApplicationDependencies {
-    val launcher:Launcher
-    val applicationConstructor:() => Application
-    val nativeManager:NativeManager
-    val pulseEvent:PulseEvent
-    val systemClipBoard:ClipBoard
     lazy val layoutEngine:LayoutEngine = DefaultLayoutEngine
+    val implementationContract:ImplementationContract
 }
 
 object ApplicationDependencies extends Dependencies[ApplicationDependencies]
 
 trait ImplicitLauncher {
-	implicit def implicitLauncher:Launcher = ApplicationDependencies.di.launcher
-}
-trait ImplicitApplicationConstructor {
-	implicit def implicitApplication:() => Application = ApplicationDependencies.di.applicationConstructor
+	implicit def implicitLauncher:Launcher = ApplicationDependencies.di.implementationContract.launcher
 }
 trait ImplicitNativeManager {
-	implicit def implicitNativeManager:NativeManager = ApplicationDependencies.di.nativeManager
+	implicit def implicitNativeManager:ElementImplementationHandler = ApplicationDependencies.di.implementationContract.elementImplementationHandler
 }
 trait ImplicitPulseEvent {
-	implicit def implicitPulseEvent:PulseEvent = ApplicationDependencies.di.pulseEvent
+	implicit def implicitPulseEvent:PulseEvent = ApplicationDependencies.di.implementationContract.pulseEvent
 }
 trait ImplicitSystemClipBoard {
-	implicit def implicitSystemClipBoard:ClipBoard = ApplicationDependencies.di.systemClipBoard
+	implicit def implicitSystemClipBoard:ClipBoard = ApplicationDependencies.di.implementationContract.systemClipBoard
 }
 trait ImplicitLayoutEngine {
   implicit def layoutEngine:LayoutEngine = ApplicationDependencies.di.layoutEngine
