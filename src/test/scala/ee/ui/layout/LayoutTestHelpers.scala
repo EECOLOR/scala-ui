@@ -1,7 +1,6 @@
 package ee.ui.layout
 
 import ee.ui.Node
-import ee.ui.traits.LayoutSize
 import org.specs2.matcher.Matcher
 import org.specs2.Specification
 import org.specs2.execute.Result
@@ -30,7 +29,7 @@ trait LayoutTestHelpers { self: Specification =>
     def value: T
   }
 
-  trait ExpectedSize extends Expected[Size] { self: Node with LayoutSize =>
+  trait ExpectedSize extends Expected[Size] { self: Node with ee.ui.traits.Size =>
 
     val default = (0d, 0d)
 
@@ -41,7 +40,7 @@ trait LayoutTestHelpers { self: Specification =>
     def value = (width, height)
   }
 
-  trait ExpectedPosition extends Expected[Position] { self: Node with LayoutSize =>
+  trait ExpectedPosition extends Expected[Position] { self: Node with ee.ui.traits.Size =>
 
     val default = (0d, 0d)
 

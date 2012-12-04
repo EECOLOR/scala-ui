@@ -2,8 +2,6 @@ package ee.ui.nativeElements
 
 import ee.ui.traits.Size
 import ee.ui.properties.Property
-import ee.ui.traits.LayoutPosition
-import ee.ui.traits.LayoutSize
 import ee.ui.traits.ExplicitSize
 
 class Rectangle extends Shape {

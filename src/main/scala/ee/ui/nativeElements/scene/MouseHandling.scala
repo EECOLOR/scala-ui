@@ -10,12 +10,13 @@ import ee.ui.events.MouseEvent
 import ee.ui.Group
 import ee.ui.events.MouseButton
 import ee.ui.properties.Binding._
+import ee.ui.events.ReadOnlyEvent
 
 trait MouseHandling { self: Scene with FocusHandling =>
 
-  val onMouseMoved = new Event[MouseEvent]
-  val onMouseDown = new Event[MouseEvent]
-  val onMouseUp = new Event[MouseEvent]
+  val onMouseMoved = new ReadOnlyEvent[MouseEvent]
+  val onMouseDown = new ReadOnlyEvent[MouseEvent]
+  val onMouseUp = new ReadOnlyEvent[MouseEvent]
 
   private val lastKnownMouseEvent = new Property[MouseEvent](null)
 

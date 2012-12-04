@@ -4,9 +4,6 @@ import ee.ui.Group
 import ee.ui.Node
 import ee.ui.properties.Property
 import ee.ui.traits.RestrictedAccess
-import ee.ui.traits.LayoutSize
-import ee.ui.traits.LayoutWidth
-import ee.ui.traits.LayoutHeight
 import ee.ui.traits.AccessRestriction
 import ee.ui.primitives.Bounds
 import ee.ui.primitives.Identity
@@ -52,7 +49,7 @@ object PartialParentRelatedSize {
     }
 }
 
-trait ParentRelatedWidth extends PartialParentRelatedSize with LayoutWidth { self: Node =>
+trait ParentRelatedWidth extends PartialParentRelatedSize with ee.ui.traits.Width { self: Node =>
 
   def minRequiredWidth: Width = minWidth
 
@@ -70,7 +67,7 @@ trait ParentRelatedWidth extends PartialParentRelatedSize with LayoutWidth { sel
 
 }
 
-trait ParentRelatedHeight extends PartialParentRelatedSize with LayoutHeight { self: Node =>
+trait ParentRelatedHeight extends PartialParentRelatedSize with ee.ui.traits.Height { self: Node =>
 
   def minRequiredHeight: Height = minHeight
 

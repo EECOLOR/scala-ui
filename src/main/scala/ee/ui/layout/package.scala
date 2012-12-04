@@ -1,13 +1,12 @@
 package ee.ui
 
-import ee.ui.traits.LayoutSize
 package object layout {
-  type Width = Double
-  type Height = Double
-  type NodeWidth = Width
-  type NodeHeight = Height
-  type Size = (Width, Height)
-  type X = Double
-  type Y = Double
-  type Position = (X, Y)
+  private[layout] type Width = Double
+  private[layout] type Height = Double
+  private[layout] type NodeWidth = Width
+  private[layout] type NodeHeight = Height
+  private[layout] type Size = (Width, Height)
+  private[layout] type X = Double
+  private[layout] type Y = Double
+  private[layout] type Position = (X, Y)
 }

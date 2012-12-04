@@ -2,8 +2,9 @@ package ee.ui.events
 
 import ee.ui.Observable
 import ee.ui.ObservableValue
+import ee.ui.traits.RestrictedAccess
 
-class Event[T] extends Observable[T] with ObservableValue[T] {
+class ReadOnlyEvent[T] extends Observable[T] with ObservableValue[T] {
   def apply(listener: T => Unit): Unit = super.listen(listener)
   def apply(listener: => Unit): Unit = super.listen(listener)
   def in(listener: PartialFunction[T, Unit]): Unit = super.listenIn(listener)
@@ -12,8 +13,10 @@ class Event[T] extends Observable[T] with ObservableValue[T] {
   override def handle(handler: => Boolean): Unit = super.handle(handler)
   override def handleIn(handler: PartialFunction[T, Boolean]):Unit = super.handleIn(handler)
   
-  def fire(information: T):Unit = notify(information)
-  
   def onValueChange(listener: T => Unit): Unit = apply(listener)
   def onValueChangeIn(listener: PartialFunction[T, Unit]): Unit = in(listener)
+}
+
+class Event[T] extends ReadOnlyEvent[T] {
+  def fire(information: T):Unit = notify(information)
 }

@@ -2,8 +2,6 @@ package ee.ui
 
 import ee.ui.properties.ReadOnlyProperty
 import ee.ui.properties.Property
-import ee.ui.traits.LayoutSize
-import ee.ui.traits.LayoutPosition
 import ee.ui.layout.LayoutClient
 import language.implicitConversions
 import ee.ui.traits.Translation
@@ -23,10 +21,12 @@ import ee.ui.primitives.Identity
 import ee.ui.traits.CalculatedBounds
 import ee.ui.traits.MouseTraits
 import ee.ui.traits.Focus
+import ee.ui.traits.Position
+import ee.ui.traits.Size
 
 //TODO should we mix all of these in or let the user (or component creator) 
 //mix them in (probably the last)
-abstract class Node extends LayoutClient with LayoutPosition with LayoutSize
+abstract class Node extends LayoutClient with Position with Size
   with Translation with Scaling with Rotation with Transformations 
   with CalculatedBounds with MouseTraits with Focus {
 

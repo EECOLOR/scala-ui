@@ -2,7 +2,6 @@ package ee.ui.layout
 
 import ee.ui.properties.Property
 import ee.ui.Group
-import ee.ui.traits.LayoutSize
 import ee.ui.Node
 import ee.ui.traits.RestrictedAccess
 

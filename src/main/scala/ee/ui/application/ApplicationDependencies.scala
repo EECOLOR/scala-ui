@@ -1,7 +1,6 @@
 package ee.ui.application
 
 import ee.ui.nativeImplementation.NativeManager
-import ee.ui.nativeElements.Stage
 import ee.ui.events.PulseEvent
 import ee.ui.layout.LayoutEngine
 import ee.ui.layout.DefaultLayoutEngine

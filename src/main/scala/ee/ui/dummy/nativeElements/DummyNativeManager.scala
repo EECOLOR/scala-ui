@@ -2,7 +2,6 @@ package ee.ui.dummy.nativeElements
 
 import ee.ui.nativeImplementation.NativeManager
 import ee.ui.nativeElements.Window
-import ee.ui.nativeElements.Stage
 import ee.ui.nativeElements.Scene
 import ee.ui.Node
 import ee.ui.Group
@@ -16,9 +15,9 @@ object DummyNativeManager extends NativeManager {
   private def message(o:AnyRef, label:String, action:String = "update") =
     println(s"Dummy $label $action for $o")
   
-  protected def register(o:Stage):Unit = message(o, "stage", "register")
+  protected def register(o:Window):Unit = message(o, "window", "register")
     
-  protected def update(o:Stage):Unit = message(o, "stage")
+  protected def update(o:Window):Unit = message(o, "window")
   protected def update(o:Scene):Unit = message(o, "scene")
   protected def update(o:Group):Unit = message(o, "group")
   protected def update(o:Text):Unit = message(o, "text")

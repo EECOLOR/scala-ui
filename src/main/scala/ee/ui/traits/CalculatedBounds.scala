@@ -11,7 +11,7 @@ import ee.ui.primitives.Rotate
 import ee.ui.primitives.Scale
 import ee.ui.primitives.Point
 
-trait CalculatedBounds extends LayoutPosition with LayoutSize
+trait CalculatedBounds extends Position with Size
   with Translation with Scaling with Rotation with Transformations {
 
   private val writableShapeTransformation = new Property[Transformation](Identity)

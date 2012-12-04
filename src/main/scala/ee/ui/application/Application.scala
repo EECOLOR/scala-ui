@@ -1,6 +1,5 @@
 package ee.ui.application
 
-import ee.ui.nativeElements.Stage
 import ee.ui.events.PulseEvent
 import ee.ui.nativeElements.Window
 import scala.collection.mutable.ListBuffer
@@ -18,7 +17,7 @@ trait Application {
 	def windows = Window.windows
 	
 	def init:Unit = {}
-	def start(stage:Stage)
+	def start(window:Window)
 	def stop:Unit = {}
 }
 

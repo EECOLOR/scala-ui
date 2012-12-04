@@ -2,7 +2,6 @@ package ee.ui.layout
 
 import org.specs2.Specification
 import ee.ui.traits.ExplicitSize
-import ee.ui.traits.LayoutSize
 import ee.ui.Group
 import ee.ui.Node
 
@@ -90,7 +89,7 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
       p ^
       " Horizontal layout " ^
       { //Simple layout
-        val scene = new LayoutSize with ExplicitSize { width = 800; height = 600 }
+        val scene = new ee.ui.traits.Size with ExplicitSize { width = 800; height = 600 }
 
         val group = new TestGroupS with HorizontalLayout {
           val name = "group"
@@ -115,7 +114,7 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
         checkResults(group)
       } ^
       { //Complex layout, minWidths
-        val scene = new LayoutSize with ExplicitSize { width = 800; height = 600 }
+        val scene = new ee.ui.traits.Size with ExplicitSize { width = 800; height = 600 }
 
         val group = new TestGroupS with HorizontalLayout {
           val name = "group"

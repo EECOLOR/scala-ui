@@ -1,39 +1,39 @@
 package ee.ui.traits
 
 import ee.ui.properties.Property
+import ee.ui.properties.ReadOnlyProperty
 
-trait Width {
-  private val _width = new Property(0d)
-  def width = _width
-  def width_=(value: Double) = width.value = value
+trait ReadOnlyWidth {
+	private[traits] val writableWidth = new Property(0d)
+	def width: ReadOnlyProperty[Double] = writableWidth
+
 }
 
-trait Height {
-  private val _height = new Property(0d)
-  def height = _height
-  def height_=(value: Double) = height.value = value
+trait ReadOnlyHeight {
+	private[traits] val writableHeight = new Property(0d)
+	def height: ReadOnlyProperty[Double] = writableHeight
 }
 
-trait Size extends Width with Height
-
-trait LayoutWidth extends Width {
-	def width_=(value: Double)(implicit ev: AccessRestriction) = super.width_=(value)
+trait Width extends ReadOnlyWidth {
+  def width_=(value: Double)(implicit ev: AccessRestriction) = writableWidth.value = value
 }
 
-trait LayoutHeight extends Height {
-	def height_=(value: Double)(implicit ev: AccessRestriction) = super.height_=(value)
+trait Height extends ReadOnlyHeight {
+  def height_=(value: Double)(implicit ev: AccessRestriction) = writableHeight.value = value
 }
 
-trait LayoutSize extends Size with LayoutWidth with LayoutHeight
+trait ReadOnlySize extends ReadOnlyWidth with ReadOnlyHeight
+
+trait Size extends ReadOnlySize with Width with Height
 
 trait PartialExplicitSize
 
-trait ExplicitWidth extends LayoutWidth with PartialExplicitSize {
-	override def width_=(value: Double) = super.width_=(value)(RestrictedAccess)
+trait ExplicitWidth extends Width with PartialExplicitSize {
+  def width_=(value: Double) = super.width_=(value)(RestrictedAccess)
 }
 
-trait ExplicitHeight extends LayoutHeight with PartialExplicitSize {
-	override def height_=(value: Double) = super.height_=(value)(RestrictedAccess)
+trait ExplicitHeight extends Height with PartialExplicitSize {
+  def height_=(value: Double) = super.height_=(value)(RestrictedAccess)
 }
 
-trait ExplicitSize extends LayoutSize with ExplicitWidth with ExplicitHeight 
+trait ExplicitSize extends Size with ExplicitWidth with ExplicitHeight 

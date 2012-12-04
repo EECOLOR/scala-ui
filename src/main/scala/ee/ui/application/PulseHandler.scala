@@ -1,6 +1,5 @@
 package ee.ui.application
 
-import ee.ui.nativeElements.Stage
 import ee.ui.nativeImplementation.NativeManager
 import ee.ui.nativeElements.Scene
 import ee.ui.Node

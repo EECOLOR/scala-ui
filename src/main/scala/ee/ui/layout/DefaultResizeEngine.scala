@@ -1,6 +1,5 @@
 package ee.ui.layout
 
-import ee.ui.traits.LayoutSize
 import ee.ui.Node
 import ee.ui.Group
 import ee.ui.traits.RestrictedAccess
@@ -9,13 +8,14 @@ import ee.ui.traits.ExplicitSize
 import ee.ui.traits.ExplicitHeight
 import ee.ui.traits.ExplicitWidth
 import ee.ui.primitives.Bounds
+import ee.ui.traits.ReadOnlySize
 
 //TODO build something so that only shizzle is measured if something has changed
 //TODO introduce LayoutClient.includeInLayout
 //TODO add a form of cache for things like size calculators
 object DefaultResizeEngine {
 
-  def adjustSizeWithParent(parent: LayoutSize, node: Node): Unit = {
+  def adjustSizeWithParent(parent: ReadOnlySize, node: Node): Unit = {
 
     implicit val sizeInformation = retrieve.sizeInformation of parent
 
@@ -78,7 +78,7 @@ object DefaultResizeEngine {
         }
       }
 
-      def of(layoutSize: LayoutSize): ParentSizeInformation = {
+      def of(layoutSize: ReadOnlySize): ParentSizeInformation = {
 
         new ParentSizeInformation {
           val width: Double = layoutSize.width

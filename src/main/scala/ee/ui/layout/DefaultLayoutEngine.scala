@@ -1,11 +1,10 @@
 package ee.ui.layout
 
-import ee.ui.nativeElements.Stage
 import ee.ui.nativeElements.Scene
 import ee.ui.Group
 import ee.ui.Node
-import ee.ui.traits.LayoutSize
 import ee.ui.traits.RestrictedAccess
+import ee.ui.traits.ReadOnlySize
 
 object DefaultLayoutEngine extends LayoutEngine {
 
@@ -13,7 +12,7 @@ object DefaultLayoutEngine extends LayoutEngine {
     scene.root foreach layoutWithParent(scene)
   }
 
-  def layoutWithParent(parent: LayoutSize)(node: Node): Unit = {
+  def layoutWithParent(parent: ReadOnlySize)(node: Node): Unit = {
 
     //before we try to do any layout we need to resize the node (and possibly it's children)
     DefaultResizeEngine.adjustSizeWithParent(parent, node)

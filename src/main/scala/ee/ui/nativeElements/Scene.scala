@@ -9,8 +9,6 @@ import ee.ui.events.Event
 import ee.ui.events.MouseEvent
 import ee.ui.events.NullEvent
 import ee.ui.traits.Fill
-import ee.ui.traits.LayoutSize
-import ee.ui.traits.LayoutPosition
 import ee.ui.Node
 import ee.ui.primitives.Point
 import ee.ui.properties.Binding._
@@ -24,8 +22,11 @@ import ee.ui.traits.KeyEvents
 import ee.ui.nativeElements.scene.MouseHandling
 import ee.ui.nativeElements.scene.KeyHandling
 import ee.ui.nativeElements.scene.FocusHandling
+import ee.ui.traits.Position
+import ee.ui.traits.Size
+import ee.ui.traits.ReadOnlySize
 
-class Scene(defaultDepthBuffer: Boolean = false) extends LayoutPosition with LayoutSize
+class Scene(defaultDepthBuffer: Boolean = false) extends Position with ReadOnlySize
   with Fill with MouseHandling with FocusHandling with KeyHandling with KeyEvents {
 
   def defaultFill = Color.WHITE

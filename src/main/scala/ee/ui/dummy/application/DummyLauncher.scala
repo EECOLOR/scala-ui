@@ -2,9 +2,8 @@ package ee.ui.dummy.application
 
 import ee.ui.application.Launcher
 import ee.ui.application.Application
-import ee.ui.nativeElements.Stage
 import ee.ui.events.Event
-import ee.ui.nativeElements.Stage
+import ee.ui.nativeElements.Window
 
 object DummyLauncher extends Launcher {
   def launch(args: Array[String]): Unit = launchApplication
@@ -13,7 +12,7 @@ object DummyLauncher extends Launcher {
 
   def launchApplication(implicit a: () => Application) = {
     val app = a()
-    app start new Stage(true)
+    app start new Window(true)
     launchComplete fire app
   }
 }
