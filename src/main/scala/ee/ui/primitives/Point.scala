@@ -4,15 +4,15 @@ case class Point(x: Double, y: Double, z: Double = 0) {
   
   def min(other: Point) =
     Point(
-      math min (other.x, x),
-      math min (other.y, y),
-      math min (other.z, z))
+      other.x min x,
+      other.y min y,
+      other.z min z)
 
   def max(other: Point) =
     Point(
-      math max (other.x, x),
-      math max (other.y, y),
-      math max (other.z, z))
+      other.x max x,
+      other.y max y,
+      other.z max z)
 
   def diff(other: Point) =
     Point(

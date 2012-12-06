@@ -22,7 +22,7 @@ class PulseHandler(application:Application) extends ImplicitNativeManager with I
     nativeManager updateImplementationOf window
   }
 
-  def notify(scene: Scene)(implicit layoutManager:LayoutEngine): Unit = {
+  def notify(scene: Scene)(implicit layoutEngine:LayoutEngine): Unit = {
     
     layoutEngine layout scene
     

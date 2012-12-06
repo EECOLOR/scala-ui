@@ -2,37 +2,78 @@ package ee.ui.traits
 
 import ee.ui.application.OperatingSystem
 import ee.ui.primitives.KeyCode._
+import ee.ui.application.ImplicitTextHelper
+import ee.ui.application.TextHelper
+import ee.ui.nativeElements.Text
+import ee.ui.primitives.Point
 
-trait MultilineTextKeyHandling extends MultilineTextKeyHandlers with MultilineTextKeyBindings { self: KeyEvents with TextInputLike =>
+trait MultilineTextKeyHandling extends MultilineTextKeyHandlers with MultilineTextKeyBindings { self: KeyEvents with TextInputLike with CalculatedBounds =>
 
 }
 
-trait MultilineTextKeyHandlers extends TextKeyHandlers { self: TextInputLike =>
+trait MultilineTextKeyHandlers extends TextKeyHandlers with ImplicitTextHelper { self: TextInputLike with CalculatedBounds =>
 
-  def lineStart() = {}
-  def lineEnd() = {}
-  def previousLine() = {}
-  def nextLine() = {}
-  def previousPage() = {}
-  def nextPage() = {}
-  def paragraphStart() =
+  implicit val underlyingText: Text
+
+  def getCaretIndex(position: Point)(implicit textHelper: TextHelper, text: Text): Int =
+    textHelper getCaretIndex (text, position)
+
+  def getCaretPosition(caretIndex: Int)(implicit textHelper: TextHelper, text: Text): Point =
+    textHelper getCaretPosition (text, caretIndex)
+
+  def currentCaretPosition = getCaretPosition(caretIndex)
+
+  def fontMetrics(implicit textHelper: TextHelper, text: Text) =
+    textHelper getFontMetrics text.font
+
+  lazy val lineHeight = fontMetrics.lineHeight
+
+  //TODO maybe we need to use different values for x, I can't think straight at the moment
+  def lineStartIndex = getCaretIndex(currentCaretPosition copy (x = 0))
+  def lineEndIndex = getCaretIndex(currentCaretPosition copy (x = width))
+
+  def previousLineIndex = {
+    val newY = currentCaretPosition.y - lineHeight
+
+    if (newY < 0) 0
+    else getCaretIndex(currentCaretPosition copy (y = newY))
+  }
+
+  def nextLineIndex = {
+    val newY = currentCaretPosition.y + lineHeight
+
+    if (newY > height) text.length
+    else getCaretIndex(currentCaretPosition copy (y = newY))
+  }
+
+  def paragraphStartIndex: Int = {
     if (caretIndex > 0) {
       val str: String = text
-      val paragraphStart =
-        (1 to caretIndex - 1).reverse find (i => str.codePointAt(i - 1) == 0x0A) getOrElse 0
-      positionCaret(paragraphStart)
-    }
 
-  def paragraphEnd() = {
+      (1 to caretIndex - 1).reverse find (i => str.codePointAt(i - 1) == 0x0A) getOrElse 0
+    } else caretIndex
+  }
+
+  def paragraphEndIndex: Int = {
     val str: String = text
     val end = str.length
     val index: Int = caretIndex
-    if (index < end) {
-      val paragraphEnd =
-        (index to end) find (i => str.codePointAt(i) == 0x0A) getOrElse end
-      positionCaret(paragraphEnd)
-    }
+    
+    if (index < end)
+      (index to end) find (i => str.codePointAt(i) == 0x0A) getOrElse end
+    else index
   }
+
+  def lineStart() = positionCaret(lineStartIndex)
+  def lineEnd() = positionCaret(lineEndIndex)
+  def previousLine() = positionCaret(previousLineIndex)
+  def nextLine() = positionCaret(nextLineIndex)
+  def paragraphStart() = positionCaret(paragraphStartIndex)
+  def paragraphEnd() = positionCaret(paragraphEndIndex)
+  
+  //TODO implement these and the select variants once you have some form of scrolling implemented for text. Don't forget to take a look at computeContentBounds or something similar in the javafx implementation
+  def previousPage() = {}
+  def nextPage() = {}
 
   def insertNewLine() = {
     val TextSelection(start, end) = selection.value
@@ -44,16 +85,21 @@ trait MultilineTextKeyHandlers extends TextKeyHandlers { self: TextInputLike =>
     replaceText(start, end, "\t")
   }
 
-  def selectLineStart() = {}
-  def selectLineEnd() = {}
+  def selectLineStart() = selectPositionCaret(lineStartIndex)
+  def selectLineEnd() = selectPositionCaret(lineEndIndex)
+  def selectPreviousLine() = selectPositionCaret(previousLineIndex)
+  def selectNextLine() = selectPositionCaret(nextLineIndex)
+  def selectParagraphStart() = selectPositionCaret(paragraphStartIndex)
+  def selectParagraphEnd() = selectPositionCaret(paragraphEndIndex)
+
+  def selectLineStartExtend() =
+    selectRange(anchorIndex.value max caretIndex, lineStartIndex)
+    
+  def selectLineEndExtend() = 
+    selectRange(anchorIndex.value min caretIndex, lineEndIndex)
+    
   def selectPreviousPage() = {}
   def selectNextPage() = {}
-  def selectNextLine() = {}
-  def selectPreviousLine() = {}
-  def selectLineStartExtend() = {}
-  def selectLineEndExtend() = {}
-  def selectParagraphStart() = {}
-  def selectParagraphEnd() = {}
 }
 
 trait MultilineTextKeyBindings extends TextKeyBindings { self: KeyEvents with MultilineTextKeyHandlers =>

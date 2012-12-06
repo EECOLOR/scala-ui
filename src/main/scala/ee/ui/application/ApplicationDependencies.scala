@@ -25,5 +25,8 @@ trait ImplicitSystemClipBoard {
 	implicit def implicitSystemClipBoard:ClipBoard = ApplicationDependencies.di.implementationContract.systemClipBoard
 }
 trait ImplicitLayoutEngine {
-  implicit def layoutEngine:LayoutEngine = ApplicationDependencies.di.layoutEngine
+  implicit def implicitLayoutEngine:LayoutEngine = ApplicationDependencies.di.layoutEngine
+}
+trait ImplicitTextHelper {
+  implicit def implicitTextHelper:TextHelper = ApplicationDependencies.di.implementationContract.textHelper
 }

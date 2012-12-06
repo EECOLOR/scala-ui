@@ -33,14 +33,14 @@ trait DirectionalLayout extends Layout { self: Group =>
     // based nodes
     val availablePercentageBasedSpace = rest - minimalAnchorChildSizes
     // ignore everything above a 100%
-    val normalizedPercentages = math min (totalChildPercentages, 100)
+    val normalizedPercentages = totalChildPercentages min 100
 
     // if it's below a 100, determine the factor
     val factor = normalizedPercentages / 100d
     // use the factor against the available percentage based space
     val requestedPercentageBasedSpace = availablePercentageBasedSpace * factor
     // determine the occupied space
-    val occupiedPercentageBasedSpace = math max (requestedPercentageBasedSpace, minimalPercentageChildSizes)
+    val occupiedPercentageBasedSpace = requestedPercentageBasedSpace max minimalPercentageChildSizes
     // now we know what space is occupied by the anchor based nodes
     val availableAnchorBasedSpace = rest - occupiedPercentageBasedSpace
 

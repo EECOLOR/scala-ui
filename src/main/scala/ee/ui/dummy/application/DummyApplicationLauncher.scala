@@ -15,6 +15,8 @@ import ee.ui.application.ImplementationContract
 import ee.ui.application.TextHelper
 import ee.ui.primitives.Point
 import ee.ui.nativeElements.Text
+import ee.ui.primitives.Font
+import ee.ui.primitives.FontMetrics
 
 trait DummyApplicationLauncher extends ApplicationLauncher {
   val applicationDependencies = new ApplicationDependencies {
@@ -38,6 +40,7 @@ trait DummyApplicationLauncher extends ApplicationLauncher {
       val textHelper = new TextHelper {
         def getCaretPosition(text: Text, index: Int): Point = Point(0, 0)
         def getCaretIndex(text: Text, position: Point): Int = 0
+        def getFontMetrics(font:Font) = FontMetrics(0, 0, 0, 0, 0, 0, font)
       }
     }
   }
