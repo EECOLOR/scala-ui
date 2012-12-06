@@ -8,4 +8,5 @@ trait ImplementationContract {
     val elementImplementationHandler:ElementImplementationHandler
     val pulseEvent:PulseEvent
     val systemClipBoard:ClipBoard
+    val textHelper:TextHelper
 }

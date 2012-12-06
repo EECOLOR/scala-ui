@@ -5,9 +5,9 @@ import java.io.File
 
 trait ClipBoard extends ClipBoardHelperMethods {
 
-  def set(key:DataFormat, value:Any): Boolean
+  def set(key:DataFormat, value:AnyRef): Boolean
 
-  def get(key: DataFormat): Option[Any]
+  def get(key: DataFormat): Option[AnyRef]
   def getAs[T](key: DataFormat)(implicit m: ClassTag[T]): Option[T] =
     get(key)
       .flatMap { item =>
