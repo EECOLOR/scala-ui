@@ -1,7 +1,7 @@
 package ee.ui.properties
 
 import language.implicitConversions
-import ee.ui.ObservableValue
+import ee.ui.observable.ObservableValue
 import ee.ui.primitives.Color
 
 //TODO bindings were created in a hurry, check if they need to be remodeled

@@ -1,7 +1,7 @@
 package ee.ui.layout
 
-import ee.ui.Node
-import ee.ui.Group
+import ee.ui.display.Node
+import ee.ui.display.Group
 
 trait PartialChildSizeCalculator {
   trait SizeInformation {

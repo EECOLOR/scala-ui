@@ -1,9 +1,9 @@
 package ee.ui.layout
 
 import org.specs2.Specification
-import ee.ui.traits.ExplicitSize
-import ee.ui.Group
-import ee.ui.Node
+import ee.ui.display.traits.ExplicitSize
+import ee.ui.display.Group
+import ee.ui.display.Node
 
 object DirectionalLayoutSpecification extends Specification with LayoutTestHelpers {
   val engine = DefaultLayoutEngine
@@ -89,7 +89,7 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
       p ^
       " Horizontal layout " ^
       { //Simple layout
-        val scene = new ee.ui.traits.Size with ExplicitSize { width = 800; height = 600 }
+        val scene = new ee.ui.display.traits.Size with ExplicitSize { width = 800; height = 600 }
 
         val group = new TestGroupS with HorizontalLayout {
           val name = "group"
@@ -114,7 +114,7 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
         checkResults(group)
       } ^
       { //Complex layout, minWidths
-        val scene = new ee.ui.traits.Size with ExplicitSize { width = 800; height = 600 }
+        val scene = new ee.ui.display.traits.Size with ExplicitSize { width = 800; height = 600 }
 
         val group = new TestGroupS with HorizontalLayout {
           val name = "group"

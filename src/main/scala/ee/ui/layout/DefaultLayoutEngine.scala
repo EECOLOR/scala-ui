@@ -1,10 +1,10 @@
 package ee.ui.layout
 
-import ee.ui.nativeElements.Scene
-import ee.ui.Group
-import ee.ui.Node
-import ee.ui.traits.RestrictedAccess
-import ee.ui.traits.ReadOnlySize
+import ee.ui.display.Scene
+import ee.ui.display.Group
+import ee.ui.system.RestrictedAccess
+import ee.ui.display.traits.ReadOnlySize
+import ee.ui.display.Node
 
 object DefaultLayoutEngine extends LayoutEngine {
 

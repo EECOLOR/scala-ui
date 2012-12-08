@@ -1,7 +1,7 @@
 package ee.ui.properties
 
-import ee.ui.Observable
-import ee.ui.ObservableValue
+import ee.ui.observable.Observable
+import ee.ui.observable.ObservableValue
 
 trait ObservableProperty[T] extends Observable[(T, T)] with ObservableValue[T] {
 

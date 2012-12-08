@@ -1,7 +1,7 @@
 package ee.ui.properties
 
 import scala.collection.mutable.Buffer
-import ee.ui.Observable
+import ee.ui.observable.Observable
 
 sealed trait Change[A]
 case class Add[A](index: Int, element: A) extends Change[A]

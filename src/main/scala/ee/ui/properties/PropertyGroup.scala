@@ -1,6 +1,6 @@
 package ee.ui.properties
 
-import ee.ui.Observable
+import ee.ui.observable.Observable
 
 import language.implicitConversions
 

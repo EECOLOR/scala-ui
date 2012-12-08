@@ -1,17 +1,17 @@
 package ee.ui.layout
 
-import ee.ui.Group
-import ee.ui.Node
+import ee.ui.display.Group
 import ee.ui.properties.Property
-import ee.ui.traits.RestrictedAccess
-import ee.ui.traits.AccessRestriction
+import ee.ui.system.RestrictedAccess
+import ee.ui.system.AccessRestriction
 import ee.ui.primitives.Bounds
 import ee.ui.primitives.Identity
 import ee.ui.primitives.Transformation
-import ee.ui.traits.Rotation
-import ee.ui.traits.Scaling
-import ee.ui.traits.RuntimeError
+import ee.ui.display.traits.Rotation
+import ee.ui.display.traits.Scaling
+import ee.ui.system.RuntimeError
 import ee.ui.primitives.Point
+import ee.ui.display.Node
 
 trait PartialParentRelatedSize extends NoTransformations
 
@@ -49,7 +49,7 @@ object PartialParentRelatedSize {
     }
 }
 
-trait ParentRelatedWidth extends PartialParentRelatedSize with ee.ui.traits.Width { self: Node =>
+trait ParentRelatedWidth extends PartialParentRelatedSize with ee.ui.display.traits.Width { self: Node =>
 
   def minRequiredWidth: Width = minWidth
 
@@ -67,7 +67,7 @@ trait ParentRelatedWidth extends PartialParentRelatedSize with ee.ui.traits.Widt
 
 }
 
-trait ParentRelatedHeight extends PartialParentRelatedSize with ee.ui.traits.Height { self: Node =>
+trait ParentRelatedHeight extends PartialParentRelatedSize with ee.ui.display.traits.Height { self: Node =>
 
   def minRequiredHeight: Height = minHeight
 

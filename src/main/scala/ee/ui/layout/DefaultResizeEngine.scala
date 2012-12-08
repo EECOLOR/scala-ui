@@ -1,14 +1,14 @@
 package ee.ui.layout
 
-import ee.ui.Node
-import ee.ui.Group
-import ee.ui.traits.RestrictedAccess
-import ee.ui.traits.PartialExplicitSize
-import ee.ui.traits.ExplicitSize
-import ee.ui.traits.ExplicitHeight
-import ee.ui.traits.ExplicitWidth
+import ee.ui.display.Node
+import ee.ui.system.RestrictedAccess
+import ee.ui.display.traits.PartialExplicitSize
+import ee.ui.display.traits.ExplicitSize
+import ee.ui.display.traits.ExplicitHeight
+import ee.ui.display.traits.ExplicitWidth
 import ee.ui.primitives.Bounds
-import ee.ui.traits.ReadOnlySize
+import ee.ui.display.traits.ReadOnlySize
+import ee.ui.display.Group
 
 //TODO build something so that only shizzle is measured if something has changed
 //TODO introduce LayoutClient.includeInLayout

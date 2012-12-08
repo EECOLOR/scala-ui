@@ -1,10 +1,10 @@
 package ee.ui.layout
 
-import ee.ui.Group
-import ee.ui.Node
+import ee.ui.display.Node
 import ee.ui.properties.Add
 import ee.ui.properties.Remove
 import ee.ui.properties.Clear
+import ee.ui.display.Group
 
 trait DirectionalLayout extends Layout { self: Group =>
   type SizeInformationType = ChildInformation

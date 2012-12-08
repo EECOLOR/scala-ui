@@ -1,14 +1,14 @@
 package ee.ui.layout
 
-import org.specs2.Specification
-import ee.ui.Group
-import ee.ui.Node
 import language.postfixOps
-import ee.ui.traits.RestrictedAccess
+import org.specs2.Specification
+import ee.ui.display.Group
+import ee.ui.system.RestrictedAccess
 import org.specs2.specification.Fragments
-import ee.ui.traits.ExplicitSize
-import ee.ui.traits.ExplicitHeight
-import ee.ui.traits.ExplicitWidth
+import ee.ui.display.traits.ExplicitSize
+import ee.ui.display.traits.ExplicitHeight
+import ee.ui.display.traits.ExplicitWidth
+import ee.ui.display.Node
 /**/
 object DefaultResizeEngineInternalsSpecification extends Specification with LayoutTestHelpers {
 
@@ -130,7 +130,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification with Layo
           (sizeInformation.childHeightFunction(testNode) === 8)
       } ^
       { // retrieve.sizeInformation of layoutSize
-        val layoutSize = new ee.ui.traits.Size with ExplicitSize { width = 2; height = 4 }
+        val layoutSize = new ee.ui.display.traits.Size with ExplicitSize { width = 2; height = 4 }
 
         val sizeInformation = retrieve.sizeInformation of layoutSize
 
@@ -230,7 +230,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification with Layo
             })
         }
 
-        implicit val sizeInformation = retrieve.sizeInformation of new ee.ui.traits.Size with ExplicitSize {
+        implicit val sizeInformation = retrieve.sizeInformation of new ee.ui.display.traits.Size with ExplicitSize {
           width = 20
           height = 60
         }

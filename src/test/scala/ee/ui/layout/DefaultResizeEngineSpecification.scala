@@ -1,15 +1,15 @@
 package ee.ui.layout
 
 import org.specs2.Specification
-import ee.ui.traits.ExplicitSize
-import ee.ui.Group
-import ee.ui.Node
+import ee.ui.display.traits.ExplicitSize
+import ee.ui.display.Group
 import ee.ui.properties.ReadOnlyProperty
 import org.specs2.matcher.MatchResult
 import org.specs2.execute.Result
 import org.specs2.matcher.Matcher
-import ee.ui.traits.ExplicitWidth
-import ee.ui.traits.ExplicitHeight
+import ee.ui.display.traits.ExplicitWidth
+import ee.ui.display.traits.ExplicitHeight
+import ee.ui.display.Node
 
 object DefaultResizeEngineSpecification extends Specification with LayoutTestHelpers {
 
@@ -65,7 +65,7 @@ object DefaultResizeEngineSpecification extends Specification with LayoutTestHel
         trait ParentRelatedSize extends ParentRelatedWidth with ParentRelatedHeight { self: Node =>
         }
 
-        val scene = new ee.ui.traits.Size with ExplicitSize { width = 200; height = 100 }
+        val scene = new ee.ui.display.traits.Size with ExplicitSize { width = 200; height = 100 }
 
         val root = new TestGroupS with ParentRelatedSize {
           val name = "root"

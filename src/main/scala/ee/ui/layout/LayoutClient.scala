@@ -1,9 +1,9 @@
 package ee.ui.layout
 
 import ee.ui.properties.Property
-import ee.ui.Group
-import ee.ui.Node
-import ee.ui.traits.RestrictedAccess
+import ee.ui.display.Group
+import ee.ui.system.RestrictedAccess
+import ee.ui.display.Node
 
 trait LayoutClient { self: Node =>
   private val _includeInLayout = new Property[Boolean](true)

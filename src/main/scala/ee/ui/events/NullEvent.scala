@@ -1,6 +1,6 @@
 package ee.ui.events
 
-import ee.ui.traits.RuntimeError
+import ee.ui.system.RuntimeError
 
 class NullEvent extends Event[Null] {
   private def error(methodType:String) = 

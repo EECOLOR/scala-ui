@@ -1,16 +1,14 @@
 package ee.ui.application
 
-import ee.ui.nativeImplementation.ElementImplementationHandler
-import ee.ui.nativeElements.Scene
-import ee.ui.Node
-import ee.ui.Group
+import ee.ui.display.implementation.DisplayImplementationHandler
+import ee.ui.display.Scene
+import ee.ui.display.Node
+import ee.ui.display.Group
 import ee.ui.layout.Layout
-import ee.ui.nativeElements.Window
+import ee.ui.display.Window
 import ee.ui.layout.LayoutEngine
 
-class PulseHandler(application:Application) extends ImplicitNativeManager with ImplicitLayoutEngine {
-
-  def nativeManager(implicit nativeManager: ElementImplementationHandler) = nativeManager
+class PulseHandler(application:Application)(implicit displayImplementationHandler: DisplayImplementationHandler, layoutEngine:LayoutEngine) {
 
   def pulse = application.windows foreach notify _
 
@@ -19,16 +17,16 @@ class PulseHandler(application:Application) extends ImplicitNativeManager with I
     
     window.scene foreach notify _
     
-    nativeManager updateImplementationOf window
+    displayImplementationHandler updateImplementationOf window
   }
 
-  def notify(scene: Scene)(implicit layoutEngine:LayoutEngine): Unit = {
+  def notify(scene: Scene): Unit = {
     
     layoutEngine layout scene
     
     scene.root foreach notify _
     
-    nativeManager updateImplementationOf scene
+    displayImplementationHandler updateImplementationOf scene
   }
 
   def notify(node: Node): Unit = {
@@ -40,6 +38,6 @@ class PulseHandler(application:Application) extends ImplicitNativeManager with I
       case _ => //we only need to recurse for groups
     }
     
-    nativeManager updateImplementationOf node
+    displayImplementationHandler updateImplementationOf node
   }
 }

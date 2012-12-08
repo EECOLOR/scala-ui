@@ -1,15 +1,15 @@
 package ee.ui.layout
 
-import ee.ui.Group
-import ee.ui.Stylable
-import ee.ui.Node
+import ee.ui.display.Group
+import ee.ui.style.Stylable
 import ee.ui.properties.Add
 import ee.ui.properties.Remove
 import ee.ui.properties.Clear
 import scala.collection.mutable.ListBuffer
-import ee.ui.traits.RestrictedAccess
-import ee.ui.nativeElements.Text
+import ee.ui.system.RestrictedAccess
+import ee.ui.display.Text
 import ee.ui.primitives.Point
+import ee.ui.display.Node
 
 trait Layout extends ChildWidthCalculator with ChildHeightCalculator with Stylable { self: Group =>
 

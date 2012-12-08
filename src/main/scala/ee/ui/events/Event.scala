@@ -1,8 +1,8 @@
 package ee.ui.events
 
-import ee.ui.Observable
-import ee.ui.ObservableValue
-import ee.ui.traits.RestrictedAccess
+import ee.ui.observable.Observable
+import ee.ui.observable.ObservableValue
+import ee.ui.system.RestrictedAccess
 
 class ReadOnlyEvent[T] extends Observable[T] with ObservableValue[T] {
   def apply(listener: T => Unit): Unit = super.listen(listener)
