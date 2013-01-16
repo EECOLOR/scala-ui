@@ -1,5 +1,7 @@
 package ee.ui.properties
 
+import scala.language.implicitConversions
+
 trait ReadOnlyProperty[T] extends ObservableProperty[T] {
   def value: T
   def get: T = value

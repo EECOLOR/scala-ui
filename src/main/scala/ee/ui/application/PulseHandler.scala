@@ -13,7 +13,6 @@ class PulseHandler(application:Application)(implicit displayImplementationHandle
   def pulse = application.windows foreach notify _
 
   def notify(window: Window): Unit = {
-    println("PulseHandler.notify window")
     
     window.scene foreach notify _
     

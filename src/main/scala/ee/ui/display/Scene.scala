@@ -18,7 +18,7 @@ import ee.ui.display.traits.Size
 import ee.ui.display.traits.KeyEvents
 
 class Scene(defaultDepthBuffer: Boolean = false) extends Position with ReadOnlySize
-  with Fill with MouseHandling with FocusHandling with KeyHandling with KeyEvents {
+  with Fill with MouseHandling with FocusHandling with KeyEvents with KeyHandling {
 
   def defaultFill = Color.WHITE
 

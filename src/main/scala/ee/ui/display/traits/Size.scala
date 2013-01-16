@@ -7,14 +7,14 @@ import ee.ui.system.RestrictedAccess
 import scala.annotation.implicitNotFound
 
 trait ReadOnlyWidth {
-	private[traits] val writableWidth = new Property(0d)
-	def width: ReadOnlyProperty[Double] = writableWidth
+  private[traits] val writableWidth = new Property(0d)
+  def width: ReadOnlyProperty[Double] = writableWidth
 
 }
 
 trait ReadOnlyHeight {
-	private[traits] val writableHeight = new Property(0d)
-	def height: ReadOnlyProperty[Double] = writableHeight
+  private[traits] val writableHeight = new Property(0d)
+  def height: ReadOnlyProperty[Double] = writableHeight
 }
 
 trait Width extends ReadOnlyWidth {
@@ -39,14 +39,14 @@ trait ExplicitHeight extends Height with PartialExplicitSize {
   def height_=(value: Double) = super.height_=(value)(RestrictedAccess)
 }
 
-trait ExplicitSize extends Size with ExplicitWidth with ExplicitHeight 
+trait ExplicitSize extends Size with ExplicitWidth with ExplicitHeight
 
 trait SizeProxy extends ExplicitSize {
-  val target:ReadOnlySize
-  
+  val target: ReadOnlySize
+
   override def width: Property[Double] = target.writableWidth
   override def width_=(value: Double) = target.writableWidth.value = value
-  
+
   override def height: Property[Double] = target.writableHeight
   override def height_=(value: Double) = target.writableHeight.value = value
 }

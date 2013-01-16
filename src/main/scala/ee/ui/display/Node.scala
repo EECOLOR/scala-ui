@@ -13,6 +13,7 @@ import ee.ui.display.traits.Rotation
 import ee.ui.display.traits.CalculatedBounds
 import ee.ui.display.traits.Transformations
 import ee.ui.display.traits.Position
+import scala.language.implicitConversions
 
 //TODO should we mix all of these in or let the user (or component creator) 
 //mix them in (probably the last)

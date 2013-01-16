@@ -14,8 +14,8 @@ import ee.ui.display.implementation.DisplayImplementationHandler
 import ee.ui.display.traits.ReadOnlyPosition
 import ee.ui.display.implementation.WindowImplementationHandler
 
-class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = WindowStyle.DECORATED) 
-	extends ReadOnlyPosition with ReadOnlySize with ReadOnlyFocus {
+class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = WindowStyle.DECORATED)
+  extends ReadOnlyPosition with ReadOnlySize with ReadOnlyFocus {
 
   private val writableShowing = new Property(false)
   lazy val showing: ReadOnlyProperty[Boolean] = writableShowing
@@ -125,7 +125,7 @@ object Window {
 
   def windows = _windows.toSeq
 
-  def show(window: Window)(implicit windowImplementationHandler:WindowImplementationHandler): Unit = {
+  def show(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {
     windowImplementationHandler windowCreated window
     _windows += window
     window.writableShowing.value = true
