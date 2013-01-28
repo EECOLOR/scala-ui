@@ -34,13 +34,11 @@ trait TextKeyHandlers { self: TextInputLike =>
 
   def forward() =
     positionCaret(
-      if (selection.isEmpty) 1 + caretIndex
-      else selection.end)
+        selection.value map (_.end) getOrElse (1 + caretIndex))
 
   def backward() =
-    positionCaret(
-      if (selection.isEmpty) caretIndex - 1
-      else selection.start)
+    positionCaret( 
+      selection.value map (_.start) getOrElse (caretIndex - 1))
 
   def wordsAfterCaret = {
     var str: String = text
@@ -125,10 +123,10 @@ trait TextKeyHandlers { self: TextInputLike =>
   }
   
   def selectHomeExtend() =
-    selectRange(selection.end, 0)
+    selectRange(selection.value.map(_.end).getOrElse(0), 0)
     
   def selectEndExtend() = 
-    selectRange(selection.start, text.length)
+    selectRange(selection.value.map(_.start).getOrElse(0), text.length)
 
   def undo()
   def redo()

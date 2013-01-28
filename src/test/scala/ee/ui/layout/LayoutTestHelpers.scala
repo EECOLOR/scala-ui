@@ -19,7 +19,7 @@ trait LayoutTestHelpers { self: Specification =>
     def beExpected: Matcher[T] = (e: T) => {
 
       def displayName(node: Node with Expected[T]): String =
-        node.parent.map(parent => displayName(parent.asInstanceOf[Node with Expected[T]]) + " - ").getOrElse("") + node.name
+        node.parent.value.map(parent => displayName(parent.asInstanceOf[Node with Expected[T]]) + " - ").getOrElse("") + node.name
 
       val path = displayName(this)
       (expected == e, s"$path failed, expected $expected, got $e")

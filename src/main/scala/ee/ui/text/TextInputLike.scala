@@ -2,8 +2,7 @@ package ee.ui.text
 
 import ee.ui.properties.Property
 import ee.ui.properties.ReadOnlyProperty
-import ee.ui.properties.Binding._
-import ee.ui.properties.ReadOnlyProperty.propertyToValue
+import ee.ui.observable.ObservableValue
 
 //TODO handle selection
 trait TextInputLike extends TextInputLikeHelper with UndoHandling {
@@ -18,15 +17,15 @@ trait TextInputLike extends TextInputLikeHelper with UndoHandling {
   protected val _writableAnchorIndex = new Property(0)
   def anchorIndex: ReadOnlyProperty[Int] = _writableAnchorIndex
 
-  protected val _writableSelection = new Property(TextSelection(0, 0))
-  def selection: ReadOnlyProperty[TextSelection] = _writableSelection
+  protected val _writableSelection = new Property[Option[TextSelection]](None)
+  def selection: ReadOnlyProperty[Option[TextSelection]] = _writableSelection
 
   private val _writableSelectedText = new Property("")
   def selectedText: ReadOnlyProperty[String] = _writableSelectedText
 
   _writableSelectedText <== selection map {
-    case TextSelection(start, end) =>
-      text substring (start, end)
+    case Some(TextSelection(start, end)) => text substring (start, end)
+    case None => ""
   }
 
 }
@@ -58,7 +57,7 @@ trait TextInputLikeHelper { self: TextInputLike =>
   protected def deleteText(start: Int, end: Int) = replaceText(start, end, "")
 
   protected def replaceSelection(replacement:String) = {
-    val TextSelection(start, end) = selection.value
+    val TextSelection(start, end) = selection getOrElse TextSelection(caretIndex, caretIndex)
     replaceText(start, end, replacement)
   }
 
@@ -76,7 +75,7 @@ trait TextInputLikeHelper { self: TextInputLike =>
 	val safeCaretIndex = inText(caretIndex)
     _writableAnchorIndex.value = safeAnchorIndex
     _writableCaretIndex.value = safeCaretIndex
-    _writableSelection.value = TextSelection(safeAnchorIndex, safeCaretIndex).normalize
+    _writableSelection.value = Some(TextSelection(safeAnchorIndex, safeCaretIndex).normalize)
   }
 }
 

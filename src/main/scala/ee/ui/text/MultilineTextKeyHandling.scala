@@ -7,7 +7,6 @@ import ee.ui.primitives.Point
 import ee.ui.display.traits.CalculatedBounds
 import ee.ui.display.traits.KeyEvents
 import ee.ui.display.Text
-import ee.ui.properties.ReadOnlyProperty.propertyToValue
 import scala.Predef.Map.apply
 
 trait MultilineTextKeyHandling extends MultilineTextKeyHandlers with MultilineTextKeyBindings { self: KeyEvents with TextInputLike with CalculatedBounds =>
@@ -17,7 +16,7 @@ trait MultilineTextKeyHandling extends MultilineTextKeyHandlers with MultilineTe
 trait MultilineTextKeyHandlers extends TextKeyHandlers { self: TextInputLike with CalculatedBounds =>
 
   val underlyingText: Text
-  val textHelper:TextHelper
+  val textHelper: TextHelper
 
   def getCaretIndex(position: Point): Int =
     textHelper getCaretIndex (underlyingText, position)
@@ -61,7 +60,7 @@ trait MultilineTextKeyHandlers extends TextKeyHandlers { self: TextInputLike wit
     val str: String = text
     val end = str.length
     val index: Int = caretIndex
-    
+
     if (index < end)
       (index to end) find (i => str.codePointAt(i) == 0x0A) getOrElse end
     else index
@@ -73,18 +72,18 @@ trait MultilineTextKeyHandlers extends TextKeyHandlers { self: TextInputLike wit
   def nextLine() = positionCaret(nextLineIndex)
   def paragraphStart() = positionCaret(paragraphStartIndex)
   def paragraphEnd() = positionCaret(paragraphEndIndex)
-  
+
   //TODO implement these and the select variants once you have some form of scrolling implemented for text. Don't forget to take a look at computeContentBounds or something similar in the javafx implementation
   def previousPage() = {}
   def nextPage() = {}
 
   def insertNewLine() = {
-    val TextSelection(start, end) = selection.value
-    replaceText(start, end, "\n")
+      val TextSelection(start, end) = selection getOrElse TextSelection(caretIndex, caretIndex)
+      replaceText(start, end, "\n")
   }
 
   def insertTab() = {
-    val TextSelection(start, end) = selection.value
+    val TextSelection(start, end) = selection getOrElse TextSelection(caretIndex, caretIndex)
     replaceText(start, end, "\t")
   }
 
@@ -97,10 +96,10 @@ trait MultilineTextKeyHandlers extends TextKeyHandlers { self: TextInputLike wit
 
   def selectLineStartExtend() =
     selectRange(anchorIndex.value max caretIndex, lineStartIndex)
-    
-  def selectLineEndExtend() = 
+
+  def selectLineEndExtend() =
     selectRange(anchorIndex.value min caretIndex, lineEndIndex)
-    
+
   def selectPreviousPage() = {}
   def selectNextPage() = {}
 }

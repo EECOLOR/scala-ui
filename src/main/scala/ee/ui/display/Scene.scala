@@ -8,7 +8,6 @@ import ee.ui.events.NullEvent
 import ee.ui.events.NullEvent
 import ee.ui.primitives.Camera
 import ee.ui.primitives.Color
-import ee.ui.properties.Binding._
 import ee.ui.properties.Property
 import ee.ui.properties.ReadOnlyProperty
 import ee.ui.display.traits.Fill

@@ -30,7 +30,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
 
   private var hasBeenVisible: Boolean = false
 
-  showing forNewValueIn {
+  showing collect {
     case true => hasBeenVisible = true
   }
 
@@ -41,7 +41,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   private val _owner = new Property[Option[Window]](None)
   def owner = _owner
   def owner_=(value: Window) = owner.value = Some(value)
-  owner forNewValue { n =>
+  owner foreach {
     if (hasBeenVisible) throw new IllegalStateException("Cannot set owner once stage has been set visible")
     if (primary) throw new IllegalStateException("Cannot set owner for the primary stage")
   }
@@ -52,7 +52,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   private val _style = new Property(defaultStyle)
   def style = _style
   def style_=(value: WindowStyle) = style.value = value
-  style forNewValue { n =>
+  style foreach {
     if (hasBeenVisible) throw new IllegalStateException("Cannot set style once stage has been set visible")
   }
 
@@ -63,7 +63,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   private val _modality = new Property[Modality](Modality.NONE)
   def modality = _modality
   def modality_=(value: Modality) = modality.value = value
-  modality forNewValue { n =>
+  modality foreach {
     if (hasBeenVisible) throw new IllegalStateException("Cannot set modality once stage has been set visible")
     if (primary) throw new IllegalStateException("Cannot set modality for the primary stage")
   }
@@ -88,7 +88,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def minWidth = _minWidth
   def minWidth_=(value: Double) = minWidth.value = value
   //TODO move this to implementation
-  minWidth forNewValue { n =>
+  minWidth foreach { n =>
     //if (n > width) width = n
   }
 
@@ -96,7 +96,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def minHeight = _minHeight
   def minHeight_=(value: Double) = minHeight.value = value
   //TODO move this to implementation
-  minHeight forNewValue { n =>
+  minHeight foreach { n =>
     //if (n > height) height = n
   }
 
@@ -104,7 +104,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def maxWidth = _maxWidth
   def maxWidth_=(value: Double) = maxWidth.value = value
   ////TODO move this to implementation
-  maxWidth forNewValue { n =>
+  maxWidth foreach { n =>
     //if (n < width) width = n
   }
 
@@ -112,7 +112,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def maxHeight = _maxHeight
   def maxHeight_=(value: Double) = maxHeight.value = value
   //TODO move this to implementation
-  maxHeight forNewValue { n =>
+  maxHeight foreach { n =>
     //if (n < height) height = n
   }
 

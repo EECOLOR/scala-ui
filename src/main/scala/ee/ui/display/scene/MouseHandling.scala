@@ -9,7 +9,6 @@ import ee.ui.properties.Property
 import ee.ui.events.MouseEvent
 import ee.ui.display.Group
 import ee.ui.events.MouseButton
-import ee.ui.properties.Binding._
 import ee.ui.events.ReadOnlyEvent
 
 trait MouseHandling { self: Scene with FocusHandling =>
@@ -18,7 +17,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
   val onMouseDown = new ReadOnlyEvent[MouseEvent]
   val onMouseUp = new ReadOnlyEvent[MouseEvent]
 
-  private val lastKnownMouseEvent = new Property[MouseEvent](null)
+  private val lastKnownMouseEvent = new Property[Option[MouseEvent]](None)
 
   //make sure these are registered first, we need them in other property handling
   lastKnownMouseEvent <== onMouseMoved
@@ -28,7 +27,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
   private var lastMouseDownNode: Option[Node] = None
 
   onMouseDown { e =>
-    nodeAtMousePosition foreach { n =>
+    nodeAtMousePosition.value foreach { n =>
       writableFocusedNode.value = Some(n)
       lastMouseDownNode = Some(n)
       n.onMouseDown fire e
@@ -38,7 +37,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
 
   onMouseUp { e =>
     for {
-      n <- nodeAtMousePosition
+      n <- nodeAtMousePosition.value
       ln <- lastMouseDownNode
     } if (ln == n) {
       n.onMouseUp fire e
@@ -49,8 +48,9 @@ trait MouseHandling { self: Scene with FocusHandling =>
     }
   }
 
-  private val writableMousePosition = new Property(Point(0, 0))
-  val mousePosition: ReadOnlyProperty[Point] = writableMousePosition
+  //TODO implement that when mouse moves out of application, this is set to None
+  private val writableMousePosition = new Property[Option[Point]](None)
+  val mousePosition: ReadOnlyProperty[Option[Point]] = writableMousePosition
 
   private val writableNodesAtMousePosition = new Property[Seq[Node]](Seq.empty)
   val nodesAtMousePosition: ReadOnlyProperty[Seq[Node]] = writableNodesAtMousePosition
@@ -62,37 +62,42 @@ trait MouseHandling { self: Scene with FocusHandling =>
     Point(e.sceneX, e.sceneY)
   }
 
-  writableNodesAtMousePosition <== mousePosition map { p =>
-    //TODO .value can be removed once we fix bindings and we do not import Binding._ anymore
-    root.value map findNodes(p) getOrElse Seq.empty
+  writableNodesAtMousePosition <== mousePosition map { position =>
+    val nodes =
+      for (p <- position; r <- root.value)
+        yield findNodes(p)(r)
+        
+    nodes getOrElse Seq.empty
   }
 
   writableNodeAtMousePosition <== writableNodesAtMousePosition map { _.headOption }
 
   //TODO think (my head won't allow me at this moment), should this happen before or after onMouseOut
-  nodesAtMousePosition onChangedIn {
+  nodesAtMousePosition.change in {
     case (oldSeq, newSeq) => {
-      val e: MouseEvent = lastKnownMouseEvent
+      lastKnownMouseEvent.value foreach { e =>
+        val noDrag = e.button == MouseButton.NONE
+        val out = oldSeq diff newSeq
+        val over = newSeq diff oldSeq
 
-      val noDrag = e.button == MouseButton.NONE
-      val out = oldSeq diff newSeq
-      val over = newSeq diff oldSeq
+        def fireOut(n: Node) =
+          (if (noDrag) n.onRollOut else n.onMouseDragOut) fire e
 
-      def fireOut(n: Node) =
-        (if (noDrag) n.onRollOut else n.onMouseDragOut) fire e
+        def fireOver(n: Node) =
+          (if (noDrag) n.onRollOver else n.onMouseDragOver) fire e
 
-      def fireOver(n: Node) =
-        (if (noDrag) n.onRollOver else n.onMouseDragOver) fire e
-
-      out foreach fireOut
-      over foreach fireOver
+        out foreach fireOut
+        over foreach fireOver
+      }
     }
   }
 
-  nodeAtMousePosition onChangedIn {
+  nodeAtMousePosition.change in {
     case (oldNode, newNode) =>
-      oldNode foreach (_.onMouseOut fire lastKnownMouseEvent)
-      newNode foreach (_.onMouseOver fire lastKnownMouseEvent)
+      lastKnownMouseEvent.value foreach { e =>
+        oldNode foreach (_.onMouseOut fire e)
+        newNode foreach (_.onMouseOver fire e)
+      }
   }
 
   private def findNodes(point: Point)(node: Node): Seq[Node] =

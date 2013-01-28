@@ -14,7 +14,7 @@ class PulseHandler(application:Application)(implicit displayImplementationHandle
 
   def notify(window: Window): Unit = {
     
-    window.scene foreach notify _
+    window.scene.value foreach notify _
     
     displayImplementationHandler updateImplementationOf window
   }
@@ -23,7 +23,7 @@ class PulseHandler(application:Application)(implicit displayImplementationHandle
     
     layoutEngine layout scene
     
-    scene.root foreach notify _
+    scene.root.value foreach notify _
     
     displayImplementationHandler updateImplementationOf scene
   }

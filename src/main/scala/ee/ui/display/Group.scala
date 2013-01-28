@@ -4,7 +4,6 @@ import ee.ui.properties.ObservableArrayBuffer
 import ee.ui.properties.Add
 import ee.ui.properties.Clear
 import ee.ui.properties.Remove
-import ee.ui.properties.ReadOnlyProperty.propertyToValue
 import ee.ui.properties.Remove.apply
 import scala.collection.mutable.ListBuffer
 
@@ -25,10 +24,10 @@ class Group extends Node {
       added.clear
     }
 
-    onChangedIn {
+    change.in {
       case x @ Add(index, element) => {
         //remove the node from the parent
-        element.parent foreach (_.children -= element)
+        element.parent.value foreach (_.children -= element)
         //set the parent to this group
         Node setParent (element, Some(Group.this))
         //remember it was added

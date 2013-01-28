@@ -8,7 +8,6 @@ trait ReadOnlyProperty[T] extends ObservableProperty[T] {
 }
 
 object ReadOnlyProperty {
-  @inline implicit def propertyToValue[T](property: ReadOnlyProperty[T]): T = property.value
 
   @inline implicit def propertyTupleToValues2[T1, T2](t: (ReadOnlyProperty[T1], ReadOnlyProperty[T2])): (T1, T2) = (t._1, t._2)
   @inline implicit def propertyTupleToValues3[T1, T2, T3](t: (ReadOnlyProperty[T1], ReadOnlyProperty[T2], ReadOnlyProperty[T3])): (T1, T2, T3) = (t._1, t._2, t._3)

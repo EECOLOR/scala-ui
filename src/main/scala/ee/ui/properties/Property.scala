@@ -1,12 +1,14 @@
 package ee.ui.properties
 
-class Property[T](default: T) extends Bindable[T] with Equals {
+class Property[T](default: T) extends WritableProperty[T] with Equals {
 
   private var _value = default
   def value = _value
   def value_=(value: T) =
-    if (_value != value) valueChange(_value, value) {
+    if (_value != value) {
+      val oldValue = _value
       _value = value
+      valueChange(oldValue, value)
     }
 
   def reset = value = default

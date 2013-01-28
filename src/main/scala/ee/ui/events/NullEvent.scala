@@ -9,9 +9,5 @@ class NullEvent extends Event[Null] {
   def apply(listener: Null => Unit)(implicit ev:RuntimeError): Unit = throw error("listener") 
   def in(listener: PartialFunction[Null, Unit])(implicit ev:RuntimeError): Unit = throw error("partial listener")
 
-  def handle(handler: Handler)(implicit ev:RuntimeError): Unit = throw error("handler")
-  def handle(handler: => Boolean)(implicit ev:RuntimeError): Unit = super.handle(handler)
-  def handleIn(handler: PartialFunction[Null, Boolean])(implicit ev:RuntimeError):Unit = throw error("partial handler")
-  
   def fire:Unit = fire(null)
 }

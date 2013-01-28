@@ -9,7 +9,7 @@ import ee.ui.display.Node
 object DefaultLayoutEngine extends LayoutEngine {
 
   def layout(scene: Scene): Unit = {
-    scene.root foreach layoutWithParent(scene)
+    scene.root.value foreach layoutWithParent(scene)
   }
 
   def layoutWithParent(parent: ReadOnlySize)(node: Node): Unit = {
