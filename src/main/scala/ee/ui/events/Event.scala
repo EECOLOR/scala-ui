@@ -9,8 +9,8 @@ import ee.ui.observable.WrappedSubscription
 import scala.language.implicitConversions
 
 class ReadOnlyEvent[T] extends Observable[T] {
-  def apply(listener: T => Unit): Subscription = super.foreach(listener)
-  def apply(listener: => Unit): Subscription = super.foreach(listener)
+  def apply(listener: T => Unit): Subscription = this observe listener
+  def apply(listener: => Unit): Subscription = this observe { value => listener }
   def in[R](listener: PartialFunction[T, R]): Observable[R] with Subscription = this collect listener
 
   private[events] def fire(information: T): Unit = notify(information)

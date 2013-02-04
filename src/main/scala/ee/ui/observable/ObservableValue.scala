@@ -11,6 +11,7 @@ trait LowLevelImplicits {
 }
 
 object ObservableValue extends LowLevelImplicits {
+
   implicit def observableToOptionalObservableValue[T](o: Observable[T]): ObservableValue[Option[T]] =
     new ObservableValue[Option[T]] with WrappedSubscription {
       val subscription =
@@ -20,17 +21,14 @@ object ObservableValue extends LowLevelImplicits {
 
       def value = None
     }
-  
-  implicit class ObservableValueExtension[T](o: ObservableValue[T]) {
 
-    def map[R](f: T => R): ObservableValue[R] with Subscription =
-      new ObservableValue[R] with WrappedSubscription {
-        val subscription =
-          o foreach { value =>
-            notify(f(value))
-          }
-        
-        def value = f(o.value)
-      }
-  }
+  def mapped[T, R](o: ObservableValue[T], f: T => R) =
+    new ObservableValue[R] with WrappedSubscription {
+      val subscription =
+        o foreach { value =>
+          notify(f(value))
+        }
+
+      def value = f(o.value)
+    }
 }

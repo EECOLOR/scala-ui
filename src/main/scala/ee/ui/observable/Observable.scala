@@ -6,24 +6,28 @@ trait Observable[T] { self =>
 
   type Observer = T => Unit
 
-  private val observers = ListBuffer[Observer]()
+  val observers = ListBuffer[Observer]()
 
-  def foreach(observer: Observer): Subscription = {
+  def observe(observer:Observer):Subscription = {
     val subscription = new Subscription {
-      def unsubscribe(): Unit = observers -= observer
-    }
-    observers += observer
-    subscription
+        def unsubscribe(): Unit = observers -= observer
+      }
+      observers += observer
+      subscription
   }
-  def foreach(observer: => Unit): Subscription = foreach(information => observer)
-
+  
   protected def notify(information: T): Unit =
     observers foreach { _(information) }
 
 }
 
 object Observable {
+
   implicit class ObservableExtension[T](o: Observable[T]) {
+
+    def foreach(observer: Observable[T]#Observer): Subscription = 
+      o.observe(observer)
+
     def collect[R](f: PartialFunction[T, R]): Observable[R] with Subscription =
       new Observable[R] with WrappedSubscription {
         val subscription =
@@ -47,6 +51,7 @@ object Observable {
             if (f(value)) notify(value)
           }
       }
+
   }
 }
 

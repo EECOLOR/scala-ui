@@ -62,7 +62,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
     Point(e.sceneX, e.sceneY)
   }
 
-  writableNodesAtMousePosition <== mousePosition map { position =>
+  writableNodesAtMousePosition bindTo mousePosition map { position =>
     val nodes =
       for (p <- position; r <- root.value)
         yield findNodes(p)(r)
@@ -70,7 +70,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
     nodes getOrElse Seq.empty
   }
 
-  writableNodeAtMousePosition <== writableNodesAtMousePosition map { _.headOption }
+  writableNodeAtMousePosition bindTo writableNodesAtMousePosition map { _.headOption }
 
   //TODO think (my head won't allow me at this moment), should this happen before or after onMouseOut
   nodesAtMousePosition.change in {

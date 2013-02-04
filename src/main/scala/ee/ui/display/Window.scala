@@ -13,6 +13,7 @@ import ee.ui.display.traits.ReadOnlyFocus
 import ee.ui.display.implementation.DisplayImplementationHandler
 import ee.ui.display.traits.ReadOnlyPosition
 import ee.ui.display.implementation.WindowImplementationHandler
+import ee.ui.observable.Observable
 
 class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = WindowStyle.DECORATED)
   extends ReadOnlyPosition with ReadOnlySize with ReadOnlyFocus {
@@ -41,7 +42,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   private val _owner = new Property[Option[Window]](None)
   def owner = _owner
   def owner_=(value: Window) = owner.value = Some(value)
-  owner foreach {
+  owner.change {
     if (hasBeenVisible) throw new IllegalStateException("Cannot set owner once stage has been set visible")
     if (primary) throw new IllegalStateException("Cannot set owner for the primary stage")
   }
@@ -52,7 +53,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   private val _style = new Property(defaultStyle)
   def style = _style
   def style_=(value: WindowStyle) = style.value = value
-  style foreach {
+  style.change {
     if (hasBeenVisible) throw new IllegalStateException("Cannot set style once stage has been set visible")
   }
 
@@ -63,7 +64,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   private val _modality = new Property[Modality](Modality.NONE)
   def modality = _modality
   def modality_=(value: Modality) = modality.value = value
-  modality foreach {
+  modality.change {
     if (hasBeenVisible) throw new IllegalStateException("Cannot set modality once stage has been set visible")
     if (primary) throw new IllegalStateException("Cannot set modality for the primary stage")
   }
@@ -96,7 +97,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def minHeight = _minHeight
   def minHeight_=(value: Double) = minHeight.value = value
   //TODO move this to implementation
-  minHeight foreach { n =>
+  minHeight.change { n =>
     //if (n > height) height = n
   }
 
@@ -104,7 +105,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def maxWidth = _maxWidth
   def maxWidth_=(value: Double) = maxWidth.value = value
   ////TODO move this to implementation
-  maxWidth foreach { n =>
+  maxWidth.change { n =>
     //if (n < width) width = n
   }
 
@@ -112,7 +113,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def maxHeight = _maxHeight
   def maxHeight_=(value: Double) = maxHeight.value = value
   //TODO move this to implementation
-  maxHeight foreach { n =>
+  maxHeight.change { n =>
     //if (n < height) height = n
   }
 
