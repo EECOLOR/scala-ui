@@ -1,6 +1,6 @@
 package ee.ui.properties
 
-import ee.ui.observable.Observable
+import ee.ui.observables.Observable
 
 import language.implicitConversions
 
@@ -155,7 +155,7 @@ class PropertyGroup1[T1](p1: ReadOnlyProperty[T1]) extends PropertyGroup {
   class PropertiesChangedHandler1[T1](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1)
   	
-    p1 observe propertyChanged _
+    p1.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler1(callback)
@@ -168,8 +168,8 @@ class PropertyGroup2[T1, T2](p1: ReadOnlyProperty[T1], p2: ReadOnlyProperty[T2])
   class PropertiesChangedHandler2[T1, T2](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler2(callback)
@@ -182,9 +182,9 @@ class PropertyGroup3[T1, T2, T3](p1: ReadOnlyProperty[T1], p2: ReadOnlyProperty[
   class PropertiesChangedHandler3[T1, T2, T3](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler3(callback)
@@ -197,10 +197,10 @@ class PropertyGroup4[T1, T2, T3, T4](p1: ReadOnlyProperty[T1], p2: ReadOnlyPrope
   class PropertiesChangedHandler4[T1, T2, T3, T4](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler4(callback)
@@ -213,11 +213,11 @@ class PropertyGroup5[T1, T2, T3, T4, T5](p1: ReadOnlyProperty[T1], p2: ReadOnlyP
   class PropertiesChangedHandler5[T1, T2, T3, T4, T5](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler5(callback)
@@ -230,12 +230,12 @@ class PropertyGroup6[T1, T2, T3, T4, T5, T6](p1: ReadOnlyProperty[T1], p2: ReadO
   class PropertiesChangedHandler6[T1, T2, T3, T4, T5, T6](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler6(callback)
@@ -248,13 +248,13 @@ class PropertyGroup7[T1, T2, T3, T4, T5, T6, T7](p1: ReadOnlyProperty[T1], p2: R
   class PropertiesChangedHandler7[T1, T2, T3, T4, T5, T6, T7](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler7(callback)
@@ -267,14 +267,14 @@ class PropertyGroup8[T1, T2, T3, T4, T5, T6, T7, T8](p1: ReadOnlyProperty[T1], p
   class PropertiesChangedHandler8[T1, T2, T3, T4, T5, T6, T7, T8](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler8(callback)
@@ -287,15 +287,15 @@ class PropertyGroup9[T1, T2, T3, T4, T5, T6, T7, T8, T9](p1: ReadOnlyProperty[T1
   class PropertiesChangedHandler9[T1, T2, T3, T4, T5, T6, T7, T8, T9](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler9(callback)
@@ -308,16 +308,16 @@ class PropertyGroup10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](p1: ReadOnlyPrope
   class PropertiesChangedHandler10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler10(callback)
@@ -330,17 +330,17 @@ class PropertyGroup11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](p1: ReadOnly
   class PropertiesChangedHandler11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler11(callback)
@@ -353,18 +353,18 @@ class PropertyGroup12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](p1: Rea
   class PropertiesChangedHandler12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler12(callback)
@@ -377,19 +377,19 @@ class PropertyGroup13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](p1
   class PropertiesChangedHandler13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler13(callback)
@@ -402,20 +402,20 @@ class PropertyGroup14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler14(callback)
@@ -428,21 +428,21 @@ class PropertyGroup15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler15(callback)
@@ -455,22 +455,22 @@ class PropertyGroup16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
-    p16 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
+    p16.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler16(callback)
@@ -483,23 +483,23 @@ class PropertyGroup17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
-    p16 observe propertyChanged _
-    p17 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
+    p16.change observe propertyChanged _
+    p17.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler17(callback)
@@ -512,24 +512,24 @@ class PropertyGroup18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
-    p16 observe propertyChanged _
-    p17 observe propertyChanged _
-    p18 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
+    p16.change observe propertyChanged _
+    p17.change observe propertyChanged _
+    p18.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler18(callback)
@@ -542,25 +542,25 @@ class PropertyGroup19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
-    p16 observe propertyChanged _
-    p17 observe propertyChanged _
-    p18 observe propertyChanged _
-    p19 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
+    p16.change observe propertyChanged _
+    p17.change observe propertyChanged _
+    p18.change observe propertyChanged _
+    p19.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler19(callback)
@@ -573,26 +573,26 @@ class PropertyGroup20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
-    p16 observe propertyChanged _
-    p17 observe propertyChanged _
-    p18 observe propertyChanged _
-    p19 observe propertyChanged _
-    p20 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
+    p16.change observe propertyChanged _
+    p17.change observe propertyChanged _
+    p18.change observe propertyChanged _
+    p19.change observe propertyChanged _
+    p20.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler20(callback)
@@ -605,27 +605,27 @@ class PropertyGroup21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
-    p16 observe propertyChanged _
-    p17 observe propertyChanged _
-    p18 observe propertyChanged _
-    p19 observe propertyChanged _
-    p20 observe propertyChanged _
-    p21 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
+    p16.change observe propertyChanged _
+    p17.change observe propertyChanged _
+    p18.change observe propertyChanged _
+    p19.change observe propertyChanged _
+    p20.change observe propertyChanged _
+    p21.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler21(callback)
@@ -638,28 +638,28 @@ class PropertyGroup22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
   class PropertiesChangedHandler22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22](callback:Callback) extends PropertiesChangedHandler {
   	def apply() = callback(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22)
   	
-    p1 observe propertyChanged _
-    p2 observe propertyChanged _
-    p3 observe propertyChanged _
-    p4 observe propertyChanged _
-    p5 observe propertyChanged _
-    p6 observe propertyChanged _
-    p7 observe propertyChanged _
-    p8 observe propertyChanged _
-    p9 observe propertyChanged _
-    p10 observe propertyChanged _
-    p11 observe propertyChanged _
-    p12 observe propertyChanged _
-    p13 observe propertyChanged _
-    p14 observe propertyChanged _
-    p15 observe propertyChanged _
-    p16 observe propertyChanged _
-    p17 observe propertyChanged _
-    p18 observe propertyChanged _
-    p19 observe propertyChanged _
-    p20 observe propertyChanged _
-    p21 observe propertyChanged _
-    p22 observe propertyChanged _
+    p1.change observe propertyChanged _
+    p2.change observe propertyChanged _
+    p3.change observe propertyChanged _
+    p4.change observe propertyChanged _
+    p5.change observe propertyChanged _
+    p6.change observe propertyChanged _
+    p7.change observe propertyChanged _
+    p8.change observe propertyChanged _
+    p9.change observe propertyChanged _
+    p10.change observe propertyChanged _
+    p11.change observe propertyChanged _
+    p12.change observe propertyChanged _
+    p13.change observe propertyChanged _
+    p14.change observe propertyChanged _
+    p15.change observe propertyChanged _
+    p16.change observe propertyChanged _
+    p17.change observe propertyChanged _
+    p18.change observe propertyChanged _
+    p19.change observe propertyChanged _
+    p20.change observe propertyChanged _
+    p21.change observe propertyChanged _
+    p22.change observe propertyChanged _
   }
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler22(callback)

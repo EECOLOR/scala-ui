@@ -5,7 +5,7 @@ import ee.ui.events.CharacterTypedEvent
 import ee.ui.events.ReadOnlyEvent
 
 trait KeyEvents {
-  val onKeyUp = new ReadOnlyEvent[KeyEvent]
-  val onKeyDown = new ReadOnlyEvent[KeyEvent]
-  val onCharacterTyped = new ReadOnlyEvent[CharacterTypedEvent]
+  val onKeyUp = ReadOnlyEvent[KeyEvent]
+  val onKeyDown = ReadOnlyEvent[KeyEvent]
+  val onCharacterTyped = ReadOnlyEvent[CharacterTypedEvent]
 }

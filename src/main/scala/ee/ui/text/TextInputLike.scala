@@ -2,7 +2,7 @@ package ee.ui.text
 
 import ee.ui.properties.Property
 import ee.ui.properties.ReadOnlyProperty
-import ee.ui.observable.ObservableValue
+import ee.ui.observables.ObservableValue
 
 //TODO handle selection
 trait TextInputLike extends TextInputLikeHelper with UndoHandling {
@@ -23,7 +23,7 @@ trait TextInputLike extends TextInputLikeHelper with UndoHandling {
   private val _writableSelectedText = new Property("")
   def selectedText: ReadOnlyProperty[String] = _writableSelectedText
 
-  (_writableSelectedText <== selection) map {
+  _writableSelectedText <== selection.raw map {
     case Some(TextSelection(start, end)) => text substring (start, end)
     case None => ""
   }

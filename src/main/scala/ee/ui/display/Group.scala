@@ -24,7 +24,7 @@ class Group extends Node {
       added.clear
     }
 
-    change.in {
+    change collect {
       case x @ Add(index, element) => {
         //remove the node from the parent
         element.parent.value foreach (_.children -= element)

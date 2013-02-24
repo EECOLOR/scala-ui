@@ -1,36 +1,10 @@
 package ee.ui.properties
 
-class Property[T](default: T) extends WritableProperty[T] with Equals {
+import ee.ui.bindings.BindableVariable
+import ee.ui.observables.ObservableVariable
 
-  private var _value = default
-  def value = _value
-  def value_=(value: T) =
-    if (_value != value) {
-      val oldValue = _value
-      _value = value
-      valueChange(oldValue, value)
-    }
+class Property[T](val default:T) extends ReadOnlyProperty[T] with ObservableVariable[T] with BindableVariable[T]
 
-  def reset = value = default
-  def isDefault = value == default
-  def isChanged = value != default
-
-  def canEqual(other: Any) = {
-    other.isInstanceOf[Property[T]]
-  }
-
-  override def equals(other: Any) = {
-    other match {
-      case that: Property[T] => (that canEqual this) && value == that.value
-      case _ => false
-    }
-  }
-
-  override def hashCode() = {
-    val prime = 41
-    prime + value.hashCode
-  }
-
+object Property {
+  def apply[T](defaultValue:T) = new Property[T](defaultValue)
 }
-
-

@@ -10,35 +10,35 @@ import scala.Predef.Map.apply
 trait MouseTraits {
   //TODO add things like mouseChildren for groups and mouseEnabled
 
-  private val writableHover = new Property(false)
+  private val writableHover = Property(false)
   val hover: ReadOnlyProperty[Boolean] = writableHover
 
-  val onMouseOver = new Event[MouseEvent]
-  val onMouseOut = new Event[MouseEvent]
+  val onMouseOver = Event[MouseEvent]
+  val onMouseOut = Event[MouseEvent]
 
-  val onRollOver = new Event[MouseEvent]
-  val onRollOut = new Event[MouseEvent]
+  val onRollOver = Event[MouseEvent]
+  val onRollOut = Event[MouseEvent]
 
-  val onMouseDragOver = new Event[MouseEvent]
-  val onMouseDragOut = new Event[MouseEvent]
+  val onMouseDragOver = Event[MouseEvent]
+  val onMouseDragOut = Event[MouseEvent]
 
-  val onMouseDown = new Event[MouseEvent]
-  val onMouseUp = new Event[MouseEvent]
-  val onMouseUpOutside = new Event[MouseEvent]
-  val onMouseClicked = new Event[MouseEvent]
+  val onMouseDown = Event[MouseEvent]
+  val onMouseUp = Event[MouseEvent]
+  val onMouseUpOutside = Event[MouseEvent]
+  val onMouseClicked = Event[MouseEvent]
 
   onMouseOver { writableHover.value = true }
   onMouseOut { writableHover.value = false }
 }
 
 trait ExtendedMouseTraits extends MouseTraits {
-  val onClick = new Event[MouseEvent]
-  val onRightClick = new Event[MouseEvent]
-  val onMiddleClick = new Event[MouseEvent]
-  val onUnknownClick = new Event[MouseEvent]
+  val onClick = Event[MouseEvent]
+  val onRightClick = Event[MouseEvent]
+  val onMiddleClick = Event[MouseEvent]
+  val onUnknownClick = Event[MouseEvent]
 
-  val onDragOver = new Event[MouseEvent]
-  val onDragOut = new Event[MouseEvent]
+  val onDragOver = onMouseDragOver filter ( _.button == PRIMARY)
+  val onDragOut = onMouseDragOut filter (_.button == PRIMARY)
 
   private val clickEvents = Map(
     PRIMARY -> onClick,
@@ -47,6 +47,5 @@ trait ExtendedMouseTraits extends MouseTraits {
     NONE -> onUnknownClick)
 
   onMouseClicked { e => clickEvents(e.button) fire e }
-  onMouseDragOver in { case e if (e.button == PRIMARY) => onDragOver fire e }
-  onMouseDragOut in { case e if (e.button == PRIMARY) => onDragOut fire e }
+  
 }

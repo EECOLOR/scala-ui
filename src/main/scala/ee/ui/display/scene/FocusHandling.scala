@@ -10,7 +10,7 @@ trait FocusHandling { self: Scene =>
   protected val writableFocusedNode = new Property[Option[Node]](None)
   val focusedNode: ReadOnlyProperty[Option[Node]] = writableFocusedNode
   
-  focusedNode.change in {
+  focusedNode.valueChange collect {
     case (oldFocused, newFocused) => {
     	implicit val access = RestrictedAccess
     	oldFocused foreach (_.focused = false)

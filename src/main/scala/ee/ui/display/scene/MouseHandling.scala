@@ -13,11 +13,11 @@ import ee.ui.events.ReadOnlyEvent
 
 trait MouseHandling { self: Scene with FocusHandling =>
 
-  val onMouseMoved = new ReadOnlyEvent[MouseEvent]
-  val onMouseDown = new ReadOnlyEvent[MouseEvent]
-  val onMouseUp = new ReadOnlyEvent[MouseEvent]
+  val onMouseMoved = ReadOnlyEvent[MouseEvent]
+  val onMouseDown = ReadOnlyEvent[MouseEvent]
+  val onMouseUp = ReadOnlyEvent[MouseEvent]
 
-  private val lastKnownMouseEvent = new Property[Option[MouseEvent]](None)
+  private val lastKnownMouseEvent = Property[Option[MouseEvent]](None)
 
   //make sure these are registered first, we need them in other property handling
   lastKnownMouseEvent <== onMouseMoved
@@ -49,20 +49,20 @@ trait MouseHandling { self: Scene with FocusHandling =>
   }
 
   //TODO implement that when mouse moves out of application, this is set to None
-  private val writableMousePosition = new Property[Option[Point]](None)
+  private val writableMousePosition = Property[Option[Point]](None)
   val mousePosition: ReadOnlyProperty[Option[Point]] = writableMousePosition
 
-  private val writableNodesAtMousePosition = new Property[Seq[Node]](Seq.empty)
+  private val writableNodesAtMousePosition = Property[Seq[Node]](Seq.empty)
   val nodesAtMousePosition: ReadOnlyProperty[Seq[Node]] = writableNodesAtMousePosition
 
-  private val writableNodeAtMousePosition = new Property[Option[Node]](None)
+  private val writableNodeAtMousePosition = Property[Option[Node]](None)
   val nodeAtMousePosition: ReadOnlyProperty[Option[Node]] = writableNodeAtMousePosition
 
   writableMousePosition <== onMouseMoved map { e =>
     Point(e.sceneX, e.sceneY)
   }
 
-  writableNodesAtMousePosition bindTo mousePosition map { position =>
+  writableNodesAtMousePosition <== mousePosition.raw map { position =>
     val nodes =
       for (p <- position; r <- root.value)
         yield findNodes(p)(r)
@@ -70,10 +70,10 @@ trait MouseHandling { self: Scene with FocusHandling =>
     nodes getOrElse Seq.empty
   }
 
-  writableNodeAtMousePosition bindTo writableNodesAtMousePosition map { _.headOption }
+  writableNodeAtMousePosition <== writableNodesAtMousePosition.raw map { _.headOption }
 
   //TODO think (my head won't allow me at this moment), should this happen before or after onMouseOut
-  nodesAtMousePosition.change in {
+  nodesAtMousePosition.valueChange collect {
     case (oldSeq, newSeq) => {
       lastKnownMouseEvent.value foreach { e =>
         val noDrag = e.button == MouseButton.NONE
@@ -92,7 +92,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
     }
   }
 
-  nodeAtMousePosition.change in {
+  nodeAtMousePosition.valueChange collect {
     case (oldNode, newNode) =>
       lastKnownMouseEvent.value foreach { e =>
         oldNode foreach (_.onMouseOut fire e)

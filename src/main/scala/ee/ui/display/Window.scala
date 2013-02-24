@@ -13,7 +13,7 @@ import ee.ui.display.traits.ReadOnlyFocus
 import ee.ui.display.implementation.DisplayImplementationHandler
 import ee.ui.display.traits.ReadOnlyPosition
 import ee.ui.display.implementation.WindowImplementationHandler
-import ee.ui.observable.Observable
+import ee.ui.observables.Observable
 
 class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = WindowStyle.DECORATED)
   extends ReadOnlyPosition with ReadOnlySize with ReadOnlyFocus {
@@ -31,7 +31,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
 
   private var hasBeenVisible: Boolean = false
 
-  showing collect {
+  showing.change collect {
     case true => hasBeenVisible = true
   }
 
@@ -89,7 +89,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def minWidth = _minWidth
   def minWidth_=(value: Double) = minWidth.value = value
   //TODO move this to implementation
-  minWidth foreach { n =>
+  minWidth.change foreach { n =>
     //if (n > width) width = n
   }
 
