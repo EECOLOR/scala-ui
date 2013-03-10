@@ -24,12 +24,12 @@ trait MouseHandling { self: Scene with FocusHandling =>
   lastKnownMouseEvent <== onMouseDown
   lastKnownMouseEvent <== onMouseUp
 
-  private var lastMouseDownNode: Option[Node] = None
+  private val lastMouseDownNode = Property[Option[Node]](None)
 
   onMouseDown { e =>
-    nodeAtMousePosition.value foreach { n =>
+    nodeAtMousePosition foreach { n =>
       writableFocusedNode.value = Some(n)
-      lastMouseDownNode = Some(n)
+      lastMouseDownNode.value = Some(n)
       n.onMouseDown fire e
     }
     //TODO If we do not have a node at mouse position, reset focused node to None
@@ -37,7 +37,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
 
   onMouseUp { e =>
     for {
-      n <- nodeAtMousePosition.value
+      n <- nodeAtMousePosition
       ln <- lastMouseDownNode
     } if (ln == n) {
       n.onMouseUp fire e
@@ -62,7 +62,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
     Point(e.sceneX, e.sceneY)
   }
 
-  writableNodesAtMousePosition <== mousePosition.raw map { position =>
+  writableNodesAtMousePosition <== mousePosition map { position =>
     val nodes =
       for (p <- position; r <- root.value)
         yield findNodes(p)(r)
@@ -70,7 +70,7 @@ trait MouseHandling { self: Scene with FocusHandling =>
     nodes getOrElse Seq.empty
   }
 
-  writableNodeAtMousePosition <== writableNodesAtMousePosition.raw map { _.headOption }
+  writableNodeAtMousePosition <== writableNodesAtMousePosition map { _.headOption }
 
   //TODO think (my head won't allow me at this moment), should this happen before or after onMouseOut
   nodesAtMousePosition.valueChange collect {

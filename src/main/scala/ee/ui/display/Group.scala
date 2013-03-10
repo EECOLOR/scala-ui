@@ -6,6 +6,7 @@ import ee.ui.properties.Clear
 import ee.ui.properties.Remove
 import ee.ui.properties.Remove.apply
 import scala.collection.mutable.ListBuffer
+import ee.ui.system.RestrictedAccess
 
 class Group extends Node {
 
@@ -29,13 +30,13 @@ class Group extends Node {
         //remove the node from the parent
         element.parent.value foreach (_.children -= element)
         //set the parent to this group
-        Node setParent (element, Some(Group.this))
+        Node.setParent(element, Some(Group.this))(RestrictedAccess)
         //remember it was added
         added += x
       }
       case x @ Remove(index, element) => {
         //on removal set the parent to None
-        Node setParent (element, None)
+        Node.setParent(element, None)(RestrictedAccess)
         //remember it was removed
         removed += x
       }

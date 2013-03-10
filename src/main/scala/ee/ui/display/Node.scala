@@ -14,6 +14,7 @@ import ee.ui.display.traits.CalculatedBounds
 import ee.ui.display.traits.Transformations
 import ee.ui.display.traits.Position
 import scala.language.implicitConversions
+import ee.ui.system.AccessRestriction
 
 //TODO should we mix all of these in or let the user (or component creator) 
 //mix them in (probably the last)
@@ -27,7 +28,7 @@ abstract class Node extends LayoutClient with Position with Size
 }
 
 object Node {
-  def setParent(node: Node, parent: Option[Group]) =
+  def setParent(node: Node, parent: Option[Group])(implicit access:AccessRestriction) =
     node.writableParent.value = parent
 }
 

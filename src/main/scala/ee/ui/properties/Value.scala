@@ -1,5 +1,7 @@
 package ee.ui.properties
 
+import scala.language.implicitConversions
+
 trait Value[T] extends Equals {
   
   def value: T

@@ -13,7 +13,7 @@ trait Variable[T] extends Value[T] {
   
   protected def setValue(value: T): Unit = _value = value
 
-  def reset = value = default
+  def reset() = value = default
   def isDefault = value == default
   def isChanged = value != default
 

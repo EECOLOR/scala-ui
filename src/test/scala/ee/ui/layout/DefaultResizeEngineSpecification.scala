@@ -16,8 +16,8 @@ object DefaultResizeEngineSpecification extends Specification with LayoutTestHel
   val engine = DefaultResizeEngine
 
   def is = "DefaultResizeEngine specification".title ^
-    hide ^ end
-    //show ^ end
+    //hide ^ end
+    show ^ end
 
   def hide = "Specification is hidden" ^ end
 
@@ -192,11 +192,10 @@ object DefaultResizeEngineSpecification extends Specification with LayoutTestHel
 
         }
 
-        val time = System.currentTimeMillis
+        //TODO test performance
         engine.adjustSizeWithParent(scene, root)
-        val elapsedTime = System.currentTimeMillis - time
                 
-        checkResults(root) and (elapsedTime must beLessThan(2l))
+        checkResults(root)
       } ^
       end
 

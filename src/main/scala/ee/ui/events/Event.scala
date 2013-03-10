@@ -8,7 +8,7 @@ import ee.ui.observables.Subscription
 import scala.language.higherKinds
 
 trait Event[T] extends ReadOnlyEvent[T] {
-	def fire(information:T):Unit = notify(information)(RestrictedAccess)
+	def fire(information:T):Unit = ReadOnlyEvent.notify(this, information)(RestrictedAccess)
 }
 
 object Event {

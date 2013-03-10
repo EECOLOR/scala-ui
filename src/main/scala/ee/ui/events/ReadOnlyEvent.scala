@@ -5,16 +5,18 @@ import ee.ui.observables.Subscription
 import ee.ui.observables.Observable
 import ee.ui.system.AccessRestriction
 import scala.language.higherKinds
+import ee.ui.system.RestrictedAccess
 
 trait ReadOnlyEvent[T] extends Observable.Default[T] {
   def apply(observer: T => Unit): Subscription = observe(observer)
   def apply(observer: => Unit): Subscription = observe(_ => observer)
-  
-  private[events] def notify(information: T)(implicit ev:AccessRestriction): Unit = super.notify(information)
 }
 
 object ReadOnlyEvent {
   def apply[T] = new ReadOnlyEvent[T] {}
+  
+  def notify[T](event:ReadOnlyEvent[T], information: T)(implicit ev:AccessRestriction) = 
+    event notify information
   
   implicit def readOnlyEventObservableMapping[O[X] <: Observable[X]] =
     new CanMapObservable[O, ReadOnlyEvent] {

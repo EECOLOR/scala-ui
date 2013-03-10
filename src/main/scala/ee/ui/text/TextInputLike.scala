@@ -23,7 +23,7 @@ trait TextInputLike extends TextInputLikeHelper with UndoHandling {
   private val _writableSelectedText = new Property("")
   def selectedText: ReadOnlyProperty[String] = _writableSelectedText
 
-  _writableSelectedText <== selection.raw map {
+  _writableSelectedText <== selection map {
     case Some(TextSelection(start, end)) => text substring (start, end)
     case None => ""
   }

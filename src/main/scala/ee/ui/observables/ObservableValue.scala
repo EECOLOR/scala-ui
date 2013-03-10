@@ -12,17 +12,17 @@ import scala.language.implicitConversions
 
 trait ObservableValue[T] extends Value[T] {
   def change: ReadOnlyEvent[T]
-  def valueChange:ReadOnlyEvent[(T, T)]
+  def valueChange: ReadOnlyEvent[(T, T)]
 }
 
 object ObservableValue {
-  
-  implicit def observableToObservableValue[O[X] <: Observable[X], T](o:O[T]):ObservableValue[Option[T]] =
+
+  implicit def observableToObservableValue[O[X] <: Observable[X], T](o: O[T]): ObservableValue[Option[T]] =
     new ObservableVariable[Option[T]] {
       val default = None
       o map Some[T] foreach setValue
     }
-  
+
   implicit class Mappable[A](o: ObservableValue[A]) {
 
     def map[B](f: A => B): ObservableValue[B] = new ObservableValue[B] {
@@ -35,40 +35,38 @@ object ObservableValue {
     }
   }
 
-  // FMC = FilterMonadicContainer
-  // D = Dummy
-  implicit class FilterMonadicMappable[A, FMC[D] <: FilterMonadic[D, FMC[D]]](o: ObservableValue[FMC[A]]) {
+  object mapContents {
+    // FMC = FilterMonadicContainer
+    // D = Dummy
+    implicit class FilterMonadicMappable[A, FMC[D] <: FilterMonadic[D, FMC[D]]](o: ObservableValue[FMC[A]]) {
 
-    object raw extends Mappable(o)
-    
-    def map[B, That](f: A => B)(implicit bf: CanBuildFrom[FMC[A], B, That]): ObservableValue[That] = new ObservableValue[That] {
-      def value = o.value.map(f)
+      def map[B, That](f: A => B)(implicit bf: CanBuildFrom[FMC[A], B, That]): ObservableValue[That] = new ObservableValue[That] {
+        def value = o.value.map(f)
 
-      val change = o.change map (_ map f)
-      val valueChange = o.valueChange map {
-        case (oldValue, newValue) => (oldValue map f, newValue map f)
+        val change = o.change map (_ map f)
+        val valueChange = o.valueChange map {
+          case (oldValue, newValue) => (oldValue map f, newValue map f)
+        }
       }
     }
-  }
 
-  type HasMap[A, That[_]] = {
-    def map[B](f: A => B): That[B]
-  }
+    type HasMap[A, That[_]] = {
+      def map[B](f: A => B): That[B]
+    }
 
-  // OVC = ObservableValueContainer
-  // MC = MappableContainer
-  // D = Dummy
-  implicit class SimpleMappable[A, MC[D] <: HasMap[D, MC], OVC[D <: MC[_]] <: ObservableValue[D]](o: OVC[MC[A]]) {
+    // OVC = ObservableValueContainer
+    // MC = MappableContainer
+    // D = Dummy
+    implicit class SimpleMappable[A, MC[D] <: HasMap[D, MC], OVC[D <: MC[_]] <: ObservableValue[D]](o: OVC[MC[A]]) {
 
-    object raw extends Mappable(o)
-    
-    def map[B](f: A => B): ObservableValue[MC[B]] = new ObservableValue[MC[B]] {
+      def map[B](f: A => B): ObservableValue[MC[B]] = new ObservableValue[MC[B]] {
 
-      def value = o.value.map(f)
+        def value = o.value.map(f)
 
-      val change = o.change map (_ map f)
-      val valueChange = o.valueChange map {
-        case (oldValue, newValue) => (oldValue map f, newValue map f)
+        val change = o.change map (_ map f)
+        val valueChange = o.valueChange map {
+          case (oldValue, newValue) => (oldValue map f, newValue map f)
+        }
       }
     }
   }
