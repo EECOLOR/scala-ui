@@ -13,24 +13,25 @@ trait BindingFactory[S, T] {
 
 trait BindingFactoryLowerPriority {
 
-  implicit def optionalBinding[T, O <: Observable[T]] = new BindingFactory[O, Variable[Option[T]]] {
-    def create(source: O, target: Variable[Option[T]]) =
-      SimpleBinding(source, target, None)
-  }
+  implicit def optionalBinding[T, O <: Observable[T]] =
+    new BindingFactory[O, Variable[Option[T]]] {
+      def create(source: O, target: Variable[Option[T]]) =
+        SimpleBinding(source, target, None)
+    }
 
-  implicit def simpleBinding[S, T, O <: ObservableValue[S]](implicit ev: S <:< T): BindingFactory[O, Variable[T]] =
+  implicit def exactBinding[T, O <: ObservableValue[T]] =
     new BindingFactory[O, Variable[T]] {
       def create(source: O, target: Variable[T]) =
-        SimpleBinding[S, T](source, target, source.value)
+        SimpleBinding[T, T](source, target, source.value)
     }
 
 }
 
 object BindingFactory extends BindingFactoryLowerPriority {
-
-  implicit def simpleBinding[T, O <: ObservableValue[T]]: BindingFactory[O, Variable[T]] =
-    new BindingFactory[O, Variable[T]] {
-      def create(source: O, target: Variable[T]) =
-        SimpleBinding[T, T](source, target, source.value)
+  implicit def inherritedBinding[S <: T, T, O[X <: S] <: ObservableValue[X]]: BindingFactory[O[S], Variable[T]] =
+    new BindingFactory[O[S], Variable[T]] {
+      def create(source: O[S], target: Variable[T]) =
+        SimpleBinding[S, T](source, target, source.value)
     }
+
 }

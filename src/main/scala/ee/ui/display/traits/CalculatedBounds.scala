@@ -9,13 +9,14 @@ import ee.ui.primitives.Scale.apply
 import ee.ui.primitives.Transformation
 import ee.ui.primitives.Translate.apply
 import ee.ui.properties.Property
-import ee.ui.properties.PropertyGroup.apply
 import ee.ui.properties.ReadOnlyProperty
-import ee.ui.properties.PropertyGroup
 import ee.ui.primitives.Point
 import ee.ui.primitives.Rotate
 import ee.ui.primitives.Scale
 import ee.ui.primitives.Translate
+import ee.ui.bindings.BindingFactory
+import ee.ui.observables.ObservableValue
+import ee.ui.properties.Variable
 
 trait CalculatedBounds extends Position with Size
   with Translation with Scaling with Rotation with Transformations {
@@ -38,62 +39,53 @@ trait CalculatedBounds extends Position with Size
   private val writableShapeBounds = new Property(Bounds.ZERO)
   val shapeBounds: ReadOnlyProperty[Bounds] = writableShapeBounds
 
-  private val totalTransformationProperties =
-    PropertyGroup(shapeTransformation, positionTransformation) ~> {
-      (shapeTransformation, positionTransformation) =>
+  writableTotalTransformation <== shapeTransformation | positionTransformation map {
+    case (shapeTransformation, positionTransformation) => {
+      val propertyDerivedTransformation: Transformation =
+        positionTransformation ++ shapeTransformation
 
-        val propertyDerivedTransformation: Transformation =
-          positionTransformation ++ shapeTransformation
+      //TODO, this should not be done here but in a listener of transformations, that would also solve the problem that shapeTransformation is not updated if the transformations contain a shape related transformation
+      val totalTransformation =
+        (transformations foldLeft propertyDerivedTransformation)(_ ++ _)
 
-        //TODO, this should not be done here but in a listener of transformations, that would also solve the problem that shapeTransformation is not updated if the transformations contain a shape related transformation
-        val totalTransformation =
-          (transformations foldLeft propertyDerivedTransformation)(_ ++ _)
-
-        writableTotalTransformation.value = totalTransformation
+      totalTransformation
     }
+  }
 
-  private val shapeTransformationProperties = PropertyGroup(
-    rotation, rotationAxis,
-    scaleX, scaleY, scaleZ,
-    width, height) ~> {
-      (rotation, rotationAxis,
-      scaleX, scaleY, scaleZ,
-      width, height) =>
+  writableShapeTransformation <==
+    rotation | rotationAxis |
+    scaleX | scaleY | scaleZ |
+    width | height map {
+      case (
+        rotation, rotationAxis,
+        scaleX, scaleY, scaleZ,
+        width, height) => {
 
         val pivot = Point(
           width / 2d,
           height / 2d)
 
-        writableShapeTransformation.value =
-          Rotate(rotation, rotationAxis, pivot) ++
-            Scale(scaleX, scaleY, scaleZ, pivot)
-
+        Rotate(rotation, rotationAxis, pivot) ++
+          Scale(scaleX, scaleY, scaleZ, pivot)
+      }
     }
 
-  private val positionTransformationProperties =
-    PropertyGroup(x, translateX, y, translateY, translateZ) ~> {
-      (x, translateX, y, translateY, translateZ) =>
+  writablePositionTransformation <== x | translateX | y | translateY | translateZ map {
+    case (x, translateX, y, translateY, translateZ) =>
+      Translate(x + translateX, y + translateY, translateZ)
+  }
+  
+  writableUntransformedBounds <== width | height map {
+    case (width, height) => Bounds(0, 0, width, height)
+  }
 
-        writablePositionTransformation.value =
-          Translate(x + translateX, y + translateY, translateZ)
-    }
-
-  private val untransformedBoundsProperties =
-    PropertyGroup(width, height) ~> {
-      (width, height) => writableUntransformedBounds.value = Bounds(0, 0, width, height)
-    }
-
-  private val boundsProperties =
-    PropertyGroup(totalTransformation, untransformedBounds) ~> {
-      (totalTransformation, untransformedBounds) =>
-
-        writableBounds.value = untransformedBounds transform totalTransformation
-    }
-
-  private val shapeBoundsProperties =
-    PropertyGroup(shapeTransformation, untransformedBounds) ~> {
-      (shapeTransformation, untransformedBounds) =>
-
-        writableShapeBounds.value = untransformedBounds transform shapeTransformation
-    }
+  writableBounds <== totalTransformation | untransformedBounds map {
+    case (totalTransformation, untransformedBounds) =>
+      untransformedBounds transform totalTransformation
+  }
+  
+  writableShapeBounds <== shapeTransformation | untransformedBounds map {
+    case (shapeTransformation, untransformedBounds) =>
+      untransformedBounds transform shapeTransformation
+  }
 }

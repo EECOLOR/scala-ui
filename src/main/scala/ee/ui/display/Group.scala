@@ -17,32 +17,21 @@ class Group extends Node {
     def apply(nodes: Node*): Unit =
       this ++= nodes
 
-    val removed = ListBuffer[Remove[Node]]()
-    val added = ListBuffer[Add[Node]]()
-
-    def reset = {
-      removed.clear
-      added.clear
-    }
-
-    change collect {
-      case x @ Add(index, element) => {
-        //remove the node from the parent
-        element.parent.value foreach (_.children -= element)
+    private def elementAdded(element:Node) = {
+        //remove the node from the previous parent
+        element.parent foreach (_.children -= element)
         //set the parent to this group
         Node.setParent(element, Some(Group.this))(RestrictedAccess)
-        //remember it was added
-        added += x
-      }
-      case x @ Remove(index, element) => {
+    }
+      
+    private def elementRemoved(element:Node) = 
         //on removal set the parent to None
         Node.setParent(element, None)(RestrictedAccess)
-        //remember it was removed
-        removed += x
-      }
-      case Clear(elements) => removed ++= elements.view.zipWithIndex.map {
-        case (elem, index) => Remove(index, elem)
-      }
+    
+    change collect {
+      case Add(index, element) => elementAdded(element)
+      case Remove(index, element) => elementRemoved(element)
+      case Clear(elements) => elements foreach elementRemoved
     }
   }
 

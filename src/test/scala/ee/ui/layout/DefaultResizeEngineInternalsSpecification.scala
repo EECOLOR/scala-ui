@@ -20,7 +20,7 @@ object DefaultResizeEngineInternalsSpecification extends Specification with Layo
     hide ^ end
     //show ^ end
 
-  def hide = "Specification is hidden" ^ end
+  def hide = args(xonly=true) ^ show ^ end
 
   def show =
     "Unit tests on methods" ^

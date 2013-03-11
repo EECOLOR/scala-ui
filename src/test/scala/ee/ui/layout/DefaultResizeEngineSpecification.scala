@@ -16,10 +16,10 @@ object DefaultResizeEngineSpecification extends Specification with LayoutTestHel
   val engine = DefaultResizeEngine
 
   def is = "DefaultResizeEngine specification".title ^
-    //hide ^ end
-    show ^ end
+    hide ^ end
+    //show ^ end
 
-  def hide = "Specification is hidden" ^ end
+  def hide = args(xonly=true) ^ show ^ end
 
   def show =
     """ Introduction

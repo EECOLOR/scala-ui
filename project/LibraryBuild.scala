@@ -10,6 +10,7 @@ object LibraryBuild extends Build {
     
   val appDependencies = Seq(
     "org.scala-lang" % "scala-actors" % scalaVersion,
+    "com.chuusai" %% "shapeless" % "1.2.4",
     "org.specs2" % "specs2_2.10" % "1.13" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test",
     "org.scala-lang" % "scala-compiler" % scalaVersion % "test")

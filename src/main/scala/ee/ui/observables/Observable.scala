@@ -67,4 +67,10 @@ object Observable {
 
   }
 
+  implicit class Combinators1[O1[T] <: Observable[T], T](val o: O1[T]) {
+    def |[X, R <: X, X1 >: T <: X, O2[X] <: Observable[X], That[X] <: Observable[X]](other: O2[R])(
+      implicit factory: CanCombineObservable[O1, O2, That]): That[X] = 
+        // the cast is completely safe here
+        factory.combine(o.asInstanceOf[O1[X1]], other)
+  }
 }

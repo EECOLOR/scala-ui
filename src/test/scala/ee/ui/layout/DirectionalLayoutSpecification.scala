@@ -9,10 +9,10 @@ object DirectionalLayoutSpecification extends Specification with LayoutTestHelpe
   val engine = DefaultLayoutEngine
 
   def is = "Directional layout specification".title ^
-    //hide ^ end
-    show ^ end
+    hide ^ end
+    //show ^ end
 
-  def hide = "Specification is hidden" ^ end
+  def hide = args(xonly=true) ^ show ^ end
 
   def show =
     """ 

@@ -102,6 +102,7 @@ $onChangedNotify
 
 
 object PropertyGroup {
+  /*
   @inline implicit def propertytoPropertyGroup1[T1](p:ReadOnlyProperty[T1]):PropertyGroup1[T1] = new PropertyGroup1(p)
   def apply[T1](p: ReadOnlyProperty[T1]):PropertyGroup1[T1] = new PropertyGroup1(p)
   @inline implicit def tupleToPropertyGroup2[T1, T2](t:(ReadOnlyProperty[T1], ReadOnlyProperty[T2])):PropertyGroup2[T1, T2] = new PropertyGroup2(t._1, t._2)
@@ -664,5 +665,6 @@ class PropertyGroup22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T1
 
   def onChanged(callback:Callback) = new PropertiesChangedHandler22(callback)
   def collect(callback:Callback) = new PropertiesChangedHandler22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22](callback) with PropertiesChangedCollector
+  */
 }
 

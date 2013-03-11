@@ -6,14 +6,15 @@ import scala.collection.mutable.ListBuffer
 import ee.ui.events.ReadOnlyEvent
 import ee.ui.TestUtils
 import scala.tools.reflect.ToolBoxError
+import scala.collection.mutable.ListBuffer
 
 object EventSpecification extends Specification {
 
   def is = "Event specification".title ^
-    //hide ^ end
-    show ^ end
+    hide ^ end
+    //show ^ end
 
-  def hide = "Specification is hidden" ^ end
+  def hide = args(xonly=true) ^ show ^ end
 
   def show =
     """ Introduction
@@ -173,27 +174,46 @@ object EventSpecification extends Specification {
       
       	In some cases you want to hide the fire method from the outside world.
         You can do that by declaring the actual event private and type the 
-      	public event as read only event
+      	public event as ReadOnlyEvent
       """ ^
       { // ReadOnlyEvent
         
         def result = TestUtils.eval("""
-          import ee.ui.events.Event
-          import ee.ui.events.ReadOnlyEvent
-            
-          val myObj = new {
-            private val writableEvent = Event[Int]
-            val event:ReadOnlyEvent[Int] = writableEvent
-          }
-        
-          // will not compile:
-          myObj.event.fire
-        """)
+          |import ee.ui.events.Event
+          |import ee.ui.events.ReadOnlyEvent
+          |  
+          |val myObj = new {
+          |  private val writableEvent = Event[Int]
+          |  val event:ReadOnlyEvent[Int] = writableEvent
+          |}
+          |
+          |// will not compile:
+          |myObj.event.fire
+        """.stripMargin)
         
         result must throwA[ToolBoxError].like {
           case e => 
             e.getMessage must contain("value fire is not a member of ee.ui.events.ReadOnlyEvent[Int]") 
         }
+      } ^
+      p ^ "Combining events" ^
+      { // Combined event |
+        val event1 = Event[Int]
+        val event2 = Event[Int]
+        
+        val combined = event1 | event2
+        
+        var events = ListBuffer.empty[Int]
+        
+        combined { events += _ }
+        
+        event1 fire 1
+        event2 fire 2
+        
+        (combined must beAnInstanceOf[Event[(Int, Int)]]) and
+        (events must have size(2)) and
+        (Seq(1, 2) ==== events.toSeq)
+        
       } ^
       end
 }
