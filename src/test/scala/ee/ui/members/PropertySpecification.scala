@@ -1,14 +1,10 @@
-package ee.ui.propertiesAndEvents
+package ee.ui.members
 
 import org.specs2.Specification
-import ee.ui.events.Event
 import scala.collection.mutable.ListBuffer
-import ee.ui.events.ReadOnlyEvent
 import ee.ui.TestUtils
 import scala.tools.reflect.ToolBoxError
-import ee.ui.properties.Property
 import scala.language.reflectiveCalls
-import ee.ui.observables.ObservableValue
 
 object PropertySpecification extends Specification {
 
@@ -119,8 +115,8 @@ object PropertySpecification extends Specification {
       { // ReadOnlyProperty
         
         def result = TestUtils.eval("""
-          |import ee.ui.properties.Property
-          |import ee.ui.properties.ReadOnlyProperty
+          |import ee.ui.members.Property
+          |import ee.ui.members.ReadOnlyProperty
           |  
           |val myObj = new {
           |  private val writableProperty = Property[Int]
@@ -133,7 +129,7 @@ object PropertySpecification extends Specification {
         
         result must throwA[ToolBoxError].like {
           case e => 
-            e.getMessage must contain("value value_= is not a member of ee.ui.properties.ReadOnlyProperty[Int]") 
+            e.getMessage must contain("value value_= is not a member of ee.ui.members.ReadOnlyProperty[Int]") 
         }
       } ^
       end

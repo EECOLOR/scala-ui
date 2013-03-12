@@ -1,22 +1,20 @@
-package ee.ui.observables
+package ee.ui.members.details
 
-import ee.ui.properties.Value
-import ee.ui.events.ReadOnlyEvent
-import scala.collection.generic.FilterMonadic
 import scala.collection.generic.CanBuildFrom
-import scala.language.higherKinds
-import scala.language.reflectiveCalls
-import ee.ui.bindings.BindableVariable
-import ee.ui.properties.Property
-import scala.language.implicitConversions
+import scala.collection.generic.FilterMonadic
+
+import ee.ui.members.ReadOnlyEvent
+import ee.util.tuples.TupleOps
+import shapeless.::
 import shapeless.HList
 import shapeless.HListerAux
-import shapeless.Tupler
-import shapeless.::
-import shapeless.TuplerAux
-import shapeless.PrependAux
 import shapeless.HNil
-import shapeless.HLister
+import shapeless.PrependAux
+import shapeless.TuplerAux
+
+import scala.language.implicitConversions
+import scala.language.higherKinds
+import scala.language.reflectiveCalls
 
 trait ObservableValue[T] extends Value[T] {
   def change: ReadOnlyEvent[T]
@@ -28,7 +26,6 @@ trait LowerPriorityObservableValueImplicits {
     def |[B](b: ObservableValue[B]): ObservableValue[(A, B)] =
       new ObservableValue[(A, B)] {
         def value = (a.value, b.value)
-
         val change: ReadOnlyEvent[(A, B)] =
           new Observable.Default[(A, B)] with ReadOnlyEvent[(A, B)] {
             val aEvent = a.change map { (_, b.value) }

@@ -1,7 +1,4 @@
-package ee.ui.bindings
-
-import ee.ui.observables.ObservableValue
-import ee.ui.properties.Variable
+package ee.ui.members.details
 
 trait Binding {
   def unbind(): Unit

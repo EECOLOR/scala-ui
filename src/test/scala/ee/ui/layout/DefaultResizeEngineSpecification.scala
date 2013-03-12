@@ -3,7 +3,7 @@ package ee.ui.layout
 import org.specs2.Specification
 import ee.ui.display.traits.ExplicitSize
 import ee.ui.display.Group
-import ee.ui.properties.ReadOnlyProperty
+import ee.ui.members.ReadOnlyProperty
 import org.specs2.matcher.MatchResult
 import org.specs2.execute.Result
 import org.specs2.matcher.Matcher

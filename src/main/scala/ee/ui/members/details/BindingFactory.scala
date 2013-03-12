@@ -1,9 +1,6 @@
-package ee.ui.bindings
+package ee.ui.members.details
 
 import scala.annotation.implicitNotFound
-import ee.ui.observables.ObservableValue
-import ee.ui.properties.Variable
-import ee.ui.observables.Observable
 import scala.language.higherKinds
 
 @implicitNotFound(msg = "Can not find a suitable BindingFactory to create a binding from ${S} to ${T}")

@@ -1,6 +1,7 @@
 package ee.ui.display.shape
-import ee.ui.properties.Property
+
 import ee.ui.display.Shape
+import ee.ui.members.Property
 
 class Rectangle extends Shape {
   private val _arcWidth = new Property(0d)

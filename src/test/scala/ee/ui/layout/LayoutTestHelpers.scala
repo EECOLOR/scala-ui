@@ -5,7 +5,7 @@ import org.specs2.matcher.Matcher
 import org.specs2.Specification
 import org.specs2.execute.Result
 import ee.ui.display.Group
-import ee.ui.properties.ReadOnlyProperty
+import ee.ui.members.ReadOnlyProperty
 
 trait LayoutTestHelpers { self: Specification =>
 

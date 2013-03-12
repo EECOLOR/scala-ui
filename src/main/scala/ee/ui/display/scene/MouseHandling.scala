@@ -1,15 +1,15 @@
 package ee.ui.display.scene
 
 import ee.ui.display.Scene
-import ee.ui.properties.ReadOnlyProperty
-import ee.ui.events.Event
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.members.Event
 import ee.ui.primitives.Point
 import ee.ui.display.Node
-import ee.ui.properties.Property
 import ee.ui.events.MouseEvent
 import ee.ui.display.Group
 import ee.ui.events.MouseButton
-import ee.ui.events.ReadOnlyEvent
+import ee.ui.members.ReadOnlyEvent
+import ee.ui.members.Property
 
 trait MouseHandling { self: Scene with FocusHandling =>
 

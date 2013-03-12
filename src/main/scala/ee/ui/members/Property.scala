@@ -1,7 +1,7 @@
-package ee.ui.properties
+package ee.ui.members
 
-import ee.ui.bindings.BindableVariable
-import ee.ui.observables.ObservableVariable
+import ee.ui.members.details.BindableVariable
+import ee.ui.members.details.ObservableVariable
 
 class Property[T](val default:T) extends ReadOnlyProperty[T] with ObservableVariable[T] with BindableVariable[T]
 

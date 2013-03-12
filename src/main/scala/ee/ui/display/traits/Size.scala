@@ -1,10 +1,9 @@
 package ee.ui.display.traits
 
-import ee.ui.properties.Property
-import ee.ui.properties.ReadOnlyProperty
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.AccessRestriction
 import ee.ui.system.RestrictedAccess
-import scala.annotation.implicitNotFound
 
 trait ReadOnlyWidth {
   private[traits] val writableWidth = new Property(0d)

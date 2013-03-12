@@ -1,4 +1,4 @@
-package ee.ui.properties
+package ee.ui.members.details
 
 import scala.language.implicitConversions
 

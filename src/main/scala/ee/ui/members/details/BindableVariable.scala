@@ -1,6 +1,4 @@
-package ee.ui.bindings
-
-import ee.ui.properties.Variable
+package ee.ui.members.details
 
 trait BindableVariable[T] extends Variable[T] {
 

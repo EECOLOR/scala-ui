@@ -1,7 +1,8 @@
-package ee.ui.observables
+package ee.ui.members.details
 
 import scala.collection.mutable.ListBuffer
 import scala.language.higherKinds
+import ee.ui.events.Observer
 
 trait Observable[T] {
 

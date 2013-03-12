@@ -1,11 +1,14 @@
 package ee.ui.display.traits
 
-import ee.ui.events.Event
+import ee.ui.events.MouseButton.MIDDLE
+import ee.ui.events.MouseButton.NONE
+import ee.ui.events.MouseButton.PRIMARY
+import ee.ui.events.MouseButton.SECONDARY
 import ee.ui.events.MouseEvent
-import ee.ui.properties.Property
-import ee.ui.properties.ReadOnlyProperty
-import ee.ui.events.MouseButton._
-import scala.Predef.Map.apply
+import ee.ui.members.Event
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.members.details.Observable.ObservableExtensions
 
 trait MouseTraits {
   //TODO add things like mouseChildren for groups and mouseEnabled

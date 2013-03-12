@@ -1,22 +1,14 @@
 package ee.ui.display.traits
 
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
 import ee.ui.primitives.Bounds
-import ee.ui.primitives.Bounds.apply
 import ee.ui.primitives.Identity
-import ee.ui.primitives.Point.apply
-import ee.ui.primitives.Rotate.apply
-import ee.ui.primitives.Scale.apply
 import ee.ui.primitives.Transformation
-import ee.ui.primitives.Translate.apply
-import ee.ui.properties.Property
-import ee.ui.properties.ReadOnlyProperty
-import ee.ui.primitives.Point
 import ee.ui.primitives.Rotate
-import ee.ui.primitives.Scale
 import ee.ui.primitives.Translate
-import ee.ui.bindings.BindingFactory
-import ee.ui.observables.ObservableValue
-import ee.ui.properties.Variable
+import ee.ui.primitives.Point
+import ee.ui.primitives.Scale
 
 trait CalculatedBounds extends Position with Size
   with Translation with Scaling with Rotation with Transformations {

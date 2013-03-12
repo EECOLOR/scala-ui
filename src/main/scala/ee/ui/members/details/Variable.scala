@@ -1,4 +1,4 @@
-package ee.ui.properties
+package ee.ui.members.details
 
 trait Variable[T] extends Value[T] {
   def default: T

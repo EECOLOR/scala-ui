@@ -1,9 +1,8 @@
-package ee.ui.properties
+package ee.ui.members.details
 
 import scala.collection.mutable.Buffer
-import ee.ui.observables.Observable
-import ee.ui.events.Event
-import ee.ui.events.ReadOnlyEvent
+import ee.ui.members.Event
+import ee.ui.members.ReadOnlyEvent
 
 sealed trait Change[A]
 case class Add[A](index: Int, element: A) extends Change[A]

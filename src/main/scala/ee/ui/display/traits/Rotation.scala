@@ -1,8 +1,8 @@
 package ee.ui.display.traits
 
-import ee.ui.properties.Property
-import ee.ui.primitives.Rotate
+import ee.ui.members.Property
 import ee.ui.primitives.Point
+import ee.ui.primitives.Rotate
 
 trait Rotation {
   /**

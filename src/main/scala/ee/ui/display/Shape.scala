@@ -1,9 +1,9 @@
 package ee.ui.display
 
-import ee.ui.properties.Property
 import ee.ui.primitives.Paint
 import ee.ui.primitives.Color
 import ee.ui.display.traits.Fill
+import ee.ui.members.Property
 
 abstract class Shape extends Node with Fill {
 

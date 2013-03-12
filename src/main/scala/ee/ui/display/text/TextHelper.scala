@@ -1,4 +1,4 @@
-package ee.ui.text
+package ee.ui.display.text
 
 import ee.ui.primitives.Point
 import ee.ui.display.Text

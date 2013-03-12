@@ -1,12 +1,11 @@
 package ee.ui.display
 
-import ee.ui.properties.ObservableArrayBuffer
-import ee.ui.properties.Add
-import ee.ui.properties.Clear
-import ee.ui.properties.Remove
-import ee.ui.properties.Remove.apply
 import scala.collection.mutable.ListBuffer
 import ee.ui.system.RestrictedAccess
+import ee.ui.members.ObservableArrayBuffer
+import ee.ui.members.details.Add
+import ee.ui.members.details.Clear
+import ee.ui.members.details.Remove
 
 class Group extends Node {
 

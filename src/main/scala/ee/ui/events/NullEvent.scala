@@ -1,7 +1,8 @@
 package ee.ui.events
 
 import ee.ui.system.RuntimeError
-import ee.ui.observables.Subscription
+import ee.ui.members.Event
+import ee.ui.members.details.Subscription
 
 class NullEvent extends Event[Null] {
   private def error(methodType:String) = 

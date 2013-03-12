@@ -1,6 +1,6 @@
 package ee.ui.display.traits
 
-import ee.ui.properties.Property
+import ee.ui.members.Property
 
 trait Scaling {
   private val _scaleX = new Property(1d)

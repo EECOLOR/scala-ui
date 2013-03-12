@@ -1,9 +1,10 @@
 package ee.ui.display.scene
 
-import ee.ui.display.Scene
-import ee.ui.properties.Property
-import ee.ui.properties.ReadOnlyProperty
 import ee.ui.display.Node
+import ee.ui.display.Scene
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.members.details.Observable.ObservableExtensions
 import ee.ui.system.RestrictedAccess
 
 trait FocusHandling { self: Scene =>

@@ -1,6 +1,6 @@
 package ee.ui.display.traits
 
-import ee.ui.properties.Property
+import ee.ui.members.Property
 
 trait Translation {
   private val _translateX = new Property(0d)

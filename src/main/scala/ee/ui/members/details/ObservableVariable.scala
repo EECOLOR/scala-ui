@@ -1,8 +1,7 @@
-package ee.ui.observables
+package ee.ui.members.details
 
-import ee.ui.events.Event
-import ee.ui.events.ReadOnlyEvent
-import ee.ui.properties.Variable
+import ee.ui.members.Event
+import ee.ui.members.ReadOnlyEvent
 
 trait ObservableVariable[T] extends ObservableValue[T] with Variable[T] {
   

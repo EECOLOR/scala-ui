@@ -1,8 +1,7 @@
 package ee.ui.display.traits
 
-import ee.ui.properties.Property
+import ee.ui.members.Property
 import ee.ui.primitives.Paint
-import scala.Some.apply
 
 trait Fill {
   def defaultFill:Paint

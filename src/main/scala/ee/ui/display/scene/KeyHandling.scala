@@ -1,9 +1,9 @@
 package ee.ui.display.scene
 
-import ee.ui.display.traits.KeyBindings
 import ee.ui.display.Scene
+import ee.ui.display.traits.KeyBindings
 import ee.ui.display.traits.KeyEvents
-import ee.ui.primitives.KeyCode._
+import ee.ui.primitives.KeyCode.TAB
 
 trait KeyHandling extends KeyBindings { self: Scene with KeyEvents =>
   protected val tabFocusBindings = Map(

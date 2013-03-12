@@ -1,12 +1,13 @@
-package ee.ui.events
+package ee.ui.members
 
 import ee.ui.system.RestrictedAccess
-import ee.ui.observables.CanMapObservable
-import ee.ui.observables.Observable
-import ee.ui.observables.Observer
-import ee.ui.observables.Subscription
+import ee.ui.members.details.CanMapObservable
+import ee.ui.members.details.Observable
+import ee.ui.members.details.CanCombineObservable
+import ee.ui.events.Observer
+import ee.ui.members.details.Subscription
+
 import scala.language.higherKinds
-import ee.ui.observables.CanCombineObservable
 
 trait Event[T] extends ReadOnlyEvent[T] {
   def fire(information: T): Unit = ReadOnlyEvent.notify(this, information)(RestrictedAccess)

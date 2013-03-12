@@ -3,7 +3,7 @@ package ee.ui.application
 import ee.ui.display.implementation.DisplayImplementationHandler
 import ee.ui.events.PulseEvent
 import ee.ui.system.ClipBoard
-import ee.ui.text.TextHelper
+import ee.ui.display.text.TextHelper
 
 trait ImplementationContract {
     val launcher:Launcher

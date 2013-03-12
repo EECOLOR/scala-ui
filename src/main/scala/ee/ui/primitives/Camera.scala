@@ -1,6 +1,6 @@
 package ee.ui.primitives
 
-import ee.ui.properties.Property
+import ee.ui.members.Property
 
 sealed abstract class Camera
 

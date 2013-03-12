@@ -1,4 +1,4 @@
-package ee.ui.text
+package ee.ui.display.text
 
 import ee.ui.system.OperatingSystem
 import ee.ui.primitives.KeyCode._
@@ -7,7 +7,6 @@ import ee.ui.primitives.Point
 import ee.ui.display.traits.CalculatedBounds
 import ee.ui.display.traits.KeyEvents
 import ee.ui.display.Text
-import scala.Predef.Map.apply
 
 trait MultilineTextKeyHandling extends MultilineTextKeyHandlers with MultilineTextKeyBindings { self: KeyEvents with TextInputLike with CalculatedBounds =>
 

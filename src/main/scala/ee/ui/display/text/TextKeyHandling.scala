@@ -1,4 +1,4 @@
-package ee.ui.text
+package ee.ui.display.text
 
 import ee.ui.primitives.KeyCode._
 import ee.ui.system.ClipBoard
@@ -7,7 +7,6 @@ import ee.ui.system.OperatingSystem
 import ee.ui.display.traits.KeyBindings
 import ee.ui.display.traits.KeyEvents
 import ee.ui.system.ClipBoard
-import scala.Predef.Map.apply
 
 trait TextKeyHandling extends TextKeyHandlers with TextKeyBindings { self: KeyEvents with TextInputLike =>
 

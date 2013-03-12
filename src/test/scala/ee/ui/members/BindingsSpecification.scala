@@ -1,14 +1,11 @@
-package ee.ui.propertiesAndEvents
+package ee.ui.members
 
 import org.specs2.Specification
-import ee.ui.events.Event
 import scala.collection.mutable.ListBuffer
-import ee.ui.events.ReadOnlyEvent
 import ee.ui.TestUtils
 import scala.tools.reflect.ToolBoxError
-import ee.ui.properties.Property
 import scala.language.reflectiveCalls
-import ee.ui.observables.ObservableValue
+import ee.ui.members.details.ObservableValue
 
 object BindingsSpecification extends Specification {
 

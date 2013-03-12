@@ -1,9 +1,7 @@
-package ee.ui.propertiesAndEvents
+package ee.ui.members
 
 import org.specs2.Specification
-import ee.ui.events.Event
 import scala.collection.mutable.ListBuffer
-import ee.ui.events.ReadOnlyEvent
 import ee.ui.TestUtils
 import scala.tools.reflect.ToolBoxError
 import scala.collection.mutable.ListBuffer
@@ -179,8 +177,8 @@ object EventSpecification extends Specification {
       { // ReadOnlyEvent
         
         def result = TestUtils.eval("""
-          |import ee.ui.events.Event
-          |import ee.ui.events.ReadOnlyEvent
+          |import ee.ui.members.Event
+          |import ee.ui.members.ReadOnlyEvent
           |  
           |val myObj = new {
           |  private val writableEvent = Event[Int]
@@ -193,7 +191,7 @@ object EventSpecification extends Specification {
         
         result must throwA[ToolBoxError].like {
           case e => 
-            e.getMessage must contain("value fire is not a member of ee.ui.events.ReadOnlyEvent[Int]") 
+            e.getMessage must contain("value fire is not a member of ee.ui.members.ReadOnlyEvent[Int]") 
         }
       } ^
       p ^ "Combining events" ^

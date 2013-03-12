@@ -1,12 +1,12 @@
-package ee.ui.events
-import ee.ui.observables.Observer
-import ee.ui.observables.CanMapObservable
-import ee.ui.observables.Subscription
-import ee.ui.observables.Observable
+package ee.ui.members
+
+import ee.ui.members.details.CanMapObservable
+import ee.ui.members.details.Observable
 import ee.ui.system.AccessRestriction
+import ee.ui.members.details.CanCombineObservable
+import ee.ui.members.details.Subscription
+
 import scala.language.higherKinds
-import ee.ui.system.RestrictedAccess
-import ee.ui.observables.CanCombineObservable
 
 trait ReadOnlyEvent[T] extends Observable.Default[T] {
   def apply(observer: T => Unit): Subscription = observe(observer)

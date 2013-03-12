@@ -1,4 +1,4 @@
-package ee.ui.observables
+package ee.ui.members.details
 
 import scala.language.higherKinds
 

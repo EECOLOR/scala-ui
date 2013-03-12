@@ -1,9 +1,8 @@
-package ee.ui.text
+package ee.ui.display.text
 
 import ee.ui.primitives.KeyCode._
 import ee.ui.system.OperatingSystem
 import ee.ui.display.traits.KeyEvents
-import scala.Predef.Map.apply
 
 trait SingleLineTextKeyHandling extends SingleLineTextKeyHandlers with SingleLikeTextKeyBindings { self: KeyEvents with TextInputLike =>
 }

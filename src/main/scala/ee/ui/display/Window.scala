@@ -1,18 +1,17 @@
 package ee.ui.display
 
-import ee.ui.properties.Property
-import ee.ui.properties.ReadOnlyProperty
+import ee.ui.members.ReadOnlyProperty
 import ee.ui.display.traits.Size
 import ee.ui.display.traits.Focus
 import scala.collection.mutable.ListBuffer
 import ee.ui.events.NullEvent
-import ee.ui.properties.ObservableArrayBuffer
 import ee.ui.primitives.Image
 import ee.ui.display.traits.ReadOnlySize
 import ee.ui.display.traits.ReadOnlyFocus
 import ee.ui.display.traits.ReadOnlyPosition
 import ee.ui.display.implementation.WindowImplementationHandler
-import ee.ui.observables.Observable
+import ee.ui.members.ObservableArrayBuffer
+import ee.ui.members.Property
 
 class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = WindowStyle.DECORATED)
   extends ReadOnlyPosition with ReadOnlySize with ReadOnlyFocus {

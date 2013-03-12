@@ -1,7 +1,7 @@
 package ee.ui.display.traits
 
 import ee.ui.primitives.KeyCode
-import ee.ui.primitives.KeyCode._
+
 import scala.language.implicitConversions
 
 trait KeyBindings { self: KeyEvents =>

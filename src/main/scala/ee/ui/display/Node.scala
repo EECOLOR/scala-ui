@@ -1,18 +1,19 @@
 package ee.ui.display
 
-import ee.ui.properties.ReadOnlyProperty
-import ee.ui.properties.Property
-import ee.ui.display.traits.Translation
-import ee.ui.display.traits.Scaling
-import ee.ui.display.traits.Size
-import ee.ui.layout.LayoutClient
+import scala.language.implicitConversions
+
+import ee.ui.display.traits.CalculatedBounds
 import ee.ui.display.traits.Focus
 import ee.ui.display.traits.MouseTraits
-import ee.ui.display.traits.Rotation
-import ee.ui.display.traits.CalculatedBounds
-import ee.ui.display.traits.Transformations
 import ee.ui.display.traits.Position
-import scala.language.implicitConversions
+import ee.ui.display.traits.Rotation
+import ee.ui.display.traits.Scaling
+import ee.ui.display.traits.Size
+import ee.ui.display.traits.Transformations
+import ee.ui.display.traits.Translation
+import ee.ui.layout.LayoutClient
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.AccessRestriction
 
 //TODO should we mix all of these in or let the user (or component creator) 

@@ -1,17 +1,13 @@
 package ee.ui.layout
 
-import ee.ui.display.Group
-import ee.ui.properties.Property
-import ee.ui.system.RestrictedAccess
-import ee.ui.system.AccessRestriction
-import ee.ui.primitives.Bounds
-import ee.ui.primitives.Identity
-import ee.ui.primitives.Transformation
+import ee.ui.display.Node
 import ee.ui.display.traits.Rotation
 import ee.ui.display.traits.Scaling
-import ee.ui.system.RuntimeError
+import ee.ui.members.Property
 import ee.ui.primitives.Point
-import ee.ui.display.Node
+import ee.ui.primitives.Transformation
+import ee.ui.system.AccessRestriction
+import ee.ui.system.RuntimeError
 
 trait PartialParentRelatedSize extends NoTransformations
 

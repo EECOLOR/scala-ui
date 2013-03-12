@@ -1,8 +1,6 @@
-package ee.ui.text
-
-import ee.ui.properties.Property
-import ee.ui.properties.ReadOnlyProperty
-import ee.ui.observables.ObservableValue
+package ee.ui.display.text
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.members.Property
 
 //TODO handle selection
 trait TextInputLike extends TextInputLikeHelper with UndoHandling {

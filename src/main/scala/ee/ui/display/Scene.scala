@@ -3,18 +3,14 @@ package ee.ui.display
 import ee.ui.display.scene.FocusHandling
 import ee.ui.display.scene.KeyHandling
 import ee.ui.display.scene.MouseHandling
-import ee.ui.events.Event
-import ee.ui.events.NullEvent
-import ee.ui.events.NullEvent
-import ee.ui.primitives.Camera
-import ee.ui.primitives.Color
-import ee.ui.properties.Property
-import ee.ui.properties.ReadOnlyProperty
 import ee.ui.display.traits.Fill
+import ee.ui.display.traits.KeyEvents
 import ee.ui.display.traits.Position
 import ee.ui.display.traits.ReadOnlySize
-import ee.ui.display.traits.Size
-import ee.ui.display.traits.KeyEvents
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.primitives.Camera
+import ee.ui.primitives.Color
 
 class Scene(defaultDepthBuffer: Boolean = false) extends Position with ReadOnlySize
   with Fill with MouseHandling with FocusHandling with KeyEvents with KeyHandling {
