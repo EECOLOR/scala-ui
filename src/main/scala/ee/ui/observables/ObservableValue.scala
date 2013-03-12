@@ -24,7 +24,7 @@ trait ObservableValue[T] extends Value[T] {
 }
 
 trait LowerPriorityObservableValueImplicits {
-  implicit class Combinators1[A](a: ObservableValue[A]) {
+  implicit class SimpleCombinator[A](a: ObservableValue[A]) {
     def |[B](b: ObservableValue[B]): ObservableValue[(A, B)] =
       new ObservableValue[(A, B)] {
         def value = (a.value, b.value)
@@ -108,7 +108,10 @@ object ObservableValue extends LowerPriorityObservableValueImplicits {
     }
   }
 
-  implicit class CombinatorsX[A <: Product](a: ObservableValue[A]) {
+  // Apparently Option extends Product... so provide a shortcut to the SimpleCombinator
+  implicit def optionCombinator[A <: Option[_]](a:ObservableValue[A]) = new SimpleCombinator(a)
+  
+  implicit class TupleCombinator[A <: Product](a: ObservableValue[A]) {
 
     import ee.util.tuples._
     

@@ -21,7 +21,7 @@ abstract class Application {
 
   def windows = Window.windows
 
-  def init: Unit = {}
+  def init(): Unit = {}
 
   def start(): Unit = {
     // Create primary stage and call application start method
@@ -30,7 +30,7 @@ abstract class Application {
   }
 
   def start(window: Window): Unit
-  def stop: Unit = {}
+  def stop(): Unit = {}
 }
 
 object Application {

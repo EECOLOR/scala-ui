@@ -4,7 +4,6 @@ import ee.ui.properties.ReadOnlyProperty
 import ee.ui.properties.Property
 import ee.ui.display.traits.Translation
 import ee.ui.display.traits.Scaling
-import ee.ui.properties.PropertyChangeCollector._
 import ee.ui.display.traits.Size
 import ee.ui.layout.LayoutClient
 import ee.ui.display.traits.Focus
