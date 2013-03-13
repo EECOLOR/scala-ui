@@ -6,10 +6,12 @@ import scala.collection.mutable.ListBuffer
 import ee.ui.display.implementation.DisplayImplementationHandler
 import ee.ui.layout.LayoutEngine
 import ee.ui.display.implementation.WindowImplementationHandler
+import ee.ui.application.details.ApplicationDependencies
+import ee.ui.application.details.PulseHandler
 
 abstract class Application {
-  
-  implicit val windowImplementationHandler: WindowImplementationHandler
+
+  implicit def windowImplementationHandler:WindowImplementationHandler
   
   def show(window: Window): Unit = {
     Window show window
@@ -24,7 +26,7 @@ abstract class Application {
   def init(): Unit = {}
 
   def start(): Unit = {
-    // Create primary stage and call application start method
+    // Create primary window and call application start method
     val primaryWindow = new Window(true)
     start(primaryWindow)
   }
@@ -35,17 +37,23 @@ abstract class Application {
 
 object Application {
 
-  def launch(args: Array[String])(implicit launcher: Launcher, createApplication: () => Application, pulseEvent: PulseEvent, displayImplementationHandler: DisplayImplementationHandler, layoutEngine: LayoutEngine): Unit = {
-    launcher launchComplete {
-      println("launchComplete")
-    }
-    launcher launchComplete createPulseHandler _
-    launcher launch args
-  }
+  def launch(args: Array[String])(
+    implicit createApplication: () => Application, applicationDependencies: ApplicationDependencies): Unit = {
 
-  def createPulseHandler(application: Application)(implicit pulseEvent: PulseEvent, displayImplementationHandler: DisplayImplementationHandler, layoutEngine: LayoutEngine) = {
-    val pulseHandler = new PulseHandler(application)
-    pulseEvent(pulseHandler.pulse)
-    pulseEvent.fire
+    val implementationContract = applicationDependencies.implementationContract
+
+    val launcher = implementationContract.launcher
+    launcher launchComplete { application =>
+
+      //create a new pulse handler for this application
+      val pulseHandler = applicationDependencies.createPulseHandler(application)
+      
+      //connect the pulse event to the pulse handler
+      val pulseEvent = implementationContract.pulseEvent
+      pulseEvent(pulseHandler.pulse)
+      //fire the first pulse
+      pulseEvent.fire
+    }
+    launcher launch args
   }
 }

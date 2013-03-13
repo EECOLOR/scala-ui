@@ -13,7 +13,7 @@ case class SceneContract(scene: Scene) {
   val read = scene
 
   object write extends PositionProxy with SizeProxy with RestrictedAccess {
-    val target = scene
+    protected val target = scene
     
     val onMouseMoved = new EventProxy[MouseEvent](scene.onMouseMoved)
     val onMouseDown = new EventProxy[MouseEvent](scene.onMouseDown)

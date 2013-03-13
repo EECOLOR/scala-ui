@@ -125,12 +125,13 @@ object Window {
   def windows = _windows.toSeq
 
   def show(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {
-    windowImplementationHandler windowCreated window
+    windowImplementationHandler show window
     _windows += window
     window.writableShowing.value = true
   }
 
-  def hide(window: Window): Unit = {
+  def hide(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {
+    windowImplementationHandler hide window
     window.writableShowing.value = false
     _windows -= window
   }

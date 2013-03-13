@@ -41,7 +41,7 @@ trait ExplicitHeight extends Height with PartialExplicitSize {
 trait ExplicitSize extends Size with ExplicitWidth with ExplicitHeight
 
 trait SizeProxy extends ExplicitSize {
-  val target: ReadOnlySize
+  protected val target: ReadOnlySize
 
   override def width: Property[Double] = target.writableWidth
   override def width_=(value: Double) = target.writableWidth.value = value

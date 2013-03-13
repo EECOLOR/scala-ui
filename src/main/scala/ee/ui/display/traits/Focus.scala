@@ -19,7 +19,7 @@ trait ExplicitFocus extends Focus {
 }
 
 trait FocusProxy extends ExplicitFocus {
-  val target: ReadOnlyFocus
+  protected val target: ReadOnlyFocus
   
   override def focused: Property[Boolean] = target.writableFocused
   override def focused_=(value: Boolean) = target.writableFocused.value = value
