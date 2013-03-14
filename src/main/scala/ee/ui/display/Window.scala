@@ -120,8 +120,9 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
 }
 
 object Window {
-  private val _windows = ListBuffer[Window]()
+  private val _windows = ObservableArrayBuffer[Window]()
 
+  val change = _windows.change
   def windows = _windows.toSeq
 
   def show(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {

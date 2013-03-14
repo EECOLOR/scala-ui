@@ -9,8 +9,8 @@ import scala.collection.mutable.ListBuffer
 object EventSpecification extends Specification {
 
   def is = "Event specification".title ^
-    //hide ^ end
-    show ^ end
+    hide ^ end
+    //show ^ end
 
   def hide = args(xonly=true) ^ show ^ end
 

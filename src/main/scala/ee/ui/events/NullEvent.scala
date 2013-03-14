@@ -10,6 +10,6 @@ class NullEvent extends Event[Null] {
   
   def apply(observer: Null => Unit)(implicit ev:RuntimeError): Subscription = throw error("listener")
 
-  def fire:Unit = fire(null)
+  def fire():Unit = fire(null)
 }
 

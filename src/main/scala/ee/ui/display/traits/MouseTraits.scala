@@ -27,6 +27,7 @@ trait MouseTraits {
 
   val onMouseDown = Event[MouseEvent]
   val onMouseUp = Event[MouseEvent]
+  
   val onMouseUpOutside = Event[MouseEvent]
   val onMouseClicked = Event[MouseEvent]
 

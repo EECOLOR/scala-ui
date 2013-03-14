@@ -6,4 +6,5 @@ import ee.ui.members.ReadOnlyEvent
 trait Launcher {
 	def launch(args:Array[String])(implicit createApplication: () => Application):Unit
 	val launchComplete:ReadOnlyEvent[Application]
+	def exit(application:Application):Unit
 }

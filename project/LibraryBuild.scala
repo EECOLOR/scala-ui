@@ -6,7 +6,7 @@ object LibraryBuild extends Build {
 
   val appName = "scala-ui"
   val appVersion = "1.0"
-  val scalaVersion = "2.10.0"
+  val scalaVersion = "2.10.1"
     
   val appDependencies = Seq(
     "org.scala-lang" % "scala-actors" % scalaVersion,

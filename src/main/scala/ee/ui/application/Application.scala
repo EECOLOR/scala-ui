@@ -8,16 +8,15 @@ import ee.ui.layout.LayoutEngine
 import ee.ui.display.implementation.WindowImplementationHandler
 import ee.ui.application.details.ApplicationDependencies
 import ee.ui.application.details.PulseHandler
+import ee.ui.system.Platform
 
-abstract class Application {
+abstract class Application extends EngineDependencies {
 
-  implicit def windowImplementationHandler:WindowImplementationHandler
-  
-  def show(window: Window): Unit = {
+  protected def show(window: Window): Unit = {
     Window show window
   }
 
-  def hide(window: Window): Unit = {
+  protected def hide(window: Window): Unit = {
     Window hide window
   }
 
@@ -31,7 +30,10 @@ abstract class Application {
     start(primaryWindow)
   }
 
-  def start(window: Window): Unit
+  protected def start(window: Window): Unit
+  
+  protected def exit()(implicit platform:Platform):Unit = platform.exit() 
+  
   def stop(): Unit = {}
 }
 
