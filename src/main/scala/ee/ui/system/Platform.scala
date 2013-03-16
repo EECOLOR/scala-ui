@@ -9,27 +9,30 @@ import ee.ui.members.ReadOnlyProperty
 import ee.ui.members.ReadOnlyEvent
 
 trait Platform {
-  protected val launcher:Launcher
-  protected val application:ReadOnlyProperty[Option[Application]]
-  
+  protected val launcher: Launcher
+  protected val application: ReadOnlyProperty[Option[Application]]
+
   val implicitExit = Property(true)
-  def exit():Unit = application foreach launcher.exit
+  def exit(): Unit = application foreach launcher.exit
 }
 
-class DefaultPlatform(protected val launcher:Launcher, applicationCreated:ReadOnlyEvent[Application]) extends Platform {
+class DefaultPlatform(protected val launcher: Launcher, applicationCreated: ReadOnlyEvent[Application]) extends Platform {
 
   val application = Property[Option[Application]](None)
-  
+
   application <== applicationCreated
-  
+
   implicitExit.change collect {
-    case true if (Window.windows.isEmpty) => exit() 
+    case true if (application.isDefined && application.get.windows.isEmpty) => exit()
   }
-  
-  Window.change { e =>
-    e match {
-      case r:Remove[_] => if (implicitExit && Window.windows.isEmpty) exit()
-      case _ => // ignore
+
+  applicationCreated { application =>
+    application.windowsChange { e =>
+      e match {
+        case r: Remove[_] => if (implicitExit && application.windows.isEmpty) exit()
+        case _ => // ignore
+      }
+
     }
   }
 }

@@ -12,6 +12,7 @@ import ee.ui.display.traits.ReadOnlyPosition
 import ee.ui.display.implementation.WindowImplementationHandler
 import ee.ui.members.ObservableArrayBuffer
 import ee.ui.members.Property
+import ee.ui.system.AccessRestriction
 
 class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = WindowStyle.DECORATED)
   extends ReadOnlyPosition with ReadOnlySize with ReadOnlyFocus {
@@ -120,22 +121,12 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
 }
 
 object Window {
-  private val _windows = ObservableArrayBuffer[Window]()
 
-  val change = _windows.change
-  def windows = _windows.toSeq
-
-  def show(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {
-    windowImplementationHandler show window
-    _windows += window
+  def show(window: Window)(implicit ev: AccessRestriction): Unit =
     window.writableShowing.value = true
-  }
 
-  def hide(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {
-    windowImplementationHandler hide window
+  def hide(window: Window)(implicit ev: AccessRestriction): Unit =
     window.writableShowing.value = false
-    _windows -= window
-  }
 }
 
 sealed abstract class Modality

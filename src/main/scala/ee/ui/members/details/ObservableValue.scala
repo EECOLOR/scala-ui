@@ -51,7 +51,7 @@ trait LowerPriorityObservableValueImplicits {
 
 object ObservableValue extends LowerPriorityObservableValueImplicits {
 
-  implicit def observableToObservableValue[O[X] <: Observable[X], T](o: O[T]): ObservableValue[Option[T]] =
+  implicit def observableToObservableValue[T](o: Observable[T]): ObservableValue[Option[T]] =
     new ObservableVariable[Option[T]] {
       val default = None
       o map Some[T] foreach setValue

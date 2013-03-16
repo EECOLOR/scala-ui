@@ -9,19 +9,30 @@ import ee.ui.display.implementation.WindowImplementationHandler
 import ee.ui.application.details.ApplicationDependencies
 import ee.ui.application.details.PulseHandler
 import ee.ui.system.Platform
+import ee.ui.members.ObservableArrayBuffer
+import ee.ui.system.RestrictedAccess
 
 abstract class Application extends EngineDependencies {
 
-  protected def show(window: Window): Unit = {
+  private val _windows = ObservableArrayBuffer[Window]()
+
+  val windowsChange = _windows.change
+  def windows = _windows.toSeq
+
+  protected def show(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {
+    windowImplementationHandler show window
+    _windows += window
+    implicit val access = RestrictedAccess
     Window show window
   }
 
-  protected def hide(window: Window): Unit = {
+  protected def hide(window: Window)(implicit windowImplementationHandler: WindowImplementationHandler): Unit = {
+    windowImplementationHandler hide window
+    implicit val access = RestrictedAccess
     Window hide window
+    _windows -= window
   }
-
-  def windows = Window.windows
-
+  
   def init(): Unit = {}
 
   def start(): Unit = {

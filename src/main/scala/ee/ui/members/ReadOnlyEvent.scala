@@ -1,28 +1,26 @@
 package ee.ui.members
 
-import ee.ui.members.details.CanMapObservable
 import ee.ui.members.details.Observable
 import ee.ui.system.AccessRestriction
-import ee.ui.members.details.CanCombineObservable
 import ee.ui.members.details.Subscription
-
 import scala.language.higherKinds
+import ee.ui.members.details.CanTypeObservable
+import ee.ui.members.details.Notifyable
 
-trait ReadOnlyEvent[T] extends Observable.Default[T] {
+trait ReadOnlyEvent[T] extends Observable[T] {
   def apply(observer: T => Unit): Subscription = observe(observer)
   def apply(observer: => Unit): Subscription = observe(_ => observer)
 }
 
 object ReadOnlyEvent {
-  def apply[T] = new ReadOnlyEvent[T] {}
 
-  def notify[T](event: ReadOnlyEvent[T], information: T)(implicit ev: AccessRestriction) =
-    event notify information
+  def apply[T]: ReadOnlyEvent[T] with Notifyable[T] =
+    new ReadOnlyEvent[T] with Observable.Default[T]
 
-  // TODO can't we just use the ones from Event? 
-  implicit def readOnlyEventObservableMapping[O[X] <: Observable[X]]:CanMapObservable[O, ReadOnlyEvent] =
-    Event.eventObservableMapping[O]
+  implicit def readOnlyEventObservableTyper[O[X] <: Observable[X]] =
+    new CanTypeObservable[O, ReadOnlyEvent] {
+      def typed[T](source: Observable[T]):ReadOnlyEvent[T] = 
+        new Observable.Proxy(source) with ReadOnlyEvent[T]
+    }
 
-  implicit def readOnlyEventObservableCombination[O1[X] <: Observable[X], O2[X] <: Observable[X]]:CanCombineObservable[O1, O2, ReadOnlyEvent] =
-    Event.eventObservableCombination[O1, O2]
 }

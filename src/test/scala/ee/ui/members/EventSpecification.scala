@@ -5,14 +5,16 @@ import scala.collection.mutable.ListBuffer
 import ee.ui.TestUtils
 import scala.tools.reflect.ToolBoxError
 import scala.collection.mutable.ListBuffer
+import ee.ui.members.details.CanTypeObservable
+import ee.ui.members.details.Observable
 
 object EventSpecification extends Specification {
 
   def is = "Event specification".title ^
     hide ^ end
-    //show ^ end
+  //show ^ end
 
-  def hide = args(xonly=true) ^ show ^ end
+  def hide = args(xonly = true) ^ show ^ end
 
   def show =
     """ Introduction
@@ -54,6 +56,24 @@ object EventSpecification extends Specification {
         }
         ok
       } ^
+      { // canceling subscription
+
+        val event = Event[Int]
+
+        var eventFired = 0
+
+        val subscription = event {
+          eventFired += 1
+        }
+
+        event fire 1
+
+        subscription.unsubscribe()
+
+        event fire 1
+
+        eventFired ==== 1
+      } ^
       p ^
       """ Transforming events
       	
@@ -69,8 +89,9 @@ object EventSpecification extends Specification {
 
         originalEvent fire 1
 
-        (event must beAnInstanceOf[Event[String]]) and
-          (eventResult === "1")
+        val typeCheck = event: ReadOnlyEvent[String]
+
+        (eventResult === "1")
       } ^
       { // filter
         var eventResults = ListBuffer[Int]()
@@ -84,8 +105,9 @@ object EventSpecification extends Specification {
         originalEvent fire 2
         originalEvent fire 3
 
-        (event must beAnInstanceOf[Event[Int]]) and
-          (eventResults must have size (1)) and
+        val typeCheck = event: ReadOnlyEvent[Int]
+
+        (eventResults must have size (1)) and
           (eventResults must contain(2))
       } ^
       { // collect
@@ -102,8 +124,9 @@ object EventSpecification extends Specification {
         originalEvent fire 2
         originalEvent fire 3
 
-        (event must beAnInstanceOf[Event[String]]) and
-          (eventResults must have size (1)) and
+        val typeCheck = event: ReadOnlyEvent[String]
+
+        (eventResults must have size (1)) and
           (eventResults must contain("less"))
       } ^
       p ^
@@ -119,7 +142,7 @@ object EventSpecification extends Specification {
         event fire 1
 
         eventResult === false
-      } ^ 
+      } ^
       "mapped event" !
       {
         var eventResult = false
@@ -133,7 +156,7 @@ object EventSpecification extends Specification {
         originalEvent fire 1
 
         eventResult === false
-      } ^ 
+      } ^
       "filtered event" !
       {
         var eventResult = false
@@ -149,7 +172,7 @@ object EventSpecification extends Specification {
         originalEvent fire 3
 
         eventResult === false
-      } ^ 
+      } ^
       "collected event" !
       {
         var eventResult = false
@@ -175,7 +198,7 @@ object EventSpecification extends Specification {
       	public event as ReadOnlyEvent
       """ ^
       { // ReadOnlyEvent
-        
+
         def result = TestUtils.eval("""
           |import ee.ui.members.Event
           |import ee.ui.members.ReadOnlyEvent
@@ -188,30 +211,56 @@ object EventSpecification extends Specification {
           |// will not compile:
           |myObj.event.fire
         """.stripMargin)
-        
+
         result must throwA[ToolBoxError].like {
-          case e => 
-            e.getMessage must contain("value fire is not a member of ee.ui.members.ReadOnlyEvent[Int]") 
+          case e =>
+            e.getMessage must contain("value fire is not a member of ee.ui.members.ReadOnlyEvent[Int]")
         }
       } ^
       p ^ "Combining events" ^
       { // Combined event |
         val event1 = Event[Int]
         val event2 = Event[Int]
-        
+
         val combined = event1 | event2
-        
-        var events = ListBuffer.empty[Int]
-        
+
+        val events = ListBuffer.empty[Int]
+
         combined { events += _ }
-        
+
         event1 fire 1
         event2 fire 2
-        
-        (combined must beAnInstanceOf[Event[(Int, Int)]]) and
-        (events must have size(2)) and
-        (Seq(1, 2) ==== events.toSeq)
-        
+
+        val typeCheck = combined: ReadOnlyEvent[Int]
+
+        (events must have size (2)) and
+          (Seq(1, 2) ==== events.toSeq)
+
       } ^
-      end
+      "Check types of combined events" ! {
+        val event1 = Event[Int] | Event[Long]
+        val event2 = Event[Int] | Event[Int]
+        val event3 = Event[Long] | Event[Int]
+
+        val typeCheck1 = event1: ReadOnlyEvent[AnyVal]
+        val typeCheck2 = event2: ReadOnlyEvent[Int]
+        val typeCheck3 = event3: ReadOnlyEvent[AnyVal]
+        ok
+      }
+  p ^ "One time observers" ^
+    { // One time observer
+
+      var eventFireCount = 0
+
+      val event = Event[Int]
+      event.once apply {
+        eventFireCount += 1
+      }
+
+      event fire 0
+      event fire 0
+
+      eventFireCount === 1
+    } ^
+    end
 }
