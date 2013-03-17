@@ -3,32 +3,32 @@ package ee.ui.members.details
 import scala.annotation.implicitNotFound
 import scala.language.higherKinds
 
-@implicitNotFound(msg = "Can not find a suitable BindingFactory to create a binding from ${S} to ${T}")
-trait BindingFactory[S, T] {
-  def create(source: S, target: T): Binding
+@implicitNotFound(msg = "Can not find a suitable BindingFactory to create a binding from ${OS}[${S}] to ${OT}")
+trait BindingFactory[OS[~], OT, S] {
+  def create(source: OS[S], target: OT): Binding
+  def create(source: OS[S], target: OT, condition: S => Boolean): Binding
 }
 
-trait BindingFactoryLowerPriority {
+object BindingFactory {
+  implicit def optionalBinding[S <: T, T, O[~] <: Observable[~]] =
+    new BindingFactory[O, Variable[Option[T]], S] {
 
-  implicit def optionalBinding[T, O <: Observable[T]] =
-    new BindingFactory[O, Variable[Option[T]]] {
-      def create(source: O, target: Variable[Option[T]]) =
+      def create(source: O[S], target: Variable[Option[T]]) =
         SimpleBinding(source, target, None)
+
+      def create(source: O[S], target: Variable[Option[T]], condition: S => Boolean) =
+        ConditionalBinding(source, target, None, condition = { value: Option[S] =>
+          value map condition getOrElse false
+        })
     }
 
-  implicit def exactBinding[T, O <: ObservableValue[T]] =
-    new BindingFactory[O, Variable[T]] {
-      def create(source: O, target: Variable[T]) =
-        SimpleBinding[T, T](source, target, source.value)
-    }
-
-}
-
-object BindingFactory extends BindingFactoryLowerPriority {
-  implicit def inherritedBinding[S <: T, T, O[X <: S] <: ObservableValue[X]]: BindingFactory[O[S], Variable[T]] =
-    new BindingFactory[O[S], Variable[T]] {
+  implicit def defaultBinding[S <: T, T, O[~] <: ObservableValue[~]] =
+    new BindingFactory[O, Variable[T], S] {
       def create(source: O[S], target: Variable[T]) =
-        SimpleBinding[S, T](source, target, source.value)
-    }
+        SimpleBinding(source, target, source.value)
 
+      def create(source: O[S], target: Variable[T], condition: S => Boolean) =
+        ConditionalBinding(source, target, source.value, condition)
+    }
 }
+

@@ -47,11 +47,14 @@ trait LowerPriorityObservableValueImplicits {
           }
       }
   }
+  
+  implicit def toBindingSource[T, O[~] <: ObservableValue[~]](o:O[T]):BindingSource[O, T] = 
+    BindingSource(o)
 }
 
 object ObservableValue extends LowerPriorityObservableValueImplicits {
 
-  implicit def observableToObservableValue[T](o: Observable[T]): ObservableValue[Option[T]] =
+  implicit def observableToObservableValue[T, O[~] <: Observable[~]](o: O[T]): ObservableValue[Option[T]] =
     new ObservableVariable[Option[T]] {
       val default = None
       o map Some[T] foreach setValue
@@ -72,49 +75,51 @@ object ObservableValue extends LowerPriorityObservableValueImplicits {
   object mapContents {
     // FMC = FilterMonadicContainer
     // D = Dummy
-    implicit class FilterMonadicMappable[A, FMC[D] <: FilterMonadic[D, FMC[D]]](o: ObservableValue[FMC[A]]) {
+    implicit class FilterMonadicMappable[A, FMC[~] <: FilterMonadic[~, FMC[~]]](o: ObservableValue[FMC[A]]) {
 
-      def map[B, That](f: A => B)(implicit bf: CanBuildFrom[FMC[A], B, That]): ObservableValue[That] = new ObservableValue[That] {
-        def value = o.value.map(f)
+      def map[B, That[~]](f: A => B)(implicit bf: CanBuildFrom[FMC[A], B, That[B]]): ObservableValue[That[B]] =
+        new ObservableValue[That[B]] {
+          def value = o.value.map(f)
 
-        val change = o.change map (_ map f)
-        val valueChange = o.valueChange map {
-          case (oldValue, newValue) => (oldValue map f, newValue map f)
+          val change = o.change map (_ map f)
+          val valueChange = o.valueChange map {
+            case (oldValue, newValue) => (oldValue map f, newValue map f)
+          }
         }
-      }
     }
 
-    type HasMap[A, That[_]] = {
+    type HasMap[A, That[~]] = {
       def map[B](f: A => B): That[B]
     }
 
     // OVC = ObservableValueContainer
     // MC = MappableContainer
     // D = Dummy
-    implicit class SimpleMappable[A, MC[D] <: HasMap[D, MC], OVC[D <: MC[_]] <: ObservableValue[D]](o: OVC[MC[A]]) {
+    implicit class SimpleMappable[A, MC[~] <: HasMap[~, MC], OVC[~ <: MC[_]] <: ObservableValue[~]](o: OVC[MC[A]]) {
 
-      def map[B](f: A => B): ObservableValue[MC[B]] = new ObservableValue[MC[B]] {
+      def map[B](f: A => B): ObservableValue[MC[B]] =
+        new ObservableValue[MC[B]] {
 
-        def value = o.value.map(f)
+          def value = o.value.map(f)
 
-        val change = o.change map (_ map f)
-        val valueChange = o.valueChange map {
-          case (oldValue, newValue) => (oldValue map f, newValue map f)
+          val change = o.change map (_ map f)
+          val valueChange = o.valueChange map {
+            case (oldValue, newValue) => (oldValue map f, newValue map f)
+          }
         }
-      }
     }
   }
 
   // Apparently Option extends Product... so provide a shortcut to the SimpleCombinator
-  implicit def optionCombinator[A <: Option[_]](a:ObservableValue[A]) = new SimpleCombinator(a)
-  
+  implicit def optionCombinator[A <: Option[_]](a: ObservableValue[A]) = new SimpleCombinator(a)
+
   implicit class TupleCombinator[A <: Product](a: ObservableValue[A]) {
 
     import ee.util.tuples._
-    
+
     def |[B, L <: HList, P <: HList, R <: Product](b: ObservableValue[B])(
       implicit hlister: HListerAux[A, L], prepend: PrependAux[L, B :: HNil, P], tupler: TuplerAux[P, R]): ObservableValue[R] = {
-      
+
       new ObservableValue[R] {
         def value = a.value :+ b.value
 

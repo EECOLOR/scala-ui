@@ -13,12 +13,15 @@ import ee.ui.display.implementation.WindowImplementationHandler
 import ee.ui.members.ObservableArrayBuffer
 import ee.ui.members.Property
 import ee.ui.system.AccessRestriction
+import ee.ui.display.traits.Position
+import ee.ui.display.traits.ExplicitSize
+import ee.ui.display.traits.ExplicitPosition
 
 class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = WindowStyle.DECORATED)
-  extends ReadOnlyPosition with ReadOnlySize with ReadOnlyFocus {
+  extends ExplicitPosition with ExplicitSize with ReadOnlyFocus {
 
   private val writableShowing = new Property(false)
-  lazy val showing: ReadOnlyProperty[Boolean] = writableShowing
+  val showing: ReadOnlyProperty[Boolean] = writableShowing
 
   private val _opacity = new Property(1.0)
   def opacity = _opacity
@@ -28,10 +31,9 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def scene = _scene
   def scene_=(value: Scene) = scene.value = Some(value)
 
-  private var hasBeenVisible: Boolean = false
-
-  showing.change collect {
-    case true => hasBeenVisible = true
+  private val hasBeenVisible = Property(false)
+  showing.change.once apply { 
+    hasBeenVisible.value = true
   }
 
   /*
@@ -87,34 +89,23 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   private val _minWidth = new Property(0d)
   def minWidth = _minWidth
   def minWidth_=(value: Double) = minWidth.value = value
-  //TODO move this to implementation
-  minWidth.change foreach { n =>
-    //if (n > width) width = n
-  }
+  width <== minWidth filter (_ > width)
 
   private val _minHeight = new Property(0d)
   def minHeight = _minHeight
   def minHeight_=(value: Double) = minHeight.value = value
-  //TODO move this to implementation
-  minHeight.change { n =>
-    //if (n > height) height = n
-  }
+  height <== minHeight filter (_ > height)
 
   private val _maxWidth = new Property(Double.MaxValue)
   def maxWidth = _maxWidth
   def maxWidth_=(value: Double) = maxWidth.value = value
-  ////TODO move this to implementation
-  maxWidth.change { n =>
-    //if (n < width) width = n
-  }
+  width <== maxWidth filter (_ < width)
+  height <== maxHeight filter (_ < height)
 
   private val _maxHeight = new Property(Double.MaxValue)
   def maxHeight = _maxHeight
   def maxHeight_=(value: Double) = maxHeight.value = value
-  //TODO move this to implementation
-  maxHeight.change { n =>
-    //if (n < height) height = n
-  }
+  height <== maxHeight filter (_ < height)
 
   val icons = new ObservableArrayBuffer[Image]
 

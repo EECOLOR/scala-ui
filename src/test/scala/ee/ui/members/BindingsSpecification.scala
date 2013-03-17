@@ -132,5 +132,26 @@ object BindingsSpecification extends Specification {
         
         t0 and t1 and t2 and t3
       } ^
+      { // Conditional binding
+        
+        val result = Property(-1)
+        val input = Property(0)
+        
+        val t0 = -1 ==== result
+        
+        result <== input filter (_ > 2)
+        
+        val t1 = -1 ==== result
+        
+        input.value = 2
+        
+        val t2 = -1 ==== result
+        
+        input.value = 3
+        
+        val t3 = 3 ==== result
+        
+        t0 and t1 and t2 and t3
+      }
       end
 }

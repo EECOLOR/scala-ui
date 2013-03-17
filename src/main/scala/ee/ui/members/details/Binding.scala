@@ -4,36 +4,31 @@ trait Binding {
   def unbind(): Unit
 }
 
-trait BasicBinding[S, T] extends Binding {
-
-  def default:T
-  def source:ObservableValue[S]
-  def target:Variable[T]
-  def map: S => T
+case class SimpleBinding[S <% T, T](
+  source: ObservableValue[S],
+  target: Variable[T],
+  default: S) extends Binding {
 
   target.value = default
-  
+
   val subscription = source.change { value =>
-    target.value = map(value)
+    target.value = value
   }
 
   def unbind() = subscription.unsubscribe()
 }
 
-case class SimpleBinding[S, T](
-    source: ObservableValue[S], 
-    target: Variable[T], 
-    default: T)(implicit ev: S <:< T) extends BasicBinding[S, T] {
-  
-  val map = { value:S => 
-      value:T
-    }
-}
+case class ConditionalBinding[S <% T, T](
+  source: ObservableValue[S],
+  target: Variable[T],
+  default: S,
+  condition: S => Boolean) extends Binding {
 
-//TODO is this used?
-case class MappedBinding[S, T](
-    source: ObservableValue[S], 
-    target: Variable[T], 
-    default: T,
-    map: S => T) extends BasicBinding[S, T] {
+  if (condition(default)) target.value = default
+  
+  val subscription = source.change filter condition apply { value =>
+    target.value = value
+  }
+  
+  def unbind() = subscription.unsubscribe()
 }

@@ -13,23 +13,23 @@ trait Observable[T] {
 
 object Observable {
 
-  implicit def defaultTyper[O[X] <: Observable[X]] =
+  implicit def defaultTyper[O[~] <: Observable[~]] =
     new CanTypeObservable[O, Observable] {
       def typed[T](observable: Observable[T]): Observable[T] = observable
     }
 
-  class Proxy[T, O[X <: T] <: Observable[X]](source: O[T]) extends Observable[T] {
+  class Proxy[T, O[~ <: T] <: Observable[~]](source: O[T]) extends Observable[T] {
     def observe(observer: Observer[T]) = source observe observer
   }
 
-  class NotifyableProxy[T, O[X <: T] <: Observable[X] with Notifyable[X]](source: O[T]) extends Proxy(source) with Notifyable[T] {
+  class NotifyableProxy[T, O[~ <: T] <: Observable[~] with Notifyable[~]](source: O[T]) extends Proxy(source) with Notifyable[T] {
     def notify(information: T) = Notifyable.notify(source, information)(RestrictedAccess)
   }
 
-  def wrapped[T, R, O[X] <: Observable[X]](observable: O[T])(f: Observer[R] => Observer[T]): Observable[R] =
+  def wrapped[T, R, O[~] <: Observable[~]](observable: O[T])(f: Observer[R] => Observer[T]): Observable[R] =
     new Wrapped(observable, f)
 
-  class Wrapped[T, R, O[X <: T] <: Observable[X]](
+  class Wrapped[T, R, O[~ <: T] <: Observable[~]](
     wrapped: O[T], wrap: Observer[R] => Observer[T]) extends Observable[R] {
 
     def observe(observer: Observer[R]): Subscription =
@@ -51,7 +51,7 @@ object Observable {
       observers foreach (_(information))
   }
 
-  class Single[T, O[X <: T] <: Observable[X]](source: O[T]) extends Proxy(source) {
+  class Single[T, O[~ <: T] <: Observable[~]](source: O[T]) extends Proxy(source) {
 
     override def observe(observer: Observer[T]): Subscription = {
       var subscription: Option[Subscription] = None
@@ -67,12 +67,12 @@ object Observable {
     }
   }
 
-  implicit class ObservableExtensions[O[X] <: Observable[X], T](val o: O[T]) {
+  implicit class ObservableExtensions[O[~] <: Observable[~], T](val o: O[T]) {
 
     def foreach(observer: Observer[T]): Subscription =
       o observe observer
 
-    def collect[R, That[X] <: Observable[X]](f: PartialFunction[T, R])(
+    def collect[R, That[~] <: Observable[~]](f: PartialFunction[T, R])(
       implicit typer: CanTypeObservable[O, That]): That[R] = {
 
       val observable =
@@ -83,7 +83,7 @@ object Observable {
       typer typed observable
     }
 
-    def map[R, That[X] <: Observable[X]](f: T => R)(
+    def map[R, That[~] <: Observable[~]](f: T => R)(
       implicit typer: CanTypeObservable[O, That]): That[R] = {
 
       val observable =
@@ -94,7 +94,7 @@ object Observable {
       typer typed observable
     }
 
-    def filter[That[X] <: Observable[X]](f: T => Boolean)(
+    def filter[That[~] <: Observable[~]](f: T => Boolean)(
       implicit typer: CanTypeObservable[O, That]): That[T] = {
       val observable =
         wrapped(o) { observer: Observer[T] =>
@@ -104,19 +104,19 @@ object Observable {
       typer typed observable
     }
 
-    def once[That[X] <: Observable[X]](implicit typer: CanTypeObservable[O, That]): That[T] =
+    def once[That[~] <: Observable[~]](implicit typer: CanTypeObservable[O, That]): That[T] =
       typer.typed(new Single(o))
 
   }
 
   implicit class Combinators1[O1[~] <: Observable[~], T](val o: O1[T]) {
-    def |[X, R <: X, X1 >: T <: X, O2[X] <: Observable[X], That[X] <: Observable[X]](other: O2[R])(
+    def |[X, R <: X, T_ >: T <: X, O2[~] <: Observable[~], That[~] <: Observable[~]](other: O2[R])(
       implicit typer: CanTypeObservable[O1, That]): That[X] = {
 
       val observable =
         new Observable.Default[X] {
           // the cast is completely safe here
-          o.asInstanceOf[O1[X1]] observe notify
+          o.asInstanceOf[O1[T_]] observe notify
           other observe notify
         }
       

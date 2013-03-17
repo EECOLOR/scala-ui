@@ -17,7 +17,7 @@ object ReadOnlyEvent {
   def apply[T]: ReadOnlyEvent[T] with Notifyable[T] =
     new ReadOnlyEvent[T] with Observable.Default[T]
 
-  implicit def readOnlyEventObservableTyper[O[X] <: Observable[X]] =
+  implicit def readOnlyEventObservableTyper[O[~] <: Observable[~]] =
     new CanTypeObservable[O, ReadOnlyEvent] {
       def typed[T](source: Observable[T]):ReadOnlyEvent[T] = 
         new Observable.Proxy(source) with ReadOnlyEvent[T]

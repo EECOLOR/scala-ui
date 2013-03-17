@@ -10,6 +10,7 @@ import ee.ui.display.Group
 import ee.ui.events.MouseButton
 import ee.ui.members.ReadOnlyEvent
 import ee.ui.members.Property
+import ee.ui.members.details.BindingSource
 
 trait MouseHandling { self: Scene with FocusHandling =>
 

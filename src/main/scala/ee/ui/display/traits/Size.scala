@@ -31,10 +31,12 @@ trait Size extends ReadOnlySize with Width with Height
 trait PartialExplicitSize
 
 trait ExplicitWidth extends Width with PartialExplicitSize {
+  override def width:Property[Double] = writableWidth
   def width_=(value: Double) = super.width_=(value)(RestrictedAccess)
 }
 
 trait ExplicitHeight extends Height with PartialExplicitSize {
+  override def height:Property[Double] = writableHeight
   def height_=(value: Double) = super.height_=(value)(RestrictedAccess)
 }
 
