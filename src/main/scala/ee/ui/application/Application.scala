@@ -69,4 +69,7 @@ object Application {
     }
     launcher launch args
   }
+  
+  def hide(application:Application, window:Window)(implicit windowImplementationHandler: WindowImplementationHandler) = 
+    application hide window
 }

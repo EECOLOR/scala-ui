@@ -10,7 +10,7 @@ trait ApplicationLauncher {
 
   def createApplication(): Application with Engine
 
-  private val applicationCreated = Event[Application]
+  protected val applicationCreated = Event[Application]
   private implicit def internalCreateApplication(): Application with Engine = {
     val application = createApplication()
     applicationCreated fire application
