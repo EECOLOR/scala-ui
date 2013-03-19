@@ -30,6 +30,6 @@ trait PositionProxy extends ExplicitPosition {
   override def x: Property[Double] = target.writableX
   override def x_=(value: Double) = target.writableX.value = value
   
-  override def y: Property[Double] = target.writableX
+  override def y: Property[Double] = target.writableY
   override def y_=(value: Double) = target.writableY.value = value
 }

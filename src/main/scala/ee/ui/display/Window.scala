@@ -33,7 +33,7 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
 
   private val hasBeenVisible = Property(false)
   showing.change.once apply { 
-    hasBeenVisible.value = true
+    hasBeenVisible.value = _
   }
 
   /*
@@ -100,7 +100,6 @@ class Window(val primary: Boolean = false, val defaultStyle: WindowStyle = Windo
   def maxWidth = _maxWidth
   def maxWidth_=(value: Double) = maxWidth.value = value
   width <== maxWidth filter (_ < width)
-  height <== maxHeight filter (_ < height)
 
   private val _maxHeight = new Property(Double.MaxValue)
   def maxHeight = _maxHeight
