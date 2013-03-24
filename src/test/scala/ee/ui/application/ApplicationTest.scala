@@ -37,22 +37,40 @@ class ApplicationTest extends Specification {
       shown === true
     }
 
+    "be able to hide a window" in {
+      var shown = true
+
+      new StubApplication {
+        override def start(window: Window) = {
+          show(window)
+          window.showing.change { shown = _ }
+          hide(window)
+        }
+      }
+
+      shown === false
+    }
+
     "should call an window implementation handler when a window is shown or hidden" in {
       var shownWindow = new Window {}
+      var hiddenWindow = new Window {}
       var expectedWindow = new Window {}
 
       new Application {
         val windowImplementationHandler = new WindowImplementationHandler {
           def show(window: Window) = shownWindow = window
+          def hide(window: Window) = hiddenWindow = window
         }
 
         def start(window: Window) = {
           expectedWindow = window
           show(window)
+          hide(window)
         }
       }
 
-      shownWindow === expectedWindow
+      shownWindow === expectedWindow and
+      hiddenWindow === expectedWindow
     }
 
   }

@@ -4,6 +4,7 @@ import org.specs2.mutable.Specification
 import utils.TestUtils
 import scala.tools.reflect.ToolBoxError
 import ee.ui.system.RestrictedAccess
+import utils.TypeTest
 
 class ReadOnlyPropertyTest extends Specification {
 
@@ -63,6 +64,10 @@ class ReadOnlyPropertyTest extends Specification {
       result === 1
     }
 
+    "have a read only change event" in {
+      TypeTest[ReadOnlyEvent[Int]].forInstance(prop1.change)
+    }
+    
     "automatically convert to its value if appropriate" in {
       val propValue: Int = prop1
       propValue === 1

@@ -13,6 +13,11 @@ abstract class Application extends DelayedInit {
     Window.show(window)
   }
 
+  def hide(window: Window) = {
+    windowImplementationHandler.hide(window)
+    Window.hide(window)
+  }
+
   def delayedInit(body: => Unit) = {
     body
     start(new Window)
