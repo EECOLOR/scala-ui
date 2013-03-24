@@ -3,6 +3,8 @@ package ee.ui.application
 import org.specs2.mutable.Specification
 import ee.ui.display.Window
 import ee.ui.display.implementation.EmptyWindowImplementationHandler
+import ee.ui.display.implementation.EngineImplementationContract
+import scala.language.reflectiveCalls
 
 class ApplicationLauncherTest extends Specification {
   xonly
@@ -10,7 +12,7 @@ class ApplicationLauncherTest extends Specification {
   def callMain(applicationLauncher: ApplicationLauncher, args: Array[String] = Array.empty) =
     applicationLauncher.main(args)
 
-  def simpleApplication:Application = new StubApplication
+  def simpleApplication:Application with StubApplicationLauncher#StubEngine = new StubApplicationLauncher().createApplication
 
   "ApplicationLauncher" should {
     "call launch when main is called" in {
@@ -19,7 +21,7 @@ class ApplicationLauncherTest extends Specification {
       
       val applicationLauncher = new ApplicationLauncher {
         def createApplication() = ???
-        def launch(createApplication: () => Application, args: Array[String]) =
+        def launch(createApplication: () => Application with Engine, args: Array[String]) =
           launchArgs = args
       }
       callMain(applicationLauncher, expectedArgs)
@@ -28,25 +30,23 @@ class ApplicationLauncherTest extends Specification {
     }
     "call launch with a specific create application method" in {
 
-      val expectedApplication = simpleApplication
       var createdApplication = simpleApplication
 
-      val applicationLauncher = new ApplicationLauncher {
-        def createApplication() = expectedApplication
-        def launch(createApplication: () => Application, args: Array[String]) =
+      val applicationLauncher = new StubApplicationLauncher {
+
+        override def launch(createApplication: () => Application with Engine, args: Array[String]) =
           createdApplication = createApplication()
       }
 
       callMain(applicationLauncher)
 
-      createdApplication === expectedApplication
+      createdApplication === applicationLauncher.application
     }
     "have an event that fires when an application is created" in {
-      val expectedApplication = simpleApplication
 
-      val applicationLauncher = new ApplicationLauncher {
-        def createApplication() = expectedApplication
-        def launch(createApplication: () => Application, args: Array[String]) =
+      val applicationLauncher = new StubApplicationLauncher {
+
+        override def launch(createApplication: () => Application with Engine, args: Array[String]) =
           createApplication()
       }
 
@@ -58,7 +58,23 @@ class ApplicationLauncherTest extends Specification {
 
       callMain(applicationLauncher)
 
-      createdApplication === expectedApplication
+      createdApplication === applicationLauncher.application
+    }
+    "start the application" in {
+      val applicationLauncher = new StubApplicationLauncher {
+
+        override def launch(createApplication: () => Application with Engine, args: Array[String]) = {
+          val application = createApplication()
+          application.start()
+        }
+      }
+      callMain(applicationLauncher)
+
+      applicationLauncher.application.isStarted === true
+    }
+    "have an engine type which is a subtype of EngineImplementationContract" in {
+      def x(y:ApplicationLauncher#Engine) = y:EngineImplementationContract
+      ok
     }
   }
 }

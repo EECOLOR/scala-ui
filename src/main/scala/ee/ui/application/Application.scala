@@ -3,9 +3,10 @@ package ee.ui.application
 import ee.ui.display.Window
 import ee.ui.display.implementation.WindowImplementationHandler
 
-abstract class Application extends DelayedInit {
+abstract class Application {
   val windowImplementationHandler: WindowImplementationHandler
 
+  def start():Unit = start(new Window())
   def start(window: Window): Unit
 
   def show(window: Window) = {
@@ -16,10 +17,5 @@ abstract class Application extends DelayedInit {
   def hide(window: Window) = {
     windowImplementationHandler.hide(window)
     Window.hide(window)
-  }
-
-  def delayedInit(body: => Unit) = {
-    body
-    start(new Window)
   }
 }
