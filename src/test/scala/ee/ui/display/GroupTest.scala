@@ -1,6 +1,7 @@
 package ee.ui.display
 
 import org.specs2.mutable.Specification
+import ee.ui.display.detail.GroupChildren
 
 class GroupTest extends Specification {
   xonly
@@ -12,13 +13,9 @@ class GroupTest extends Specification {
     "extend node" in {
       group must beAnInstanceOf[Node]
     }
-    "be able to have a child" in {
-      group.children(new Node)
-      ok
-    }
-    "be able to have more than one child" in {
-      group.children(new Node, new Node)
-      ok
+    
+    "have a collection of children" in {
+      group.children must beAnInstanceOf[GroupChildren]
     }
   }
 }

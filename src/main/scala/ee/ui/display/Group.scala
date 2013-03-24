@@ -1,6 +1,7 @@
 package ee.ui.display
 
+import ee.ui.display.detail.GroupChildren
+
 class Group extends Node {
-  
-  def children(node:Node*) = {}
+  val children = new GroupChildren
 }

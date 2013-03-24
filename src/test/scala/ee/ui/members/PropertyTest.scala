@@ -32,14 +32,29 @@ class PropertyTest extends Specification {
       propValue === 1
     }
     
+    "have a readonly change event" in {
+      // how to check if it's not an event, but a read only event? probably using the compiler check
+      todo
+    }
+    
     "be able to dispatch changes" in {
-      var result = 2
+      var result = 1
       prop1.change { information =>
         result = information
       }
       prop1.value = 2
       
       result === 2
+    }
+    
+    "only dispatch changes if the value changes" in {
+      var result = 1
+      prop1.change { information =>
+        result = 2
+      }
+      prop1.value = 1
+      
+      result === 1
     }
     
     "have an unapply method" in {
