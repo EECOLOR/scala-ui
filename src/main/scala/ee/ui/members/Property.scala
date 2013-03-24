@@ -1,6 +1,5 @@
 package ee.ui.members
 
-import scala.language.implicitConversions
 import ee.ui.system.RestrictedAccess
 
 case class Property[T](defaultValue: T) extends ReadOnlyProperty[T] {
@@ -11,10 +10,4 @@ case class Property[T](defaultValue: T) extends ReadOnlyProperty[T] {
       _value = value
       ReadOnlyEvent.fire(change, value)(RestrictedAccess)
     }
-
-  val change = ReadOnlyEvent[T]()
-}
-
-object Property {
-  implicit def propertyToValue[T](p: Property[T]): T = p.value
 }

@@ -11,7 +11,9 @@ class ReadOnlyPropertyTest extends Specification {
   isolated
 
   val prop1 = ReadOnlyProperty(1)
-  
+  var result = 1
+  def setValue(value: Int) = ReadOnlyProperty.setValue(prop1, value)(RestrictedAccess)
+
   "ReadOnlyPropert" should {
     "have a default value" in {
       prop1.defaultValue === 1
@@ -37,11 +39,41 @@ class ReadOnlyPropertyTest extends Specification {
           e.getMessage must contain("method value_= in trait ReadOnlyProperty cannot be accessed in ee.ui.members.ReadOnlyProperty[Int]")
       }
     }
-    
+
     "be able to set a value using a detour" in {
-      ReadOnlyProperty.setValue(prop1, 2)(RestrictedAccess)
+      setValue(2)
       prop1.value === 2
     }
+
+    "be able to dispatch changes" in {
+      prop1.change { information =>
+        result = information
+      }
+      setValue(2)
+
+      result === 2
+    }
+
+    "only dispatch changes if the value changes" in {
+      prop1.change { information =>
+        result = 2
+      }
+      setValue(1)
+
+      result === 1
+    }
+
+    "automatically convert to its value if appropriate" in {
+      val propValue: Int = prop1
+      propValue === 1
+    }
+
+    "have an unapply method" in {
+      val ReadOnlyProperty(value) = prop1
+
+      value === 1
+    }
+
   }
 
 }

@@ -13,4 +13,5 @@ object TestUtils {
     val m = scala.reflect.runtime.currentMirror
     m.mkToolBox(options = compileOptions)
   }
+  
 }

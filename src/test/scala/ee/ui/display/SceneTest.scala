@@ -14,7 +14,14 @@ class SceneTest extends Specification {
       scene.root.value === None
     }
     "be able to set a root value" in {
-      scene.root = new Node
+      val root = new Node
+      scene.root = root
+      scene.root.value === Some(root)
+    }
+    "be able to set a root value as an option" in {
+      val root = new Node
+      scene.root = Some(root)
+          scene.root.value === Some(root)
     }
   }
 }
