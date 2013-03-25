@@ -4,21 +4,20 @@ package ee.ui.application
 import org.specs2.mutable.Specification
 import ee.ui.display.Window
 import ee.ui.display.Scene
-import ee.ui.display.implementation.WindowImplementationHandler
-import ee.ui.display.implementation.EmptyWindowImplementationHandler
+import utils.TypeTest
+import ee.ui.members.ObservableSeq
+import scala.collection.mutable.ListBuffer
+import ee.ui.events.Change
+import ee.ui.events.Add
+import ee.ui.events.Remove
+import ee.ui.implementation.WindowImplementationHandler
 
 class ApplicationTest extends Specification {
 
   xonly
+  isolated
 
-  // introducing FakeEngine to show a potential bug in the DelayedInit trait 
-  trait FakeEngine {
-    val windowImplementationHandler = EmptyWindowImplementationHandler
-  }
-
-  class TestApplication extends StubApplication with FakeEngine {
-    // the body should be kept emtpy to make sure DelayedInit of Application is tested correctly
-  }
+  val testApplication = new TestApplication
 
   "Application" should {
     "start" in {
@@ -66,7 +65,7 @@ class ApplicationTest extends Specification {
       shown === false
     }
 
-    "should call an window implementation handler when a window is shown or hidden" in {
+    "call an window implementation handler when a window is shown or hidden" in {
       var shownWindow = new Window {}
       var hiddenWindow = new Window {}
       var expectedWindow = new Window {}
@@ -85,10 +84,44 @@ class ApplicationTest extends Specification {
           }
         }
       application.start()
-      
+
       shownWindow === expectedWindow and
         hiddenWindow === expectedWindow
     }
 
+    "have an exit method" in {
+      testApplication.exit()
+    }
+    "have an exit handler" in {
+      testApplication.exitHandler
+      ok
+    }
+    
+    "have an observable read only list of windows" in {
+      TypeTest[ObservableSeq[Window]].forInstance(testApplication.windows)
+    }
+    "update the window list when showing or hiding windows" in {
+      val window1 = new Window
+      val window2 = new Window
+      val resultingEvents = ListBuffer.empty[Change[Window]]
+      
+      testApplication.windows.change { resultingEvents += _ }
+      testApplication.show(window1)
+      testApplication.show(window2)
+      testApplication.hide(window1)
+      testApplication.hide(window2)
+      
+      resultingEvents.toSeq === Seq(
+          Add(0, window1), 
+          Add(1, window2), 
+          Remove(0, window1), 
+          Remove(0, window2))
+    }
+    "have a platform" in {
+      todo
+    }
+    "stop when all windows are closed and the appropriate setting is set" in {
+      todo
+    }
   }
 }

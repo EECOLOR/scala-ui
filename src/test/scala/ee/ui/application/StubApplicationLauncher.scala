@@ -1,8 +1,8 @@
 package ee.ui.application
 
-import ee.ui.display.implementation.EngineImplementationContract
-import ee.ui.display.implementation.WindowImplementationHandler
-import ee.ui.display.implementation.EmptyWindowImplementationHandler
+import ee.ui.implementation.EmptyWindowImplementationHandler
+import ee.ui.implementation.EngineImplementationContract
+import ee.ui.implementation.WindowImplementationHandler
 
 class StubApplicationLauncher extends ApplicationLauncher {
   type Engine = StubEngine

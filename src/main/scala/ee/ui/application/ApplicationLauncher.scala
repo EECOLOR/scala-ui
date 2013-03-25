@@ -1,10 +1,8 @@
 package ee.ui.application
 
-import ee.ui.display.Window
 import ee.ui.members.ReadOnlyEvent
 import ee.ui.system.RestrictedAccess
-import ee.ui.display.implementation.WindowImplementationHandler
-import ee.ui.display.implementation.EngineImplementationContract
+import ee.ui.implementation.EngineImplementationContract
 
 abstract class ApplicationLauncher {
   val applicationCreated = ReadOnlyEvent[Application with Engine]()

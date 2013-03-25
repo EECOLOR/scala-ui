@@ -2,8 +2,7 @@ package ee.ui.application
 
 import org.specs2.mutable.Specification
 import ee.ui.display.Window
-import ee.ui.display.implementation.EmptyWindowImplementationHandler
-import ee.ui.display.implementation.EngineImplementationContract
+import ee.ui.implementation.EngineImplementationContract
 import scala.language.reflectiveCalls
 
 class ApplicationLauncherTest extends Specification {

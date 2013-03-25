@@ -1,4 +1,4 @@
-package ee.ui.display.implementation
+package ee.ui.implementation
 
 import org.specs2.mutable.Specification
 import ee.ui.display.Window
