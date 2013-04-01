@@ -4,27 +4,29 @@ import org.specs2.mutable.Specification
 import utils.TestUtils
 import scala.tools.reflect.ToolBoxError
 import ee.ui.system.RestrictedAccess
+import utils.SignatureTest
+import ee.ui.members.detail.Subscription
 
 class ReadOnlyEventTest extends Specification {
   xonly
   isolated
-  
+
   val event = ReadOnlyEvent[Int]()
-  
-  def fireOne = ReadOnlyEvent.fire(event, 1)(RestrictedAccess)
+
+  def fire[T](event:ReadOnlyEvent[T], value: T):Unit = ReadOnlyEvent.fire(event, value)(RestrictedAccess)
+  def fire(value: Int):Unit = fire(event, value)
+  def fireOne = fire(1)
   var result = 0
-  
+
   "ReadOnlyEvent" should {
     "have the ability to observe" in {
-      event.observe { information => }
-      ok
+      SignatureTest[ReadOnlyEvent[Int], Subscription](_.observe(observer = { information:Int => }))
     }
-    
+
     "have a simpler method of observe" in {
-      event { information => }
-      ok
+      SignatureTest[ReadOnlyEvent[Int], Subscription](_.apply(observer = { information:Int => }))
     }
-    
+
     "not be able to fire directly" in {
       def result = TestUtils.eval("""
           |import ee.ui.members.ReadOnlyEvent
@@ -42,20 +44,44 @@ class ReadOnlyEventTest extends Specification {
           e.getMessage must contain("method fire in trait ReadOnlyEvent cannot be accessed in ee.ui.members.ReadOnlyEvent[Int]")
       }
     }
-    
+
     "be fired using a detour" in {
-      event { result = _}
-      fireOne
+      event { result = _ }
       
+      ReadOnlyEvent.fire(event, 1)(RestrictedAccess)
+
       result === 1
     }
-    
+
     "have the ability to unsubscribe an observer" in {
       val subscription = event { result = _ }
       subscription.unsubscribe()
       fireOne
-      
+
       result === 0
+    }
+
+    "have the ability to collect events" in {
+      var caughtInformation = "0"
+      val newEvent:ReadOnlyEvent[String] =
+        event collect {
+          case information if (information == 1) => information.toString 
+        }
+
+      newEvent { caughtInformation = _ }
+      
+      fire(1)
+      fire(2)
+
+      caughtInformation === "1"
+    }
+    
+    "firing the on a collected event throw an exception" in {
+      val newEvent = event collect {
+          case _ =>  
+        }
+
+      fire(newEvent, {}) must throwA[UnsupportedOperationException]
     }
   }
 }

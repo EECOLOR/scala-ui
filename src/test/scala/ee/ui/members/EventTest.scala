@@ -8,25 +8,15 @@ class EventTest extends Specification {
   isolated
   
   val event = Event[Int]()
-  def fireOne = event fire 1
   var result = 0
   
   "Event" should {
     
-    "have the ability to observe and fire" in {
+    "have the ability to fire" in {
       event.observe {  
         result = _
       }
-      fireOne
-      
-      result === 1
-    }
-    
-    "have a simpler method of observe" in {
-      event { 
-        result = _
-      }
-      fireOne
+      event fire 1
       
       result === 1
     }
@@ -34,6 +24,7 @@ class EventTest extends Specification {
     "extend readonly event" in {
       event must beAnInstanceOf[ReadOnlyEvent[Int]]
     }
+    
   } 
   
 }
