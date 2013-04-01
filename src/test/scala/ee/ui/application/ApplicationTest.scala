@@ -11,6 +11,10 @@ import ee.ui.events.Change
 import ee.ui.events.Add
 import ee.ui.events.Remove
 import ee.ui.implementation.WindowImplementationHandler
+import ee.ui.implementation.EmptyExitHandler
+import ee.ui.implementation.EmptyWindowImplementationHandler
+import ee.ui.implementation.ExitHandler
+import ee.ui.members.ReadOnlyEvent
 
 class ApplicationTest extends Specification {
 
@@ -65,19 +69,19 @@ class ApplicationTest extends Specification {
       shown === false
     }
 
-    "call an window implementation handler when a window is shown or hidden" in {
+    "call a window implementation handler when a window is shown or hidden" in {
       var shownWindow = new Window {}
       var hiddenWindow = new Window {}
       var expectedWindow = new Window {}
 
       val application =
-        new Application {
-          val windowImplementationHandler = new WindowImplementationHandler {
+        new TestApplication {
+          override val windowImplementationHandler = new WindowImplementationHandler {
             def show(window: Window) = shownWindow = window
             def hide(window: Window) = hiddenWindow = window
           }
 
-          def start(window: Window) = {
+          override def start(window: Window) = {
             expectedWindow = window
             show(window)
             hide(window)
@@ -89,14 +93,56 @@ class ApplicationTest extends Specification {
         hiddenWindow === expectedWindow
     }
 
-    "have an exit method" in {
-      testApplication.exit()
+    "call the exit handler when the exit method is called" in {
+      var exitHandlerCalled = false
+      val application =
+        new TestApplication {
+          override val exitHandler = new ExitHandler {
+            def exit(application: Application) = exitHandlerCalled = true
+          }
+        }
+      application.exit()
+
+      exitHandlerCalled === true
     }
-    "have an exit handler" in {
-      testApplication.exitHandler
-      ok
+
+    "call exit when all windows are closed" in {
+      var exitCalled = false
+      val application =
+        new TestApplication {
+
+          override def exit() = exitCalled = true
+
+          override def start(window: Window) = {
+            show(window)
+            hide(window)
+          }
+        }
+      application.start()
+
+      exitCalled === true
     }
-    
+    "have an ApplicationSettings instance" in {
+      testApplication.settings must beAnInstanceOf[ApplicationSettings]
+    }
+    "don't call exit if explicitExit in the settings is false" in {
+      var exitCalled = false
+      val application =
+        new TestApplication {
+
+          override def exit() = exitCalled = true
+
+          override def start(window: Window) = {
+            show(window)
+            hide(window)
+          }
+        }
+      application.settings.implicitExit = false
+      application.start()
+
+      exitCalled === false
+    }
+
     "have an observable read only list of windows" in {
       TypeTest[ObservableSeq[Window]].forInstance(testApplication.windows)
     }
@@ -104,24 +150,21 @@ class ApplicationTest extends Specification {
       val window1 = new Window
       val window2 = new Window
       val resultingEvents = ListBuffer.empty[Change[Window]]
-      
+
       testApplication.windows.change { resultingEvents += _ }
       testApplication.show(window1)
       testApplication.show(window2)
       testApplication.hide(window1)
       testApplication.hide(window2)
-      
+
       resultingEvents.toSeq === Seq(
-          Add(0, window1), 
-          Add(1, window2), 
-          Remove(0, window1), 
-          Remove(0, window2))
+        Add(0, window1),
+        Add(1, window2),
+        Remove(0, window1),
+        Remove(0, window2))
     }
-    "have a platform" in {
-      todo
-    }
-    "stop when all windows are closed and the appropriate setting is set" in {
-      todo
-    }
+  }
+  "have a stop method" in {
+    testApplication.stop()
   }
 }

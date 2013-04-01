@@ -3,9 +3,11 @@ package ee.ui.application
 import ee.ui.members.ReadOnlyEvent
 import ee.ui.system.RestrictedAccess
 import ee.ui.implementation.EngineImplementationContract
+import scala.concurrent.promise
 
 abstract class ApplicationLauncher {
-  val applicationCreated = ReadOnlyEvent[Application with Engine]()
+  private val applicationPromise = promise[Application with Engine]
+  val application = applicationPromise.future
   
   def createApplication():Application with Engine
   
@@ -13,7 +15,7 @@ abstract class ApplicationLauncher {
   
   def internalCreateApplication():Application with Engine = {
     val application = createApplication()
-    ReadOnlyEvent.fire(applicationCreated, application)(RestrictedAccess)
+    applicationPromise success application
     application
   }
   

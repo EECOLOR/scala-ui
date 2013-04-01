@@ -8,3 +8,6 @@ class TypeTest[A] extends StandardMatchResults {
 object TypeTest {
   def apply[A]() = new TypeTest[A]
 }
+object SubtypeTest extends StandardMatchResults {
+  def apply[A <: <:<[_, _]]() = ok
+}
