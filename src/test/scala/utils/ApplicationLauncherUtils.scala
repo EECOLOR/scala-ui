@@ -14,9 +14,11 @@ trait ApplicationLauncherUtils extends ThreadUtils {
   def start(applicationLauncher: ApplicationLauncher, timeout: Duration = 1.seconds) = {
     val applicationPromise = Promise[Application]
 
-    inThread {
+    inThread({
       launch(applicationLauncher)
-    } onFailure PartialFunction(applicationPromise.failure)
+    }, timeout) onFailure {
+      case e => throw e
+    }
     
     applicationPromise.completeWith(applicationLauncher.application)
 

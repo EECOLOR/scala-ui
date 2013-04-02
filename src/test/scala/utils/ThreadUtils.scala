@@ -20,17 +20,17 @@ trait ThreadUtils {
     val codeExecution = future(code)
     future {
       // ensures the code executes within the given timeout
-      waitFor(codeExecution, timeout)
+      waitFor(codeExecution, s"inThread with timeout of $timeout", timeout)
     }
   }
 
-  def blockingThread[T](timeout: Duration)(code: => T): T =
-    waitFor(inThread(code, timeout), Duration.Inf)
+  def blockingThread[T](timeout: Duration, message:String)(code: => T): T =
+    waitFor(inThread(code, Duration.Inf), message, timeout)
 
   def blockingThread[T](code: => T): T =
-    blockingThread(500.milliseconds)(code)
+    blockingThread(500.milliseconds, "default blocking thread")(code)
 
-  case class WaitingBoolean(initialValue: Boolean) {
+  case class WaitingBoolean(initialValue: Boolean, timeout:Duration = 500.milliseconds) {
     private var _value = initialValue
 
     val valueChanged = new CountDownLatch(1)
@@ -41,7 +41,7 @@ trait ThreadUtils {
     }
 
     def get(): Boolean = {
-      blockingThread {
+      blockingThread(timeout, s"Waiting for value change of $this with a timeout of $timeout") {
         valueChanged.await
       }
 
