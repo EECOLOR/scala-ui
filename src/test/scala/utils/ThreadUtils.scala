@@ -24,6 +24,27 @@ trait ThreadUtils {
     }
   }
 
+  trait Timer {
+    val promise:Promise[Nothing]
+    def cancel = promise.failure(new Exception("Timer was canceled"))
+  }
+  
+  def timer(timeout:Duration)(code: => Unit) = {
+    val timerPromise = Promise[Nothing]
+    
+    future {
+      try {
+        Await.ready(timerPromise.future, timeout)
+      } catch {
+        case e:TimeoutException => code
+      }
+    }
+    
+    new Timer {
+      val promise = timerPromise
+    }
+  }
+  
   def blockingThread[T](timeout: Duration, message:String)(code: => T): T =
     waitFor(inThread(code, Duration.Inf), message, timeout)
 
