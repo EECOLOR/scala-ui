@@ -1,8 +1,7 @@
 package ee.ui.display
 
 import ee.ui.members.ReadOnlyProperty
+import ee.ui.display.traits.ReadOnlySize
 
-class Node {
-  val width = ReadOnlyProperty(0d)
-  val height = ReadOnlyProperty(0d)
+class Node extends ReadOnlySize {
 }

@@ -3,8 +3,9 @@ package ee.ui.display
 import ee.ui.members.Property
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.RestrictedAccess
+import ee.ui.display.traits.Size
 
-class Window {
+class Window extends Size {
   private val _scene = Property[Option[Scene]](None)
   def scene = _scene
   def scene_=(value: Scene) = _scene.value = Some(value)

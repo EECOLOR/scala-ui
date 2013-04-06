@@ -78,7 +78,30 @@ class ReadOnlyPropertyTest extends Specification {
 
       value === 1
     }
-
+    "be combinable" in {
+      val prop1 = Property(1)
+      val prop2 = Property("a")
+      val prop3 = Property(0l)
+      
+      val newProp:ReadOnlyProperty[(Int, String, Long)] = 
+        prop1 | prop2 | prop3
+        
+      newProp.value === (1, "a", 0l)
+      prop1.value = 2
+      newProp.value === (2, "a", 0l)
+      prop2.value = "b"
+      newProp.value === (2, "b", 0l)
+      prop3.value = 1l
+      newProp.value === (2, "b", 1l)
+    }
+    "be combinable with Option values" in {
+      val prop1 = Property[Option[Int]](None)
+      val prop2 = Property[Option[String]](None)
+      
+      val newProp:ReadOnlyProperty[(Option[Int], Option[String])] =
+        prop1 | prop2
+      todo
+    }
   }
 
 }

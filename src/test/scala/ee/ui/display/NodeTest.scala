@@ -3,6 +3,7 @@ package ee.ui.display
 import org.specs2.mutable.Specification
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.members.Property
+import ee.ui.display.traits.ReadOnlySize
 
 class NodeTest extends Specification {
 
@@ -12,11 +13,8 @@ class NodeTest extends Specification {
   val node = new Node
   
   "Node" should {
-    "have a width with a default value of 0" in {
-      node.width.value === 0
-    }
-    "have a height with a default value of 0" in {
-      node.height.value === 0
+    "have a readonly size" in {
+      node must beAnInstanceOf[ReadOnlySize]
     }
   }
 }

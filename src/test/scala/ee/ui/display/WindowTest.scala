@@ -3,6 +3,7 @@ package ee.ui.display
 import org.specs2.mutable.Specification
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.RestrictedAccess
+import ee.ui.display.traits.Size
 
 class WindowTest extends Specification {
 
@@ -14,9 +15,13 @@ class WindowTest extends Specification {
   "Window" should {
 
     "have an scene property with a default of None" in {
+      val s1 = new Scene
+      val s2 = new Scene
       window.scene.value === None
-      window.scene = new Scene
-      window.scene = Some(new Scene)
+      window.scene = s1
+      window.scene.value === Some(s1)
+      window.scene = Some(s2)
+      window.scene.value === Some(s2)
     }
 
     "have a showing property that is false by default" in {
@@ -37,9 +42,17 @@ class WindowTest extends Specification {
     }
 
     "have a title property with a default value of None" in {
+      val t1 = "t1"
+      val t2 = "t2"
       window.title.value === None
-      window.title = "test"
-      window.title = Some("test")
+      window.title = t1
+      window.title.value === Some(t1)
+      window.title = Some(t2)
+      window.title.value === Some(t2)
+    }
+
+    "have a size" in {
+      window must beAnInstanceOf[Size]
     }
   }
 

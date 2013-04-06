@@ -64,5 +64,21 @@ class ReadOnlySignalTest extends Specification {
 
       !fired
     }
+    
+    "should have the ability to be combined" in {
+      val signal1 = Signal()
+      val signal2 = Signal()
+      
+      val signal3:ReadOnlySignal = signal1 | signal2
+      
+      var fireCount = 0
+      signal3 {
+        fireCount += 1
+      }
+      signal1.fire
+      signal2.fire
+      
+      fireCount === 2
+    }
   }
 }
