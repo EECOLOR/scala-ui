@@ -15,6 +15,8 @@ import ee.ui.implementation.EmptyExitHandler
 import ee.ui.implementation.EmptyWindowImplementationHandler
 import ee.ui.implementation.ExitHandler
 import ee.ui.members.ReadOnlyEvent
+import ee.ui.implementation.contracts.WindowContract
+import ee.ui.system.RestrictedAccess
 
 class ApplicationTest extends Specification {
 
@@ -77,8 +79,10 @@ class ApplicationTest extends Specification {
       val application =
         new TestApplication {
           override val windowImplementationHandler = new WindowImplementationHandler {
-            def show(window: Window) = shownWindow = window
-            def hide(window: Window) = hiddenWindow = window
+            def show(windowContract: WindowContract) = 
+              shownWindow = WindowContract.internalWindow(windowContract)(RestrictedAccess)
+            def hide(windowContract: WindowContract) = 
+              hiddenWindow = WindowContract.internalWindow(windowContract)(RestrictedAccess)
           }
 
           override def start(window: Window) = {

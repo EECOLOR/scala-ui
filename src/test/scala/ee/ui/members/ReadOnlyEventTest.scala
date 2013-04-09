@@ -62,6 +62,16 @@ class ReadOnlyEventTest extends Specification {
       result === 0
     }
 
+    "have the ability to disable and enable an observer" in {
+      val subscription = event { result = _ }
+      subscription.disable()
+      fireOne
+      result === 0
+      subscription.enable()
+      fireOne
+      result === 1
+    }
+    
     "have the ability to collect events" in {
       var caughtInformation = "0"
       val newEvent: ReadOnlyEvent[String] =

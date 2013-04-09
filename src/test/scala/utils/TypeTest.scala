@@ -11,3 +11,9 @@ object TypeTest {
 object SubtypeTest extends StandardMatchResults {
   def apply[A <: <:<[_, _]]()(implicit a: A) = ok
 }
+class MemberTypeTest[Type, ExpectedMemberType] extends StandardMatchResults {
+  def forMember[ReturnType](code: Type => ReturnType)(implicit ev: ExpectedMemberType =:= ReturnType) = ok
+}
+object MemberTypeTest {
+  def apply[Type, ExpectedMemberType]() = new MemberTypeTest[Type, ExpectedMemberType]
+}

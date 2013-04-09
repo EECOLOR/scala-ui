@@ -21,6 +21,14 @@ trait ReadOnlySignal { self =>
             subscription1.unsubscribe()
             subscription2.unsubscribe()
           }
+          def enable() = {
+            subscription1.enable()
+            subscription2.enable()
+          }
+          def disable() = {
+            subscription1.disable()
+            subscription2.disable()
+          }
         }
       }
 

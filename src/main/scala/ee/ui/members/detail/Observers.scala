@@ -9,6 +9,8 @@ trait Observers[T] {
     observers += observer
     new Subscription {
       def unsubscribe() = observers -= observer
+      def enable() = if (!(observers contains observer)) observers += observer
+      def disable() = unsubscribe()
     }
   }
 

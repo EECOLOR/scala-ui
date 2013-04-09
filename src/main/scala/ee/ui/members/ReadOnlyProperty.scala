@@ -10,6 +10,7 @@ import shapeless.TuplerAux
 import shapeless.PrependAux
 import shapeless.::
 import shapeless.HNil
+import ee.ui.members.detail.CombinedPropertyBase
 
 trait ReadOnlyProperty[T] { self =>
   val defaultValue: T
@@ -17,6 +18,9 @@ trait ReadOnlyProperty[T] { self =>
   protected def value_=(value: T): Unit
   val change = ReadOnlyEvent[T]()
 
+  protected def fireChange(value:T) =
+    ReadOnlyEvent.fire(change, value)(RestrictedAccess)
+  
   def map[R](f: T => R): ReadOnlyProperty[R] =
     new ReadOnlyProperty[R] {
       val defaultValue = f(self.defaultValue)
@@ -30,7 +34,7 @@ trait ReadOnlyProperty[T] { self =>
 }
 
 object ReadOnlyProperty {
-  def apply[T](defaultValue: T): ReadOnlyProperty[T] = new Property(defaultValue)
+  def apply[T](defaultValue: T): ReadOnlyProperty[T] = Property(defaultValue)
 
   def setValue[T](readOnlyProperty: ReadOnlyProperty[T], value: T)(implicit ev: AccessRestriction) =
     readOnlyProperty.value = value
@@ -50,58 +54,24 @@ object ReadOnlyProperty {
       override val change = event map Option.apply
     }
 
-  implicit def toBindingSource[T](source: ReadOnlyProperty[T]) =
-    new BindingSource[T](source) {
-      def bindTo(property: Property[T]) = {
-        property.value = source.value
-
-        source.change { property.value = _ }
-      }
-    }
-
-  implicit class SimpleCombinator[A](a: ReadOnlyProperty[A]) {
-
-    def |[B](b: ReadOnlyProperty[B]): ReadOnlyProperty[(A, B)] =
-
-      new ReadOnlyProperty[(A, B)] {
-        val defaultValue = (a.defaultValue, b.defaultValue)
-        def value = (a.value, b.value)
-        override val change = ReadOnlyEvent[(A, B)]()
-
-        private def fireChange(value: (A, B)): Unit =
-          ReadOnlyEvent.fire(change, value)(RestrictedAccess)
-
-        a.change map (_ -> b.value) apply fireChange
-        b.change map (a.value -> _) apply fireChange
-
-        protected def value_=(value: (A, B)): Unit =
-          throw new UnsupportedOperationException("The value_= method is not supported on a combined instance")
-      }
-  }
-
-  // Option extends Product so provide a shortcut to the SimpleCombinator
-  implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = new SimpleCombinator(a)
+  implicit def toBindingSource[T](source: ReadOnlyProperty[T]):BindingSource[T] =
+    new BindingSource(source)
   
+  // Option extends Product so provide a shortcut to the SimpleCombinator
+  implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = simpleCombinator(a)
+  implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = new TupleCombinator(a map Tuple1.apply)
+
   implicit class TupleCombinator[A <: Product](a: ReadOnlyProperty[A]) {
 
     import ee.util.Tuples._
 
     def |[B, L <: HList, P <: HList, R <: Product](b: ReadOnlyProperty[B])(
-      implicit hlister: HListerAux[A, L], prepend: PrependAux[L, B :: HNil, P], tupler: TuplerAux[P, R]): ReadOnlyProperty[R] =
-
-      new ReadOnlyProperty[R] {
-        val defaultValue = a.defaultValue :+ b.defaultValue
-        def value = a.value :+ b.value
-        override val change = ReadOnlyEvent[R]()
-
-        private def fireChange(value: R): Unit =
-          ReadOnlyEvent.fire(change, value)(RestrictedAccess)
-
-        a.change map (_ :+ b.value) apply fireChange
-        b.change map (a.value :+ _) apply fireChange
-
+      implicit implicits:Implicits[A, B, L, P, R]): ReadOnlyProperty[R] = {
+      
+      new CombinedPropertyBase(a, b) {
         protected def value_=(value: R): Unit =
           throw new UnsupportedOperationException("The value_= method is not supported on a combined instance")
       }
+    }
   }
 }

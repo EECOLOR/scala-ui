@@ -2,17 +2,20 @@ package ee.ui.display.traits
 
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.RestrictedAccess
+import ee.ui.members.Property
 
 trait ReadOnlySize {
-  protected val _width = ReadOnlyProperty(0d)
-  def width = _width
+  protected val _width = Property(0d)
+  def width:ReadOnlyProperty[Double] = _width
   
-  protected val _height = ReadOnlyProperty(0d)
-  def height = _height
+  protected val _height = Property(0d)
+  def height:ReadOnlyProperty[Double] = _height
 }
 
 trait Size extends ReadOnlySize {
-  def width_=(value: Double) = ReadOnlyProperty.setValue(_width, value)(RestrictedAccess)
+  override def width = _width 
+  def width_=(value: Double) = _width.value = value
 
-  def height_=(value: Double) = ReadOnlyProperty.setValue(_height, value)(RestrictedAccess)
+  override def height = _height 
+  def height_=(value: Double) = _height.value = value
 }

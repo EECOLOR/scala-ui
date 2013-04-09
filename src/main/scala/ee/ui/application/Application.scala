@@ -6,6 +6,7 @@ import ee.ui.members.ObservableArrayBuffer
 import ee.ui.members.ObservableSeq
 import ee.ui.system.RestrictedAccess
 import ee.ui.implementation.ExitHandler
+import ee.ui.implementation.contracts.WindowContract
 
 abstract class Application {
   val windowImplementationHandler: WindowImplementationHandler
@@ -22,7 +23,7 @@ abstract class Application {
   def stop():Unit = {}
   
   def show(window: Window) = {
-    windowImplementationHandler.show(window)
+    windowImplementationHandler.show(WindowContract(window))
     Window.show(window)
     ObservableSeq.add(windows, window)(RestrictedAccess) 
   }
@@ -30,7 +31,7 @@ abstract class Application {
   def hide(window: Window) = {
     ObservableSeq.remove(windows, window)(RestrictedAccess) 
     Window.hide(window)
-    windowImplementationHandler.hide(window)
+    windowImplementationHandler.hide(WindowContract(window))
     
     if (windows.isEmpty && settings.implicitExit) exit()
   }

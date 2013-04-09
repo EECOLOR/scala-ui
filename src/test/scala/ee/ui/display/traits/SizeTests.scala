@@ -1,30 +1,38 @@
 package ee.ui.display.traits
 
 import org.specs2.mutable.Specification
+import utils.MemberTypeTest
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.members.Property
 
-class SizeTests extends Specification {
+class SizeTests extends Specification with TraitTestTemplate {
 
-  xonly
-  isolated
+  val name: String = "Size"
+  val instance = new Size {}
 
-  val size = new Size {}
+  def subTypeTest = instance must beAnInstanceOf[ReadOnlySize]
 
-  "Size" should {
-
-    "extend ReadOnlySize" in {
-      size must beAnInstanceOf[ReadOnlySize]
-    }
-
-    "have a width property with a default value of 0" in {
-      size.width.value === 0d
-      size.width = 1d
-      size.width.value === 1d
-    }
-
-    "have a height property with a default value of 0" in {
-      size.height.value === 0d
-      size.height = 1d
-      size.height.value === 1d
-    }
-  }
+  val properties = Seq(
+    property(
+      "width",
+      MemberTypeTest[ReadOnlySize, ReadOnlyProperty[Double]].forMember(_.width),
+      MemberTypeTest[Size, Property[Double]].forMember(_.width),
+      "0",
+      {
+        val w = 1d
+        instance.width.value === 0d
+        instance.width = w
+        instance.width.value === w
+      }),
+    property(
+      "height",
+      MemberTypeTest[ReadOnlySize, ReadOnlyProperty[Double]].forMember(_.height),
+      MemberTypeTest[Size, Property[Double]].forMember(_.height),
+      "0",
+      {
+        val h = 1d
+        instance.height.value === 0d
+        instance.height = h
+        instance.height.value === h
+      }))
 }

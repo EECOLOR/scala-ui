@@ -4,6 +4,7 @@ import org.specs2.mutable.Specification
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.RestrictedAccess
 import ee.ui.display.traits.Size
+import ee.ui.display.traits.Title
 
 class WindowTest extends Specification {
 
@@ -52,7 +53,7 @@ class WindowTest extends Specification {
     }
 
     "have a size" in {
-      window must beAnInstanceOf[Size]
+      window must beAnInstanceOf[Size with Title]
     }
   }
 
