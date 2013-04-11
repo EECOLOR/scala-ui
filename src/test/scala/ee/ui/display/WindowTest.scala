@@ -5,6 +5,7 @@ import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.RestrictedAccess
 import ee.ui.display.traits.Size
 import ee.ui.display.traits.Title
+import ee.ui.display.detail.ReadOnlyScene
 
 class WindowTest extends Specification {
 
@@ -53,7 +54,7 @@ class WindowTest extends Specification {
     }
 
     "have a size" in {
-      window must beAnInstanceOf[Size with Title]
+      window must beAnInstanceOf[ReadOnlyScene with Size with Title]
     }
   }
 

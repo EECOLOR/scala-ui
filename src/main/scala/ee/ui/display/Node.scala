@@ -2,6 +2,7 @@ package ee.ui.display
 
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.display.traits.ReadOnlySize
+import ee.ui.display.detail.ReadOnlyNode
+import ee.ui.display.detail.NodeContract
 
-class Node extends ReadOnlySize {
-}
+abstract class Node extends ReadOnlyNode

@@ -5,9 +5,11 @@ import ee.ui.display.Window
 import ee.ui.display.traits.ReadOnlyTitle
 import ee.ui.display.traits.Size
 import ee.ui.system.AccessRestriction
+import ee.ui.display.detail.ReadOnlyScene
+import ee.ui.display.detail.ReadOnlyScene
 
 case class WindowContract(protected val internalWindow:Window) {
-  val window:Size with ReadOnlyTitle = internalWindow
+  val window:Size with ReadOnlyTitle with ReadOnlyScene = internalWindow
 }
 
 object WindowContract {

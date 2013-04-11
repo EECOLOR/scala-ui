@@ -20,7 +20,7 @@ class GroupChildrenTest extends Specification {
   val groupChildren = new GroupChildren
 
   val resultingEvents = ListBuffer.empty[Change[Node]]
-  def n = new Node
+  def n = new Node {}
 
   "GroupChildren" should {
     "be able to have a child" in {
