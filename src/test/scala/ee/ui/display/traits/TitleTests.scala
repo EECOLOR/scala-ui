@@ -1,24 +1,26 @@
 package ee.ui.display.traits
 
 import org.specs2.mutable.Specification
-import utils.MemberTypeTest
-import ee.ui.members.ReadOnlyProperty
-import ee.ui.members.Property
 
-class TitleTests extends Specification with TraitTestTemplate {
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
+import utils.SignatureTest
+import utils.SubtypeTest
+
+object TitleTests extends Specification with TraitTestTemplate {
 
   val name: String = "Title"
-  val instance = new Title {}
   
-  def subTypeTest = instance must beAnInstanceOf[ReadOnlyTitle]
+  def subTypeTest = SubtypeTest[Title <:< ReadOnlyTitle]
   
   val properties = Seq(
     property(
       "title",
-      MemberTypeTest[ReadOnlyTitle, ReadOnlyProperty[Option[String]]].forMember(_.title),
-      MemberTypeTest[Title, Property[Option[String]]].forMember(_.title),
+      SignatureTest[ReadOnlyTitle, ReadOnlyProperty[Option[String]]](_.title),
+      SignatureTest[Title, Property[Option[String]]](_.title),
       "None",
       {
+        val instance = new Title {}
         val t1 = "test1"
         val t2 = "test2"
         instance.title.value === None

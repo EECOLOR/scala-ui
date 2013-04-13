@@ -1,22 +1,20 @@
 
 package ee.ui.application
 
-import org.specs2.mutable.Specification
-import ee.ui.display.Window
-import ee.ui.display.Scene
-import utils.TypeTest
-import ee.ui.members.ObservableSeq
 import scala.collection.mutable.ListBuffer
-import ee.ui.events.Change
+
+import org.specs2.mutable.Specification
+
+import ee.ui.display.Window
 import ee.ui.events.Add
+import ee.ui.events.Change
 import ee.ui.events.Remove
-import ee.ui.implementation.WindowImplementationHandler
-import ee.ui.implementation.EmptyExitHandler
-import ee.ui.implementation.EmptyWindowImplementationHandler
 import ee.ui.implementation.ExitHandler
-import ee.ui.members.ReadOnlyEvent
+import ee.ui.implementation.WindowImplementationHandler
 import ee.ui.implementation.contracts.WindowContract
+import ee.ui.members.ObservableSeq
 import ee.ui.system.RestrictedAccess
+import utils.SignatureTest
 
 class ApplicationTest extends Specification {
 
@@ -25,8 +23,12 @@ class ApplicationTest extends Specification {
 
   val testApplication = new TestApplication
 
+  def getWindowFromContract(windowContract:WindowContract) = 
+    WindowContract.internalWindow(windowContract)(RestrictedAccess)
+  
   "Application" should {
-    "start" in {
+    
+    "call start with a window" in {
       var started = false
 
       val application =
@@ -37,10 +39,10 @@ class ApplicationTest extends Specification {
         }
       application.start()
 
-      started === true
+      started
     }
 
-    "be able to show a window" in {
+    "set the showing property of a window to true" in {
       var shown = false
 
       val application =
@@ -52,10 +54,10 @@ class ApplicationTest extends Specification {
         }
       application.start()
 
-      shown === true
+      shown
     }
 
-    "be able to hide a window" in {
+    "set the showing property of a window to false" in {
       var shown = true
 
       val application =
@@ -68,7 +70,7 @@ class ApplicationTest extends Specification {
         }
       application.start()
 
-      shown === false
+      !shown
     }
 
     "call a window implementation handler when a window is shown or hidden" in {
@@ -80,9 +82,9 @@ class ApplicationTest extends Specification {
         new TestApplication {
           override val windowImplementationHandler = new WindowImplementationHandler {
             def show(windowContract: WindowContract) = 
-              shownWindow = WindowContract.internalWindow(windowContract)(RestrictedAccess)
+              shownWindow = getWindowFromContract(windowContract)
             def hide(windowContract: WindowContract) = 
-              hiddenWindow = WindowContract.internalWindow(windowContract)(RestrictedAccess)
+              hiddenWindow = getWindowFromContract(windowContract)
           }
 
           override def start(window: Window) = {
@@ -107,7 +109,7 @@ class ApplicationTest extends Specification {
         }
       application.exit()
 
-      exitHandlerCalled === true
+      exitHandlerCalled
     }
 
     "call exit when all windows are closed" in {
@@ -124,12 +126,14 @@ class ApplicationTest extends Specification {
         }
       application.start()
 
-      exitCalled === true
+      exitCalled
     }
+    
     "have an ApplicationSettings instance" in {
-      testApplication.settings must beAnInstanceOf[ApplicationSettings]
+      SignatureTest[Application, ApplicationSettings](_.settings)
     }
-    "don't call exit if explicitExit in the settings is false" in {
+    
+    "not call exit if explicitExit in the settings is false" in {
       var exitCalled = false
       val application =
         new TestApplication {
@@ -144,22 +148,24 @@ class ApplicationTest extends Specification {
       application.settings.implicitExit = false
       application.start()
 
-      exitCalled === false
+      !exitCalled
     }
 
     "have an observable read only list of windows" in {
-      TypeTest[ObservableSeq[Window]].forInstance(testApplication.windows)
+      SignatureTest[Application, ObservableSeq[Window]](_.windows)
     }
+    
     "update the window list when showing or hiding windows" in {
       val window1 = new Window
       val window2 = new Window
+      
       val resultingEvents = ListBuffer.empty[Change[Window]]
-
-      testApplication.windows.change { resultingEvents += _ }
-      testApplication.show(window1)
-      testApplication.show(window2)
-      testApplication.hide(window1)
-      testApplication.hide(window2)
+      testApplication.windows change { resultingEvents += _ }
+      
+      testApplication show window1
+      testApplication show window2
+      testApplication hide window1
+      testApplication hide window2
 
       resultingEvents.toSeq === Seq(
         Add(0, window1),
@@ -168,7 +174,8 @@ class ApplicationTest extends Specification {
         Remove(0, window2))
     }
   }
+  
   "have a stop method" in {
-    testApplication.stop()
+    SignatureTest[Application, Unit](_.stop())
   }
 }

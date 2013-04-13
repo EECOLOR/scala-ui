@@ -1,7 +1,7 @@
 package ee.ui.display.implementation.contracts
 
-import ee.ui.display.shapes.detail.ReadOnlyRectangle
 import ee.ui.display.detail.ReadOnlyNode
+import ee.ui.display.shapes.detail.ReadOnlyRectangle
 
 sealed trait NodeContract { self: ReadOnlyNode => }
 

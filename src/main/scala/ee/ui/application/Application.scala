@@ -1,12 +1,12 @@
 package ee.ui.application
 
 import ee.ui.display.Window
-import ee.ui.implementation.WindowImplementationHandler
-import ee.ui.members.ObservableArrayBuffer
-import ee.ui.members.ObservableSeq
-import ee.ui.system.RestrictedAccess
 import ee.ui.implementation.ExitHandler
+import ee.ui.implementation.WindowImplementationHandler
 import ee.ui.implementation.contracts.WindowContract
+import ee.ui.members.ObservableSeq
+import ee.ui.members.ReadOnlyProperty.propertyToValue
+import ee.ui.system.RestrictedAccess
 
 abstract class Application {
   val windowImplementationHandler: WindowImplementationHandler
@@ -22,14 +22,16 @@ abstract class Application {
   
   def stop():Unit = {}
   
+  implicit private val restrictedAccess = RestrictedAccess
+  
   def show(window: Window) = {
     windowImplementationHandler.show(WindowContract(window))
     Window.show(window)
-    ObservableSeq.add(windows, window)(RestrictedAccess) 
+    ObservableSeq.add(windows, window) 
   }
 
   def hide(window: Window) = {
-    ObservableSeq.remove(windows, window)(RestrictedAccess) 
+    ObservableSeq.remove(windows, window) 
     Window.hide(window)
     windowImplementationHandler.hide(WindowContract(window))
     

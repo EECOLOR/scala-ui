@@ -1,11 +1,15 @@
 package ee.ui.display
 
 import org.specs2.mutable.Specification
-import ee.ui.members.ReadOnlyProperty
-import ee.ui.system.RestrictedAccess
+import ee.ui.display.detail.ReadOnlyScene
 import ee.ui.display.traits.Size
 import ee.ui.display.traits.Title
-import ee.ui.display.detail.ReadOnlyScene
+import ee.ui.implementation.contracts.SceneContract
+import ee.ui.members.Property
+import utils.SignatureTest
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.system.RestrictedAccess
+import utils.SubtypeTest
 
 class WindowTest extends Specification {
 
@@ -14,48 +18,84 @@ class WindowTest extends Specification {
 
   val window = new Window
 
+  val scene = new Scene
+  def correctSceneValue = window.scene.value === Some(scene)
+
+  val title = "title"
+  def correctTitleValue = window.title.value === Some(title)
+
   "Window" should {
 
-    "have an scene property with a default of None" in {
-      val s1 = new Scene
-      val s2 = new Scene
-      window.scene.value === None
-      window.scene = s1
-      window.scene.value === Some(s1)
-      window.scene = Some(s2)
-      window.scene.value === Some(s2)
+    "extend the correct traits" in {
+      SubtypeTest[Window <:< Size with Title with ReadOnlyScene]
+    }
+    
+    "have a scene property" >> {
+
+      "with the correct signature" in {
+        SignatureTest[Window, Property[Option[SceneContract]]](_.scene)
+      }
+
+      "with a default value of None" in {
+        window.scene.value === None
+      }
+
+      "that can be set directly" in {
+        window.scene = scene
+        correctSceneValue
+      }
+
+      "that can be set as an option" in {
+        window.scene = Some(scene)
+        correctSceneValue
+      }
     }
 
-    "have a showing property that is false by default" in {
-      window.showing.value === false
+    "have a showing property" >> {
+
+      "with the correct signature" in {
+        SignatureTest[Window, ReadOnlyProperty[Boolean]](_.showing)
+      }
+
+      "that is false by default" in {
+        window.showing.value === false
+      }
+
+      "that is set on show and hide" in {
+        implicit val restrictedAccess = RestrictedAccess
+
+        var result = false
+        window.showing.change { result = _ }
+
+        Window.show(window)
+        val shown = result
+
+        Window.hide(window)
+        val hidden = !result
+
+        shown and hidden
+      }
     }
 
-    "should be able to show and hide" in {
-      var result = false
-      window.showing.change { result = _ }
+    "have a title property" >> {
 
-      Window.show(window)
-      val shown = result === true
+      "with the correct signature" in {
+        SignatureTest[Window, Property[Option[String]]](_.title)
+      }
 
-      Window.hide(window)
-      val hidden = result === false
+      "with a default value of None" in {
+        window.title.value === None
+      }
 
-      shown and hidden
-    }
+      "that can be set directly" in {
+        window.title = title
+        correctTitleValue
+      }
 
-    "have a title property with a default value of None" in {
-      val t1 = "t1"
-      val t2 = "t2"
-      window.title.value === None
-      window.title = t1
-      window.title.value === Some(t1)
-      window.title = Some(t2)
-      window.title.value === Some(t2)
-    }
-
-    "have a size" in {
-      window must beAnInstanceOf[ReadOnlyScene with Size with Title]
+      "that can be set as an option" in {
+        window.title = Some(title)
+        correctTitleValue
+      }
     }
   }
-
 }

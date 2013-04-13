@@ -1,9 +1,7 @@
 package ee.ui.members
 
-import scala.collection.mutable.ListBuffer
-import ee.ui.members.detail.Subscription
-import ee.ui.members.detail.Observers
 import ee.ui.members.detail.CombinedEventBase
+import ee.ui.members.detail.Observers
 
 trait Event[A] extends ReadOnlyEvent[A] with Observers[A => Unit] { self =>
 

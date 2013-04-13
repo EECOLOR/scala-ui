@@ -1,8 +1,7 @@
 package ee.ui.display.traits
 
-import ee.ui.members.ReadOnlyProperty
-import ee.ui.system.RestrictedAccess
 import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
 
 trait ReadOnlySize {
   protected val _width = Property(0d)

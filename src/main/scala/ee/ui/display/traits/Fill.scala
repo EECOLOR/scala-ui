@@ -1,8 +1,8 @@
 package ee.ui.display.traits
 
+import ee.ui.display.primitives.Color
 import ee.ui.members.Property
 import ee.ui.members.ReadOnlyProperty
-import ee.ui.display.primitives.Color
 
 trait ReadOnlyFill {
   protected val _fill = Property[Option[Color]](None)

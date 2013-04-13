@@ -1,22 +1,15 @@
 package ee.ui.application
 
 import org.specs2.mutable.Specification
-import ee.ui.display.Window
-import ee.ui.implementation.EngineImplementationContract
-import scala.language.reflectiveCalls
 import scala.concurrent.Future
-import scala.concurrent.duration.Duration
-import scala.util.Success
-import scala.util.Failure
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
-import utils.TestUtils
-import utils.TypeTest
+import scala.concurrent.duration.Duration
 import utils.SubtypeTest
+import ee.ui.implementation.EngineImplementationContract
 
-class ApplicationLauncherTest extends Specification {
+object ApplicationLauncherTest extends Specification {
+  
   xonly
-
   
   def callMain(applicationLauncher: ApplicationLauncher, args: Array[String] = Array.empty) =
     applicationLauncher.main(args)
@@ -24,6 +17,7 @@ class ApplicationLauncherTest extends Specification {
   def simpleApplication:Application with StubApplicationLauncher#StubEngine = new StubApplicationLauncher().createApplication
 
   "ApplicationLauncher" should {
+    
     "call launch when main is called" in {
       val expectedArgs = Array("test")
       var launchArgs = Array.empty[String]
@@ -37,6 +31,7 @@ class ApplicationLauncherTest extends Specification {
 
       launchArgs === expectedArgs
     }
+    
     "call launch with a specific create application method" in {
 
       var actualApplication = simpleApplication
@@ -51,6 +46,7 @@ class ApplicationLauncherTest extends Specification {
 
       actualApplication === applicationLauncher.createdApplication
     }
+    
     "have a future that completes when an application is created" in {
 
       val applicationLauncher = new StubApplicationLauncher {
@@ -65,24 +61,7 @@ class ApplicationLauncherTest extends Specification {
 
       Await.result(applicationFuture, Duration.Inf) === applicationLauncher.createdApplication
     }
-    "start the application" in {
-      var applicationStarted = false
-      
-      val applicationLauncher = new StubApplicationLauncher {
-
-        override def createApplication() = new TestApplication with Engine {
-          override def start(window:Window):Unit = applicationStarted = true 
-        }
-        
-        override def launch(createApplication: () => Application with Engine, args: Array[String]) = {
-          val application = createApplication()
-          application.start()
-        }
-      }
-      callMain(applicationLauncher)
-
-      applicationStarted === true
-    }
+    
     "have an engine type which is a subtype of EngineImplementationContract" in {
       SubtypeTest[ApplicationLauncher#Engine <:< EngineImplementationContract]
     }

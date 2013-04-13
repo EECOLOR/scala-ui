@@ -10,7 +10,6 @@ import org.specs2.execute.Result
 trait TraitTestTemplate extends DelayedInit { self: Specification =>
 
   xonly
-  isolated
 
   type PropertyType = (String, () => Result, () => Result, String, () => Result)
 

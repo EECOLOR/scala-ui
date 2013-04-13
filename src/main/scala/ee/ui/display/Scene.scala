@@ -1,11 +1,8 @@
 package ee.ui.display
 
-import ee.ui.members.Property
-import ee.ui.display.detail.ReadOnlyRoot
-import ee.ui.display.traits.ReadOnlySize
-import ee.ui.display.detail.ReadOnlyNode
-import ee.ui.implementation.contracts.SceneContract
 import ee.ui.display.implementation.contracts.NodeContract
+import ee.ui.implementation.contracts.SceneContract
+import ee.ui.members.Property
 
 class Scene extends SceneContract {
   val _root = Property[Option[NodeContract]](None)

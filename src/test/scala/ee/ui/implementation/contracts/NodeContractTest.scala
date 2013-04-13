@@ -14,7 +14,9 @@ object NodeContractTest extends Specification {
   xonly
 
   "NodeContract" should {
+    
     "be a sealed trait" in {
+      
       TestUtils.eval(
         """|import ee.ui.display.implementation.contracts.NodeContract
            |new NodeContract {}              
@@ -22,6 +24,7 @@ object NodeContractTest extends Specification {
           case e => e.getMessage must contain("illegal inheritance from sealed trait NodeContract")
         }
     }
+    
     "have sub traits with the correct types" in {
       SubtypeTest[RectangleContract <:< NodeContract with ReadOnlyRectangle]
     }

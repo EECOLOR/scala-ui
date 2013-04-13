@@ -1,8 +1,11 @@
 package ee.ui.display.detail
 
+import scala.annotation.implicitNotFound
+
 import org.specs2.mutable.Specification
-import utils.SubtypeTest
+
 import ee.ui.display.traits.ReadOnlySize
+import utils.SubtypeTest
 
 object ReadOnlyNodeTest extends Specification {
   

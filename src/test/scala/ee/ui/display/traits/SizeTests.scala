@@ -1,22 +1,24 @@
 package ee.ui.display.traits
 
 import org.specs2.mutable.Specification
-import utils.MemberTypeTest
-import ee.ui.members.ReadOnlyProperty
-import ee.ui.members.Property
 
-class SizeTests extends Specification with TraitTestTemplate {
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
+import utils.SignatureTest
+import utils.SubtypeTest
+
+object SizeTests extends Specification with TraitTestTemplate {
 
   val name: String = "Size"
   val instance = new Size {}
 
-  def subTypeTest = instance must beAnInstanceOf[ReadOnlySize]
+  def subTypeTest = SubtypeTest[Size <:< ReadOnlySize]
 
   val properties = Seq(
     property(
       "width",
-      MemberTypeTest[ReadOnlySize, ReadOnlyProperty[Double]].forMember(_.width),
-      MemberTypeTest[Size, Property[Double]].forMember(_.width),
+      SignatureTest[ReadOnlySize, ReadOnlyProperty[Double]](_.width),
+      SignatureTest[Size, Property[Double]](_.width),
       "0",
       {
         val w = 1d
@@ -26,8 +28,8 @@ class SizeTests extends Specification with TraitTestTemplate {
       }),
     property(
       "height",
-      MemberTypeTest[ReadOnlySize, ReadOnlyProperty[Double]].forMember(_.height),
-      MemberTypeTest[Size, Property[Double]].forMember(_.height),
+      SignatureTest[ReadOnlySize, ReadOnlyProperty[Double]](_.height),
+      SignatureTest[Size, Property[Double]](_.height),
       "0",
       {
         val h = 1d

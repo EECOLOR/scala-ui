@@ -1,9 +1,8 @@
 package ee.ui.display.detail
 
-import ee.ui.members.ReadOnlyProperty
 import ee.ui.implementation.contracts.SceneContract
+import ee.ui.members.ReadOnlyProperty
 
 trait ReadOnlyScene {
-  type SceneType <: SceneContract
-  def scene:ReadOnlyProperty[Option[SceneType]]
+  def scene:ReadOnlyProperty[Option[SceneContract]]
 }
