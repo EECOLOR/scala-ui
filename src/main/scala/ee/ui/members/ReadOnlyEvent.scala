@@ -6,40 +6,46 @@ import ee.ui.members.detail.Subscription
 import ee.ui.members.detail.Subscription
 import scala.language.implicitConversions
 import ee.ui.members.detail.BindingSource
+import ee.ui.members.detail.CombinedEventBase
 
-trait ReadOnlyEvent[T] { self =>
+trait ReadOnlyEvent[A] { self =>
 
-  def observe(observer: T => Unit): Subscription
+  def observe(observer: A => Unit): Subscription
 
-  def apply(observer: T => Unit) = observe(observer)
+  def apply(observer: A => Unit) = observe(observer)
 
-  protected def fire(information: T): Unit
+  protected def fire(information: A): Unit
 
-  protected def mappedReadOnlyEvent[R](wrapped: (R => Unit) => (T => Unit)): ReadOnlyEvent[R] =
-    new ReadOnlyEvent[R] {
-      def observe(observer: R => Unit): Subscription = {
+  protected def mappedReadOnlyEvent[B](wrapped: (B => Unit) => (A => Unit)): ReadOnlyEvent[B] =
+    new ReadOnlyEvent[B] {
+      def observe(observer: B => Unit): Subscription = {
         self observe wrapped(observer)
       }
 
-      protected def fire(information: R): Unit =
+      protected def fire(information: B): Unit =
         throw new UnsupportedOperationException("The fire method is not supported on a mapped instance")
     }
 
-  def collect[R](f: PartialFunction[T, R]) =
-    mappedReadOnlyEvent[R] { observer =>
+  def collect[B](f: PartialFunction[A, B]) =
+    mappedReadOnlyEvent[B] { observer =>
       information => if (f isDefinedAt information) observer(f(information))
     }
 
-  def map[R](f: T => R): ReadOnlyEvent[R] =
-    mappedReadOnlyEvent[R] { observer =>
+  def map[B](f: A => B): ReadOnlyEvent[B] =
+    mappedReadOnlyEvent[B] { observer =>
       information => observer(f(information))
     }
 
-  def filter(f: T => Boolean): ReadOnlyEvent[T] =
-    mappedReadOnlyEvent[T] { observer =>
+  def filter(f: A => Boolean): ReadOnlyEvent[A] =
+    mappedReadOnlyEvent[A] { observer =>
       information => if (f(information)) observer(information)
     }
 
+  def |[B <: C, A1 >: A <: C, C](that: ReadOnlyEvent[B]) =
+    new CombinedEventBase[A1, B, C](self.asInstanceOf[ReadOnlyEvent[A1]], that) {
+      protected def fire(information: C): Unit =
+        throw new UnsupportedOperationException("The fire method is not supported on a combined instance")
+    }
 }
 
 object ReadOnlyEvent {

@@ -5,6 +5,9 @@ import utils.SubtypeTest
 import ee.ui.display.traits.ReadOnlySize
 
 object ReadOnlyNodeTest extends Specification {
+  
+  xonly
+  
   "ReadOnlyNode" should {
     "have the correct type" in {
       SubtypeTest[ReadOnlyNode <:< ReadOnlySize]

@@ -11,26 +11,23 @@ import shapeless.PrependAux
 import shapeless.::
 import shapeless.HNil
 import ee.ui.members.detail.CombinedPropertyBase
+import ee.ui.members.detail.MappedReadOnlyProperty
 
 trait ReadOnlyProperty[T] { self =>
   val defaultValue: T
   def value: T
   protected def value_=(value: T): Unit
-  val change = ReadOnlyEvent[T]()
+  val change:ReadOnlyEvent[T]
+  val valueChange:ReadOnlyEvent[(T, T)]
 
-  protected def fireChange(value:T) =
+  protected def fireChange(value: T) =
     ReadOnlyEvent.fire(change, value)(RestrictedAccess)
-  
+
+  protected def fireValueChange(change: (T, T)) =
+    ReadOnlyEvent.fire(valueChange, change)(RestrictedAccess)
+
   def map[R](f: T => R): ReadOnlyProperty[R] =
-    new ReadOnlyProperty[R] {
-      val defaultValue = f(self.defaultValue)
-      def value = f(self.value)
-      override val change = self.change map f
-
-      protected def value_=(value: R): Unit =
-        throw new UnsupportedOperationException("The value_= method is not supported on a mapped instance")
-    }
-
+    new MappedReadOnlyProperty[T, R](f, this)
 }
 
 object ReadOnlyProperty {
@@ -44,19 +41,17 @@ object ReadOnlyProperty {
   def unapply[T](r: ReadOnlyProperty[T]): Option[T] =
     Option(r) map (_.value)
 
-  implicit def fromReadOnlyEvent[T](event: ReadOnlyEvent[T]): ReadOnlyProperty[Option[T]] =
-    new ReadOnlyProperty[Option[T]] {
-      val defaultValue = None
-      def value = defaultValue
-      protected def value_=(value: Option[T]) =
-        throw new UnsupportedOperationException("The value_= method is not supported on a mapped instance")
+  implicit def fromReadOnlyEvent[T](event: ReadOnlyEvent[T]): ReadOnlyProperty[Option[T]] = {
+    val property = Property[Option[T]](None)
+    val mappedEvent = event map Option.apply
+    mappedEvent apply property.value_=
 
-      override val change = event map Option.apply
-    }
+    property
+  }
 
-  implicit def toBindingSource[T](source: ReadOnlyProperty[T]):BindingSource[T] =
+  implicit def toBindingSource[T](source: ReadOnlyProperty[T]): BindingSource[T] =
     new BindingSource(source)
-  
+
   // Option extends Product so provide a shortcut to the SimpleCombinator
   implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = simpleCombinator(a)
   implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = new TupleCombinator(a map Tuple1.apply)
@@ -66,8 +61,8 @@ object ReadOnlyProperty {
     import ee.util.Tuples._
 
     def |[B, L <: HList, P <: HList, R <: Product](b: ReadOnlyProperty[B])(
-      implicit implicits:Implicits[A, B, L, P, R]): ReadOnlyProperty[R] = {
-      
+      implicit implicits: Implicits[A, B, L, P, R]): ReadOnlyProperty[R] = {
+
       new CombinedPropertyBase(a, b) {
         protected def value_=(value: R): Unit =
           throw new UnsupportedOperationException("The value_= method is not supported on a combined instance")

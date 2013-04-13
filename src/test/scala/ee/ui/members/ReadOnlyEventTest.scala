@@ -6,6 +6,7 @@ import scala.tools.reflect.ToolBoxError
 import ee.ui.system.RestrictedAccess
 import utils.SignatureTest
 import ee.ui.members.detail.Subscription
+import scala.collection.mutable.ListBuffer
 
 class ReadOnlyEventTest extends Specification {
   xonly
@@ -71,7 +72,7 @@ class ReadOnlyEventTest extends Specification {
       fireOne
       result === 1
     }
-    
+
     "have the ability to collect events" in {
       var caughtInformation = "0"
       val newEvent: ReadOnlyEvent[String] =
@@ -123,9 +124,26 @@ class ReadOnlyEventTest extends Specification {
     }
 
     "be able to convert to a signal" in {
-      val signal:ReadOnlySignal = event
+      val signal: ReadOnlySignal = event
       ok
     }
 
+    "have the ability to be combined" in {
+      val event1 = ReadOnlyEvent[Int]
+      val event2 = ReadOnlyEvent[Long]
+      val event3 = ReadOnlyEvent[Char]
+
+      val combined = event1 | event2 | event3
+
+      val events = ListBuffer.empty[AnyVal]
+
+      combined { events += _ }
+
+      fire(event1, 1)
+      fire(event2, 2l)
+      fire(event3, '3')
+
+      events.toSeq === Seq(1, 2l, '3')
+    }
   }
 }

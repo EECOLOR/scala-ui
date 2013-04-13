@@ -46,10 +46,12 @@ class ReadOnlyPropertyTest extends Specification {
       prop1.value === 2
     }
 
+    "have a read only change event" in {
+      TypeTest[ReadOnlyEvent[Int]].forInstance(prop1.change)
+    }    
+    
     "be able to dispatch changes" in {
-      prop1.change { information =>
-        result = information
-      }
+      prop1.change { result = _ }
       setValue(2)
 
       result === 2
@@ -63,9 +65,18 @@ class ReadOnlyPropertyTest extends Specification {
 
       result === 1
     }
-
-    "have a read only change event" in {
-      TypeTest[ReadOnlyEvent[Int]].forInstance(prop1.change)
+    
+    "have a read only valueChange event" in {
+      TypeTest[ReadOnlyEvent[(Int, Int)]].forInstance(prop1.valueChange)
+    }
+    
+    "dispatch value changes old -> new" in {
+      var result = (0, 1)
+      prop1.valueChange { result = _ }
+      
+      setValue(2)
+      
+      result === (1, 2)
     }
     
     "automatically convert to its value if appropriate" in {

@@ -6,6 +6,9 @@ import ee.ui.display.detail.ReadOnlyNode
 import ee.ui.display.traits.ReadOnlyFill
 
 object ReadOnlyRectangleTest extends Specification {
+  
+  xonly
+  
   "ReadOnlyRectangle" should {
     "extend the correct traits" in {
       SubtypeTest[ReadOnlyRectangle <:< ReadOnlyNode with ReadOnlyFill]

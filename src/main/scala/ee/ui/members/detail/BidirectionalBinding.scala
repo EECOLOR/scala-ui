@@ -21,13 +21,13 @@ class BidirectionalBinding[T](internalLeft: Property[T], internalRight: Property
   val rightSubscription: Subscription =
     internalRight change changeHandler(leftSubscription, leftRepresentation)
 
-  case class PropertyProxy[T](source: Property[T]) extends ReadOnlyProperty[T] {
+  case class PropertyProxy[T](source: Property[T]) extends Property[T] {
     val defaultValue = source.defaultValue
     def value = source.value
-    def value_=(value: T) = {
-      source.value = value
-      fireChange(value)
-    }
+    def setValue(value: T) = source.value = value
+
+    val change = ReadOnlyEvent[T]
+    val valueChange = ReadOnlyEvent[(T, T)]
   }
 
   val leftRepresentation = PropertyProxy(internalLeft)

@@ -16,10 +16,24 @@ import shapeless.Last
 import shapeless.InitAux
 import shapeless.LastAux
 import ee.ui.members.detail.CombinedPropertyBase
+import ee.ui.members.detail.MappedProperty
 
 trait Property[T] extends ReadOnlyProperty[T] {
 
-  def value_=(value: T): Unit
+  def value_=(value: T): Unit = {
+    val oldValue = this.value
+    if (value != oldValue) {
+      setValue(value)
+      fireEvents(oldValue, value)
+    }
+  }
+
+  protected def setValue(value: T): Unit
+
+  protected def fireEvents(oldValue: T, newValue: T): Unit = {
+    fireChange(value)
+    fireValueChange(oldValue, newValue)
+  }
 
   def <==(source: BindingSource[T]) = source bindTo this
 
@@ -31,11 +45,9 @@ object Property {
   case class DefaultProperty[T](defaultValue: T) extends Property[T] {
     private var _value: T = defaultValue
     def value = _value
-    def value_=(value: T): Unit =
-      if (value != _value) {
-        _value = value
-        fireChange(value)
-      }
+    def setValue(value: T): Unit = _value = value
+    val change = ReadOnlyEvent[T]
+    val valueChange = ReadOnlyEvent[(T, T)]
   }
 
   def apply[T](defaultValue: T): Property[T] = DefaultProperty(defaultValue)
@@ -44,17 +56,14 @@ object Property {
 
   // Option extends Product so provide a shortcut to the SimpleCombinator
   implicit def optionCombinator[A <: Option[_]](a: Property[A]) = simpleCombinator(a)
-  implicit def simpleCombinator[A](a: Property[A]) = {
+  implicit def simpleCombinator[A](a: Property[A]): TupleCombinator[Tuple1[A]] = {
 
     val f = Tuple1.apply[A] _
 
-    val wrapped =
-      new Property[Tuple1[A]] {
-        val defaultValue = f(a.defaultValue)
-        def value = f(a.value)
-        def value_=(value: Tuple1[A]) = a.value = value._1
-        override val change = a.change map f
-      }
+    def r(t: Tuple1[A]) = t._1
+
+    val wrapped = new MappedProperty[A, Tuple1[A]](f, r, a)
+
     new TupleCombinator(wrapped)
   }
 
@@ -63,12 +72,19 @@ object Property {
     import ee.util.Tuples._
 
     def |[B, L <: HList, P <: HList, R <: Product](b: Property[B])(
-      implicit implicits:Implicits[A, B, L, P, R],
+      implicit implicits: Implicits[A, B, L, P, R],
       reverseHLister: HListerAux[R, P], reverseTupler: TuplerAux[L, A],
       init: InitAux[P, L], last: LastAux[P, B]): Property[R] =
 
       new CombinedPropertyBase(a, b) with Property[R] {
-        def value_=(value: R): Unit = {
+
+        /* 
+         * Do not fire events, we set the value on the sub elements, that will
+         * trigger the events to fire in CombinedPropertyBase
+         */  
+        override protected def fireEvents(oldValue: R, newValue: R): Unit = {}
+
+        def setValue(value: R): Unit = {
           val valueAsHList = reverseHLister(value)
           a.value = reverseTupler(init(valueAsHList))
           b.value = last(valueAsHList)

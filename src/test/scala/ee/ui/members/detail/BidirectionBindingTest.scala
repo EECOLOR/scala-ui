@@ -6,6 +6,7 @@ import scala.collection.mutable.ListBuffer
 
 class BidirectionBindingTest extends Specification {
 
+  xonly
   isolated
 
   val prop1 = Property[Int](1)
