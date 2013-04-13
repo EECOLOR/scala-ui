@@ -5,6 +5,7 @@ import utils.SignatureTest
 import ee.ui.members.ReadOnlyProperty
 import scala.language.existentials
 import ee.ui.display.traits.ReadOnlySize
+import ee.ui.display.implementation.contracts.NodeContract
 
 object ReadOnlyRootTest extends Specification {
   
