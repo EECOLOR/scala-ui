@@ -1,18 +1,25 @@
 package ee.ui.system
 
-import org.specs2.mutable.Specification
-import utils.TestUtils
+import scala.annotation.implicitNotFound
 import scala.tools.reflect.ToolBoxError
 
-class AccessRestrictionTest extends Specification {
+import org.specs2.mutable.Specification
+
+import utils.SubtypeTest
+import utils.TestUtils
+
+object AccessRestrictionTest extends Specification {
+  
   xonly
-  isolated
   
   "AccessRestriction" should {
+    
     "be available as object" in {
-      val a:AccessRestriction = RestrictedAccess
+      SubtypeTest[RestrictedAccess.type <:< AccessRestriction]
     }
+    
     "give a message as to what is meant if not implicitly available" in {
+      
       def result = TestUtils.eval(
           """|import ee.ui.system.AccessRestriction
              |implicitly[AccessRestriction]

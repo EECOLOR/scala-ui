@@ -1,8 +1,9 @@
 package ee.ui.members
 
+import scala.annotation.implicitNotFound
+
 import ee.ui.events.Change
 import ee.ui.system.AccessRestriction
-import scala.annotation.implicitNotFound
 
 trait ObservableSeq[T] extends Seq[T] {
   val change = ReadOnlyEvent[Change[T]]
@@ -15,9 +16,9 @@ object ObservableSeq {
   def apply[T](elements: T*): ObservableSeq[T] = ObservableArrayBuffer(elements: _*)
   def empty[T]: ObservableSeq[T] = ObservableArrayBuffer.empty[T]
 
-  def add[T](o: ObservableSeq[T], element: T)(implicit ev: AccessRestriction) =
+  def add[T](o: ObservableSeq[T], element: T)(implicit ev: AccessRestriction):Unit =
     o += element
 
-  def remove[T](o: ObservableSeq[T], element: T)(implicit ev: AccessRestriction) =
+  def remove[T](o: ObservableSeq[T], element: T)(implicit ev: AccessRestriction):Unit =
     o -= element
 }

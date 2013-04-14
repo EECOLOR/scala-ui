@@ -1,9 +1,11 @@
 package ee.ui.members.detail
 
-import org.specs2.mutable.Specification
-import utils.SubtypeTest
-import ee.ui.members.Property
 import scala.collection.mutable.ListBuffer
+
+import org.specs2.mutable.Specification
+
+import ee.ui.members.Property
+import utils.SubtypeTest
 
 class MappedPropertyTest extends Specification {
 

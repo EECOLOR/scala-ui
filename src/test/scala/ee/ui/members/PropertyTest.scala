@@ -3,103 +3,127 @@ package ee.ui.members
 import org.specs2.mutable.Specification
 import org.specs2.mutable.Before
 import scala.collection.mutable.ListBuffer
+import utils.SubtypeTest
+import utils.SignatureTest
+import ee.ui.members.detail.BindingSource
+import ee.ui.members.detail.TupleCombinator
 
 class PropertyTest extends Specification {
 
   xonly
   isolated
 
-  val prop1 = Property(1)
-  val prop2 = Property(2)
-  var result = 1
+  class StubProperty extends Property[Int] {
+    val defaultValue = 1
+    def value = 1
+    def setValue(value: Int): Unit = {}
+    val change = ReadOnlyEvent[Int]
+    val valueChange = ReadOnlyEvent[(Int, Int)]
+  }
 
   "Property" should {
 
     "extend ReadOnlyProperty" in {
-      prop1 must beAnInstanceOf[ReadOnlyProperty[Int]]
+      SubtypeTest[Property[Int] <:< ReadOnlyProperty[Int]]
     }
 
-    "have a value property that can be set" in {
-      prop1.value = 2
-      prop1.value === 2
-    }
+    "have a value property" >> {
 
-    "have an unapply method and a default value" in {
-      prop1.value = 2
-      val Property(value) = prop1
-
-      value === 2
-    }
-    "not fire two change event if value does not change" in {
-      var valueChanged = false
-      prop1.change { valueChanged = true }
-      prop1.value === 1
-
-      !valueChanged
-    }
-  }
-  "Bindings" >> {
-    "to another property" in {
-      prop1 <== prop2
-      prop1.value === 2
-      prop2.value = 3
-      prop1.value === 3
-    }
-    "to another mapped property" in {
-      val prop = Property("2")
-      prop1 <== prop map (_.toInt)
-      prop1.value === 2
-    }
-    "to an event" in {
-      val prop = Property[Option[Int]](None)
-      val event = Event[Int]
-      prop <== event
-      prop.value === None
-      event fire 1
-      prop.value === Some(1)
-    }
-    "to another filtered property" in {
-      prop1 <== prop2 filter (_ > 2)
-      prop1.value === 1
-      prop2.value = 3
-      prop1.value === 3
-    }
-    "to a method" in {
-      val values = ListBuffer.empty[Int]
-      prop1 bindWith { value =>
-        values += value
+      "with signature" in {
+        SignatureTest[Property[Int], Int, Unit](_.value = _)
       }
-      prop1.value = 2
-      values.toSeq === Seq(1, 2)
-    }
-    "combined to a method" in {
-      val values = ListBuffer.empty[(Int, Int)]
-      prop1 | prop2 bindWith { value =>
-        values += value
+
+      "that can be set" in {
+        val prop = Property(1)
+        prop.value = 2
+        prop.value === 2
       }
-      prop1.value = 2
-      prop2.value = 3
-      values.toSeq === Seq((1, 2), (2, 2), (2, 3))
+
+      "that does not call setValue and fireEvents" in {
+        var methodCalled = false
+
+        val prop = new StubProperty {
+          override def setValue(value: Int): Unit = methodCalled = true
+          override def fireEvents(oldValue: Int, newValue: Int) = methodCalled = true
+        }
+
+        prop.value = 1
+
+        !methodCalled
+      }
     }
-    "be combinable" in {
-      val prop1 = Property(1)
-      val prop2 = Property("a")
-      val prop3 = Property(0l)
-      
-      val newProp:Property[(Int, String, Long)] = 
-        prop1 | prop2 | prop3
-        
-      newProp.value === (1, "a", 0l)
-      prop1.value = 2
-      newProp.value === (2, "a", 0l)
-      prop2.value = "b"
-      newProp.value === (2, "b", 0l)
-      prop3.value = 1l
-      newProp.value === (2, "b", 1l)
-      newProp.value = (3, "c", 2l)
-      prop1.value === 3
-      prop2.value === "c"
-      prop3.value === 2l
+
+    "have a fireEvents method that calls fireChange and fireValueChange" in {
+      var fireChangeCalled = false
+      var fireValueChangeCalled = false
+
+      val prop = new StubProperty {
+
+        override def fireChange(value: Int) =
+          fireChangeCalled = value == 2
+
+        override def fireValueChange(values: (Int, Int)) =
+          fireValueChangeCalled = values._1 == 1 && values._2 == 2
+
+        fireEvents(1, 2)
+      }
+
+      fireValueChangeCalled and fireValueChangeCalled
+    }
+
+    "have a bind method" in {
+      SignatureTest[Property[Int], BindingSource[Int], Unit](_ <== _)
+    }
+
+    "have a birectional bind method" in {
+      SignatureTest[Property[Int], Property[Int], Unit](_ <==> _)
+    }
+
+    "have an apply method" in {
+      SignatureTest[Property.type, Int, Property[Int]](_ apply _)
+    }
+
+    "have a DefaultProperty member" >> {
+
+      "that has the correct signature" in {
+        SignatureTest[Property.type, Int, Property[Int]](_.DefaultProperty(_))
+      }
+
+      "that behaves correctly" in {
+        val prop = Property.DefaultProperty(1)
+        prop.value === 1
+        prop.value = 2
+        prop.value === 2
+      }
+
+      "has a change and valueChange event" in {
+        SignatureTest[Property.DefaultProperty[Int], ReadOnlyEvent[Int]](_.change)
+        SignatureTest[Property.DefaultProperty[Int], ReadOnlyEvent[(Int, Int)]](_.valueChange)
+      }
+    }
+
+    "have an unapply method" in {
+      val Property(value) = new StubProperty
+
+      value === 1
+    }
+
+    "have an implicit conversion to TupleCombinator" >> {
+
+      "for properties that contain tuples" in {
+        val combinator: TupleCombinator[(String, Int)] = Property("1" -> 1)
+        ok
+      }
+
+      "for properties that contain options" in {
+        val combinator: TupleCombinator[Tuple1[Option[String]]] = Property[Option[String]](None)
+        ok
+      }
+
+      "for other properties" in {
+        val combinator: TupleCombinator[Tuple1[String]] = Property("")
+        ok
+      }
     }
   }
 }

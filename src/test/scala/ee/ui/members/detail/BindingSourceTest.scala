@@ -1,23 +1,48 @@
 package ee.ui.members.detail
 
 import org.specs2.mutable.Specification
+
 import ee.ui.members.Property
-import scala.collection.mutable.ListBuffer
+import ee.ui.members.ReadOnlyProperty
+import ee.ui.system.RestrictedAccess
 
 class BindingSourceTest extends Specification {
 
   xonly
   isolated
 
-  val prop1 = Property(1)
-  val prop2 = Property("1")
-  val prop3 = Property(1l)
-  val bindingSource1 = prop1: BindingSource[Int]
-  val bindingSource2 = prop2: BindingSource[String]
-  val bindingSource3 = prop3: BindingSource[Long]
-  val changes = ListBuffer.empty[(Int, String, Long)]
-
+  val prop = Property(0)
+  val sourceProp = ReadOnlyProperty(1)
+  val source = new BindingSource(sourceProp)
+  def setSourceValue(value:Int) =  
+    ReadOnlyProperty.setValue(sourceProp, value)(RestrictedAccess)
+  
   "BindingSource" should {
-    
+
+    "bind to another property" in {
+      source bindTo prop
+
+      prop.value === 1
+      setSourceValue(2)
+      prop.value === 2
+    }
+
+    "bind to a method" in {
+      var value = 0
+      source bindWith { value = _ }
+      value === 1
+      setSourceValue(2)
+      value === 2
+    }
+
+    "be able to filter" in {
+      val filtered = source filter (_ > 2)
+      filtered bindTo prop
+      prop.value === 0
+      setSourceValue(2)
+      prop.value === 0
+      setSourceValue(3)
+      prop.value === 3
+    }
   }
 }

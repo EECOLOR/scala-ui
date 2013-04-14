@@ -1,14 +1,18 @@
 package ee.ui.members
 
-import org.specs2.mutable.Specification
-import utils.TestUtils
+import scala.collection.mutable.ListBuffer
 import scala.tools.reflect.ToolBoxError
+
+import org.specs2.mutable.Specification
+
+import ee.ui.members.detail.BindingSource
+import ee.ui.members.detail.Subscription
 import ee.ui.system.RestrictedAccess
 import utils.SignatureTest
-import ee.ui.members.detail.Subscription
-import scala.collection.mutable.ListBuffer
+import utils.TestUtils
 
 class ReadOnlyEventTest extends Specification {
+
   xonly
   isolated
 
@@ -19,16 +23,32 @@ class ReadOnlyEventTest extends Specification {
   def fireOne = fire(1)
   var result = 0
 
+  val collected: ReadOnlyEvent[String] =
+    event collect {
+      case information if (information == 1) => information.toString
+    }
+
+  val mapped: ReadOnlyEvent[String] = event map (_.toString)
+
+  val filtered: ReadOnlyEvent[Int] = event filter (_ > 1)
+
+  val event1 = ReadOnlyEvent[Int]
+  val event2 = ReadOnlyEvent[Long]
+  val event3 = ReadOnlyEvent[Char]
+
+  val combined = event1 | event2 | event3
+
   "ReadOnlyEvent" should {
+
     "have the ability to observe" in {
-      SignatureTest[ReadOnlyEvent[Int], Subscription](_.observe(observer = { information: Int => }))
+      SignatureTest[ReadOnlyEvent[Int], Int => Unit, Subscription](_ observe _)
     }
 
     "have a simpler method of observe" in {
-      SignatureTest[ReadOnlyEvent[Int], Subscription](_.apply(observer = { information: Int => }))
+      SignatureTest[ReadOnlyEvent[Int], Int => Unit, Subscription](_ apply _)
     }
 
-    "not be able to fire directly" in {
+    "not be able to be fired directly" in {
       def result = TestUtils.eval("""
           |import ee.ui.members.ReadOnlyEvent
           |  
@@ -47,40 +67,10 @@ class ReadOnlyEventTest extends Specification {
       }
     }
 
-    "be fired using a detour" in {
-      event { result = _ }
-
-      ReadOnlyEvent.fire(event, 1)(RestrictedAccess)
-
-      result === 1
-    }
-
-    "have the ability to unsubscribe an observer" in {
-      val subscription = event { result = _ }
-      subscription.unsubscribe()
-      fireOne
-
-      result === 0
-    }
-
-    "have the ability to disable and enable an observer" in {
-      val subscription = event { result = _ }
-      subscription.disable()
-      fireOne
-      result === 0
-      subscription.enable()
-      fireOne
-      result === 1
-    }
-
     "have the ability to collect events" in {
-      var caughtInformation = "0"
-      val newEvent: ReadOnlyEvent[String] =
-        event collect {
-          case information if (information == 1) => information.toString
-        }
 
-      newEvent { caughtInformation = _ }
+      var caughtInformation = "0"
+      collected { caughtInformation = _ }
 
       fire(1)
       fire(2)
@@ -88,21 +78,11 @@ class ReadOnlyEventTest extends Specification {
       caughtInformation === "1"
     }
 
-    "firing the on a collected event throw an exception" in {
-      val newEvent = event collect {
-        case _ =>
-      }
-
-      fire(newEvent, {}) must throwA[UnsupportedOperationException]
-    }
-
     "have the ability to map events" in {
-      val newEvent: ReadOnlyEvent[String] =
-        event map (_.toString)
 
       var caughtInformation = "0"
 
-      newEvent { caughtInformation = _ }
+      mapped { caughtInformation = _ }
 
       fire(1)
 
@@ -110,12 +90,10 @@ class ReadOnlyEventTest extends Specification {
     }
 
     "have the ability to filter events" in {
-      val newEvent: ReadOnlyEvent[Int] =
-        event filter (_ > 1)
 
       var caughtInformation = 0
 
-      newEvent { caughtInformation = _ }
+      filtered { caughtInformation = _ }
 
       fire(1)
       fire(2)
@@ -123,17 +101,7 @@ class ReadOnlyEventTest extends Specification {
       caughtInformation === 2
     }
 
-    "be able to convert to a signal" in {
-      val signal: ReadOnlySignal = event
-      ok
-    }
-
     "have the ability to be combined" in {
-      val event1 = ReadOnlyEvent[Int]
-      val event2 = ReadOnlyEvent[Long]
-      val event3 = ReadOnlyEvent[Char]
-
-      val combined = event1 | event2 | event3
 
       val events = ListBuffer.empty[AnyVal]
 
@@ -144,6 +112,35 @@ class ReadOnlyEventTest extends Specification {
       fire(event3, '3')
 
       events.toSeq === Seq(1, 2l, '3')
+    }
+
+    "throw an error for each type of event" in {
+      fire(collected, "1") must throwAn[UnsupportedOperationException]
+      fire(mapped, "1") must throwAn[UnsupportedOperationException]
+      fire(filtered, 1) must throwAn[UnsupportedOperationException]
+      fire(combined, 1) must throwAn[UnsupportedOperationException]
+    }
+
+    "have an apply method" in {
+      SignatureTest[ReadOnlyEvent.type, ReadOnlyEvent[Int]](_.apply[Int])
+    }
+    
+    "be fired using a detour" in {
+      event { result = _ }
+
+      ReadOnlyEvent.fire(event, 1)(RestrictedAccess)
+
+      result === 1
+    }
+
+    "be able to convert to a binding source" in {
+      val b:BindingSource[Option[Int]] = event
+      ok
+    }
+    
+    "be able to convert to a signal that can not be fired" in {
+      val signal: ReadOnlySignal = event
+      ReadOnlySignal.fire(signal)(RestrictedAccess) must throwAn[UnsupportedOperationException]
     }
   }
 }

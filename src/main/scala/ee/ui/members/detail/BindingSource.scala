@@ -2,14 +2,6 @@ package ee.ui.members.detail
 
 import ee.ui.members.Property
 import ee.ui.members.ReadOnlyProperty
-import scala.language.implicitConversions
-import ee.ui.members.ReadOnlyEvent
-import shapeless.TuplerAux
-import shapeless.HListerAux
-import shapeless.HList
-import shapeless.PrependAux
-import shapeless.::
-import shapeless.HNil
 
 class BindingSource[A](protected val source: ReadOnlyProperty[A]) { self =>
 
@@ -29,8 +21,4 @@ class BindingSource[A](protected val source: ReadOnlyProperty[A]) { self =>
           if (f(value)) method(value)
         }
     }
-}
-
-object BindingSource {
-
 }

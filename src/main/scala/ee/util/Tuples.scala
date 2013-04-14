@@ -1,12 +1,11 @@
 package ee.util
 
-import shapeless.TuplerAux
-import shapeless.HListerAux
-import shapeless.HList
 import shapeless.::
-import shapeless.PrependAux
+import shapeless.HList
+import shapeless.HListerAux
 import shapeless.HNil
-import scala.language.implicitConversions
+import shapeless.PrependAux
+import shapeless.TuplerAux
 
 object Tuples {
 

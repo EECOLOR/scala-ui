@@ -1,12 +1,12 @@
 package ee.ui.members
 
-import scala.collection.mutable.ListBuffer
-import ee.ui.system.AccessRestriction
-import ee.ui.members.detail.Subscription
-import ee.ui.members.detail.Subscription
-import scala.language.implicitConversions
+import ee.ui.members.ReadOnlyProperty.fromReadOnlyEvent
 import ee.ui.members.detail.BindingSource
 import ee.ui.members.detail.CombinedEventBase
+import ee.ui.members.detail.Subscription
+import ee.ui.system.AccessRestriction
+
+import scala.language.implicitConversions
 
 trait ReadOnlyEvent[A] { self =>
 
@@ -41,7 +41,7 @@ trait ReadOnlyEvent[A] { self =>
       information => if (f(information)) observer(information)
     }
 
-  def |[B <: C, A1 >: A <: C, C](that: ReadOnlyEvent[B]) =
+  def |[B <: C, A1 >: A <: C, C](that: ReadOnlyEvent[B]):ReadOnlyEvent[C] =
     new CombinedEventBase[A1, B, C](self.asInstanceOf[ReadOnlyEvent[A1]], that) {
       protected def fire(information: C): Unit =
         throw new UnsupportedOperationException("The fire method is not supported on a combined instance")

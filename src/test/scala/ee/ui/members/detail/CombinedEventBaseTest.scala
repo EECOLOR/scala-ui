@@ -1,10 +1,12 @@
 package ee.ui.members.detail
 
-import org.specs2.mutable.Specification
-import utils.SubtypeTest
-import ee.ui.members.ReadOnlyEvent
 import scala.collection.mutable.ListBuffer
+
+import org.specs2.mutable.Specification
+
 import ee.ui.members.Event
+import ee.ui.members.ReadOnlyEvent
+import utils.SubtypeTest
 
 class CombinedEventBaseTest extends Specification {
 

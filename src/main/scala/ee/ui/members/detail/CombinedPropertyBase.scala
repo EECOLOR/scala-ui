@@ -17,15 +17,21 @@ abstract class CombinedPropertyBase[A <: Product, B, L <: HList, P <: HList, R <
   val defaultValue = a.defaultValue :+ b.defaultValue
   def value = a.value :+ b.value
 
-  private val aChange = a.change map (_ :+ b.value)
-  private val bChange = b.change map (a.value :+ _)
-  private val aValueChange = a.valueChange map {
-    case (oldValue, newValue) => (oldValue :+ b.value) -> (newValue :+ b.value)
-  }
-  private val bValueChange = b.valueChange map {
-    case (oldValue, newValue) => (a.value :+ oldValue) -> (a.value :+ newValue)
+  val changeEvent = {
+    val aChange = a.change map (_ :+ b.value)
+    val bChange = b.change map (a.value :+ _)
+
+    aChange | bChange
   }
 
-  val change = aChange | bChange
-  val valueChange = aValueChange | bValueChange
+  val valueChangeEvent = {
+    val aValueChange = a.valueChange map {
+      case (oldValue, newValue) => (oldValue :+ b.value) -> (newValue :+ b.value)
+    }
+    val bValueChange = b.valueChange map {
+      case (oldValue, newValue) => (a.value :+ oldValue) -> (a.value :+ newValue)
+    }
+
+    aValueChange | bValueChange
+  }
 }

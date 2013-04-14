@@ -1,9 +1,8 @@
 package ee.ui.members.detail
 
 import ee.ui.members.Property
-import ee.ui.members.ReadOnlyProperty
-import ee.ui.system.RestrictedAccess
 import ee.ui.members.ReadOnlyEvent
+import ee.ui.members.ReadOnlyProperty
 
 class BidirectionalBinding[T](internalLeft: Property[T], internalRight: Property[T]) {
 

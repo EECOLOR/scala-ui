@@ -1,10 +1,13 @@
 package ee.ui.members.detail
 
-import org.specs2.mutable.Specification
-import utils.SubtypeTest
-import ee.ui.members.ReadOnlyProperty
-import ee.ui.members.Property
+import scala.annotation.implicitNotFound
 import scala.collection.mutable.ListBuffer
+
+import org.specs2.mutable.Specification
+
+import ee.ui.members.Property
+import ee.ui.members.ReadOnlyProperty
+import utils.SubtypeTest
 
 class MappedReadOnlyPropertyTest extends Specification {
 

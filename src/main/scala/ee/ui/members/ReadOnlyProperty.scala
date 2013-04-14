@@ -12,6 +12,7 @@ import shapeless.::
 import shapeless.HNil
 import ee.ui.members.detail.CombinedPropertyBase
 import ee.ui.members.detail.MappedReadOnlyProperty
+import ee.ui.members.detail.ReadOnlyTupleCombinator
 
 trait ReadOnlyProperty[T] { self =>
   val defaultValue: T
@@ -54,19 +55,7 @@ object ReadOnlyProperty {
 
   // Option extends Product so provide a shortcut to the SimpleCombinator
   implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = simpleCombinator(a)
-  implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = new TupleCombinator(a map Tuple1.apply)
+  implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = tupleCombinator(a map Tuple1.apply)
 
-  implicit class TupleCombinator[A <: Product](a: ReadOnlyProperty[A]) {
-
-    import ee.util.Tuples._
-
-    def |[B, L <: HList, P <: HList, R <: Product](b: ReadOnlyProperty[B])(
-      implicit implicits: Implicits[A, B, L, P, R]): ReadOnlyProperty[R] = {
-
-      new CombinedPropertyBase(a, b) {
-        protected def value_=(value: R): Unit =
-          throw new UnsupportedOperationException("The value_= method is not supported on a combined instance")
-      }
-    }
-  }
+  implicit def tupleCombinator[A <: Product](a: ReadOnlyProperty[A])= new ReadOnlyTupleCombinator(a)
 }
