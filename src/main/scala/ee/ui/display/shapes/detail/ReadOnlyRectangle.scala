@@ -1,6 +1,5 @@
 package ee.ui.display.shapes.detail
 
-import ee.ui.display.detail.ReadOnlyNode
-import ee.ui.display.traits.ReadOnlyFill
+import ee.ui.display.detail.ReadOnlyShape
 
-trait ReadOnlyRectangle extends ReadOnlyNode with ReadOnlyFill
+trait ReadOnlyRectangle extends ReadOnlyShape
