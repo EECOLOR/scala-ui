@@ -2,7 +2,13 @@ package ee.ui.display.implementation.contracts
 
 import ee.ui.display.detail.ReadOnlyNode
 import ee.ui.display.shapes.detail.ReadOnlyRectangle
+import ee.ui.display.detail.ReadOnlyShape
 
 sealed trait NodeContract { self: ReadOnlyNode => }
 
-trait RectangleContract extends NodeContract with ReadOnlyRectangle
+sealed trait ShapeContract extends ReadOnlyShape { self: NodeContract => 
+
+  val asNodeContract = self
+}
+
+trait RectangleContract extends NodeContract with ShapeContract with ReadOnlyRectangle
