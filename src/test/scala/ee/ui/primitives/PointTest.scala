@@ -5,7 +5,6 @@ import org.specs2.mutable.Specification
 object PointTest extends Specification {
 
   xonly
-  isolated
 
   val point1 = Point(1, 4, 5)
   val point2 = Point(2, 3, 6)
