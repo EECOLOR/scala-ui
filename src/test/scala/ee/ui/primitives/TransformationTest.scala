@@ -9,6 +9,8 @@ object TransformationTest extends Specification {
 
   xonly
 
+  val transformation:Transformation = Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+  
   def checkDefaultValues(transformation: Transformation) = {
     transformation.xx === 1
     transformation.xy === 0
@@ -95,54 +97,53 @@ object TransformationTest extends Specification {
       SignatureTest[Transformation, Point, Point](_ transform _)
 
       val point = Point(1, 2, 3)
-      val affine = Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 
       val Point(x, y, z) = point
-      val Affine(xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt) = affine
+      val Affine(xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt) = transformation
 
-      Point(18, 46, 74) === (affine transform point)
+      Point(18, 46, 74) === (transformation transform point)
     }
 
     "be able to transform bounds" in {
       SignatureTest[Transformation, Bounds, Bounds](_ transform _)
 
       val bounds = Bounds(-1, -2, -3, 1, 2, 3)
-      val affine = Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 
-      Bounds(-10, -30, -50, 18, 46, 74) === (affine transform bounds)
+      Bounds(-10, -30, -50, 18, 46, 74) === (transformation transform bounds)
     }
 
     "be able to concat with another transformation" in {
-      val affine1 = Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-      val affine2 = Affine(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24)
+      val affine1 = Affine(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24)
+      val affine2 = transformation
 
-      affine2 ++ affine1 === Affine(76.0,88.0,100.0,116.0,196.0,232.0,268.0,312.0,316.0,376.0,436.0,508.0)
+      affine1 ++ affine2 === Affine(76.0, 88.0, 100.0, 116.0, 196.0, 232.0, 268.0, 312.0, 316.0, 376.0, 436.0, 508.0)
     }
 
-    def ++(self: Affine, t: Transformation): Transformation = {
+    "be able to convert to affine" in {
+      
+      val t1 = new Transformation {
+        override val xx: Double = 1
+        override val xy: Double = 2
+        override val xz: Double = 3
+        override val xt: Double = 4
 
-      val Affine(xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt) = self
+        override val yx: Double = 5
+        override val yy: Double = 6
+        override val yz: Double = 7
+        override val yt: Double = 8
 
-      val mxx = xx * t.xx + xy * t.yx + xz * t.zx
-      val mxy = xx * t.xy + xy * t.yy + xz * t.zy
-      val mxz = xx * t.xz + xy * t.yz + xz * t.zz
-      val mxt = xx * t.xt + xy * t.yt + xz * t.zt + xt
+        override val zx: Double = 9
+        override val zy: Double = 10
+        override val zz: Double = 11
+        override val zt: Double = 12
+      }
 
-      val myx = yx * t.xx + yy * t.yx + yz * t.zx
-      val myy = yx * t.xy + yy * t.yy + yz * t.zy
-      val myz = yx * t.xz + yy * t.yz + yz * t.zz
-      val myt = yx * t.xt + yy * t.yt + yz * t.zt + yt
-
-      val mzx = zx * t.xx + zy * t.yx + zz * t.zx
-      val mzy = zx * t.xy + zy * t.yy + zz * t.zy
-      val mzz = zx * t.xz + zy * t.yz + zz * t.zz
-      val mzt = zx * t.xt + zy * t.yt + zz * t.zt + zt
-
-      Affine(
-        mxx, mxy, mxz, mxt,
-        myx, myy, myz, myt,
-        mzx, mzy, mzz, mzt)
+      t1.toAffine === transformation
     }
-
+    
+    "not convert when it already is affine" in {
+      val t2: Transformation = transformation
+      t2.toAffine eq transformation
+    }
   }
 }

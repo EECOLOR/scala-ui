@@ -63,7 +63,7 @@ trait Transformation {
 
     Bounds(minPoint, maxPoint)
   }
-  
+
   def ++(t: Transformation): Transformation = {
 
     val mxx = xx * t.xx + xy * t.yx + xz * t.zx
@@ -86,4 +86,8 @@ trait Transformation {
       myx, myy, myz, myt,
       mzx, mzy, mzz, mzt)
   }
+
+  def toAffine =
+    if (isInstanceOf[Affine]) asInstanceOf[Affine]
+    else Affine(xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt)
 }
