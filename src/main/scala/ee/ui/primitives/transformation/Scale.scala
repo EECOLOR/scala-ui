@@ -33,20 +33,20 @@ case class Scale(
 
   override def ++(t: Transformation): Transformation = {
 
-    val mxx = xx * t.xx
-    val mxy = xx * t.xy
-    val mxz = xx * t.xz
-    val mxt = xx * t.xt + t.xt
+    val mxx = t.xx * xx
+    val mxy = t.xy * yy
+    val mxz = t.xz * zz
+    val mxt = t.xx * xt + t.xy * yt + t.xz * zt + t.xt
 
-    val myx = yy * t.yx
-    val myy = yy * t.yy
-    val myz = yy * t.yz
-    val myt = yy * t.yt + t.yt
+    val myx = t.yx * xx
+    val myy = t.yy * yy
+    val myz = t.yz * zz
+    val myt = t.yx * xt + t.yy * yt + t.yz * zt + t.yt
 
-    val mzx = zz * t.zx
-    val mzy = zz * t.zy
-    val mzz = zz * t.zz
-    val mzt = zz * t.zt + t.zt
+    val mzx = t.zx * xx
+    val mzy = t.zy * yy
+    val mzz = t.zz * zz
+    val mzt = t.zx * xt + t.zy * yt + t.zz * zt + t.zt
 
     Affine(
       mxx, mxy, mxz, mxt,

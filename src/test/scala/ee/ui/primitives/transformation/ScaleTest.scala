@@ -8,6 +8,8 @@ import ee.ui.primitives.Bounds
 
 object ScaleTest extends Specification {
 
+  xonly
+  
   // has changed values for the values that are not touched by scale
   def invalidScale(x: Double = 1, y: Double = 1, z: Double = 1, pivot: Point = Point(0, 0, 0)) = new Scale(x, y, z, pivot) {
     override val xy: Double = 1
@@ -56,7 +58,7 @@ object ScaleTest extends Specification {
     }
 
     "overrides ++" in {
-      (invalidScale(1, 2, 3, Point(4, 5, 6)) ++ Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)) === Affine(1.0,2.0,3.0,8.0,10.0,12.0,14.0,24.0,27.0,30.0,33.0,48.0)
+      (invalidScale(1, 2, 3, Point(4, 5, 6)) ++ Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)) === Affine(1.0,4.0,9.0,-42.0,5.0,12.0,21.0,-106.0,9.0,20.0,33.0,-170.0)
     }
   }
 
