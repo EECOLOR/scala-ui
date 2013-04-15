@@ -31,20 +31,18 @@ trait Transformation {
     transform(x, y, z)
   }
 
-  private def transform(x:Double, y:Double, z:Double):Point =
+  private def transform(x: Double, y: Double, z: Double): Point =
     Point(
       xx * x + xy * y + xz * z + xt,
       yx * x + yy * y + yz * z + yt,
       zx * x + zy * y + zz * z + zt)
-  
+
   def transform(b: Bounds): Bounds = {
 
     val Bounds(minX, minY, minZ, maxX, maxY, maxZ) = b
 
-    val firstTransformation = 
-      transform(minX, minY, minZ)
-
     val transformations = Seq(
+      transform(minX, minY, minZ),
       transform(minX, minY, maxZ),
       transform(minX, maxY, minZ),
       transform(minX, maxY, maxZ),
@@ -53,9 +51,12 @@ trait Transformation {
       transform(maxX, maxY, minZ),
       transform(maxX, maxY, maxZ))
 
+    val head = transformations.head
+    val tail = transformations.tail
+
     val (minPoint, maxPoint) =
-      transformations.foldLeft(firstTransformation -> firstTransformation) {
-        case ((minPoint, maxPoint), t) => (t min minPoint, t max maxPoint)
+      tail.foldLeft(head -> head) {
+        case ((minPoint, maxPoint), p) => (p min minPoint, p max maxPoint)
       }
 
     Bounds(minPoint, maxPoint)
