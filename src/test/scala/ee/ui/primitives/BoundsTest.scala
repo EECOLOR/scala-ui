@@ -4,7 +4,7 @@ import org.specs2.mutable.Specification
 
 object BoundsTest extends Specification {
 
-  //xonly
+  xonly
 
   val bounds = Bounds(-1, -2, -3, 1, 2, 3)
 
@@ -64,10 +64,5 @@ object BoundsTest extends Specification {
     "have a ZERO instance" in {
       Bounds.ZERO === Bounds(0, 0, 0, 0)
     }
-    
-    "have a transform method" in {
-      todo
-    }
   }
-
 }

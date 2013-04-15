@@ -100,10 +100,16 @@ object TransformationTest extends Specification {
       val Point(x, y, z) = point
       val Affine(xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt) = affine
 
-      Point(
-        xx * x + xy * y + xz * z + xt,
-        yx * x + yy * y + yz * z + yt,
-        zx * x + zy * y + zz * z + zt) === (affine transform point)
+      Point(18, 46, 74) === (affine transform point)
+    }
+
+    "be able to transform bounds" in {
+      SignatureTest[Transformation, Bounds, Bounds](_ transform _)
+
+      val bounds = Bounds(-1, -2, -3, 1, 2, 3)
+      val affine = Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+      
+      Bounds(-10.0,-30.0,-50.0,18.0,46.0,74.0) === (affine transform bounds) 
     }
   }
 }

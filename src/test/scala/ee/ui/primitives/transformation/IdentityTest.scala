@@ -7,6 +7,8 @@ import ee.ui.primitives.TransformationTest
 
 object IdentityTest extends Specification {
   
+  xonly
+  
   "Identity" should {
     
     "extend Transformation" in {
@@ -16,7 +18,5 @@ object IdentityTest extends Specification {
     "has the correct values" in {
       TransformationTest.checkDefaultValues(Identity)
     }
-    
   }
-  
 }

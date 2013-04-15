@@ -1,7 +1,6 @@
 package ee.ui.primitives.transformation
 
 import ee.ui.primitives.Transformation
-import scala.runtime.Statics
 
 case class Affine(
   override val xx: Double = 1,
@@ -17,5 +16,4 @@ case class Affine(
   override val zx: Double = 0,
   override val zy: Double = 0,
   override val zz: Double = 1,
-  override val zt: Double = 0) extends Transformation {
-}
+  override val zt: Double = 0) extends Transformation
