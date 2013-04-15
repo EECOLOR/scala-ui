@@ -108,8 +108,41 @@ object TransformationTest extends Specification {
 
       val bounds = Bounds(-1, -2, -3, 1, 2, 3)
       val affine = Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-      
-      Bounds(-10.0,-30.0,-50.0,18.0,46.0,74.0) === (affine transform bounds) 
+
+      Bounds(-10, -30, -50, 18, 46, 74) === (affine transform bounds)
     }
+
+    "be able to concat with another transformation" in {
+      val affine1 = Affine(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+      val affine2 = Affine(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24)
+
+      affine2 ++ affine1 === Affine(76.0,88.0,100.0,116.0,196.0,232.0,268.0,312.0,316.0,376.0,436.0,508.0)
+    }
+
+    def ++(self: Affine, t: Transformation): Transformation = {
+
+      val Affine(xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt) = self
+
+      val mxx = xx * t.xx + xy * t.yx + xz * t.zx
+      val mxy = xx * t.xy + xy * t.yy + xz * t.zy
+      val mxz = xx * t.xz + xy * t.yz + xz * t.zz
+      val mxt = xx * t.xt + xy * t.yt + xz * t.zt + xt
+
+      val myx = yx * t.xx + yy * t.yx + yz * t.zx
+      val myy = yx * t.xy + yy * t.yy + yz * t.zy
+      val myz = yx * t.xz + yy * t.yz + yz * t.zz
+      val myt = yx * t.xt + yy * t.yt + yz * t.zt + yt
+
+      val mzx = zx * t.xx + zy * t.yx + zz * t.zx
+      val mzy = zx * t.xy + zy * t.yy + zz * t.zy
+      val mzz = zx * t.xz + zy * t.yz + zz * t.zz
+      val mzt = zx * t.xt + zy * t.yt + zz * t.zt + zt
+
+      Affine(
+        mxx, mxy, mxz, mxt,
+        myx, myy, myz, myt,
+        mzx, mzy, mzz, mzt)
+    }
+
   }
 }
