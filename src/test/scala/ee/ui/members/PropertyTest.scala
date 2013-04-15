@@ -74,6 +74,13 @@ class PropertyTest extends Specification {
     "have a bind method" in {
       SignatureTest[Property[Int], BindingSource[Int], Unit](_ <== _)
     }
+    
+    "have a bind method that allows binding to a property of a subtype" in {
+      val anyValProp = Property[AnyVal](0)
+      val intProp = Property(1)
+      anyValProp <== intProp
+      anyValProp.value === 1
+    }
 
     "have a birectional bind method" in {
       SignatureTest[Property[Int], Property[Int], Unit](_ <==> _)

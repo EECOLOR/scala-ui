@@ -5,7 +5,7 @@ import ee.ui.members.ReadOnlyProperty
 
 class BindingSource[A](protected val source: ReadOnlyProperty[A]) { self =>
 
-  def bindTo(property: Property[A]): Unit =
+  def bindTo[B >: A](property: Property[B]): Unit =
     bindWith(property.value_=)
 
   def bindWith(method: A => Unit): Unit = {

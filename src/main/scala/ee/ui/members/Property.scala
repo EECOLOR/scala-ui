@@ -7,9 +7,9 @@ import ee.ui.members.detail.TupleCombinator
 
 import scala.language.implicitConversions
 
-trait Property[T] extends ReadOnlyProperty[T] {
+trait Property[A] extends ReadOnlyProperty[A] {
 
-  def value_=(value: T): Unit = {
+  def value_=(value: A): Unit = {
     val oldValue = this.value
     if (value != oldValue) {
       setValue(value)
@@ -17,16 +17,16 @@ trait Property[T] extends ReadOnlyProperty[T] {
     }
   }
 
-  protected def setValue(value: T): Unit
+  protected def setValue(value: A): Unit
 
-  protected def fireEvents(oldValue: T, newValue: T): Unit = {
+  protected def fireEvents(oldValue: A, newValue: A): Unit = {
     fireChange(value)
     fireValueChange(oldValue -> newValue)
   }
 
-  def <==(source: BindingSource[T]) = source bindTo this
+  def <==[B <: A](source: BindingSource[B]) = source bindTo this
 
-  def <==>(other: Property[T]) = BidirectionalBinding(this, other)
+  def <==>(other: Property[A]) = BidirectionalBinding(this, other)
 }
 
 object Property {

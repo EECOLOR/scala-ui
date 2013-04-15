@@ -50,7 +50,7 @@ object ReadOnlyProperty {
     property
   }
 
-  implicit def toBindingSource[T](source: ReadOnlyProperty[T]): BindingSource[T] =
+  implicit def toBindingSource[A](source: ReadOnlyProperty[A]): BindingSource[A] =
     new BindingSource(source)
 
   // Option extends Product so provide a shortcut to the SimpleCombinator

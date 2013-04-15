@@ -14,9 +14,9 @@ class BindingSourceTest extends Specification {
   val prop = Property(0)
   val sourceProp = ReadOnlyProperty(1)
   val source = new BindingSource(sourceProp)
-  def setSourceValue(value:Int) =  
+  def setSourceValue(value: Int) =
     ReadOnlyProperty.setValue(sourceProp, value)(RestrictedAccess)
-  
+
   "BindingSource" should {
 
     "bind to another property" in {
@@ -25,6 +25,12 @@ class BindingSourceTest extends Specification {
       prop.value === 1
       setSourceValue(2)
       prop.value === 2
+    }
+
+    "bind to a property that is a subtype" in {
+      val prop = Property[AnyVal](0)
+      source bindTo prop
+      prop.value === 1
     }
 
     "bind to a method" in {
