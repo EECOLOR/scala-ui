@@ -113,7 +113,7 @@ object TransformationTest extends Specification {
     }
 
     "be able to concat with another transformation" in {
-      val affine1 = Affine(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24)
+      val affine1:Transformation = Affine(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24)
       val affine2 = transformation
 
       affine1 ++ affine2 === Affine(76.0, 88.0, 100.0, 116.0, 196.0, 232.0, 268.0, 312.0, 316.0, 376.0, 436.0, 508.0)

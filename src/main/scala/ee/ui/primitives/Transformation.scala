@@ -33,7 +33,7 @@ trait Transformation {
     transform(x, y, z)
   }
 
-  private def transform(x: Double, y: Double, z: Double): Point =
+  protected def transform(x: Double, y: Double, z: Double): Point =
     Point(
       xx * x + xy * y + xz * z + xt,
       yx * x + yy * y + yz * z + yt,

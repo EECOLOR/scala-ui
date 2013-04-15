@@ -22,12 +22,12 @@ object IdentityTest extends Specification {
     }
 
     "overrides isPureTranslation" in {
-      // Actually not testable
+      // Actually not easily testable
       Identity.isPureTranslation
     }
 
     "overrides isIdentity" in {
-      // Actually not testable
+      // Actually not easily testable
       Identity.isIdentity
     }
 
