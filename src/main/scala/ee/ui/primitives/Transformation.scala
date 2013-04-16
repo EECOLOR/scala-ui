@@ -1,6 +1,7 @@
 package ee.ui.primitives
 
 import ee.ui.primitives.transformation.Affine
+import ee.ui.primitives.transformation.Identity
 
 trait Transformation {
 
@@ -90,4 +91,8 @@ trait Transformation {
   def toAffine =
     if (isInstanceOf[Affine]) asInstanceOf[Affine]
     else Affine(xx, xy, xz, xt, yx, yy, yz, yt, zx, zy, zz, zt)
+}
+
+object Transformation {
+  val ZERO:Transformation = Identity
 }

@@ -8,7 +8,7 @@ import shapeless.InitAux
 import ee.ui.members.Property
 import ee.ui.members.Event
 
-class TupleCombinator[A <: Product](a: Property[A]) {
+class TupleCombinator[A <: Product](a: Property[A]) extends ReadOnlyTupleCombinator(a) {
 
   import ee.util.Tuples._
 

@@ -41,6 +41,7 @@ class ReadOnlyPropertyTest extends Specification {
         override protected def value_=(value: Int): Unit = {}
         override protected def fireChange(value: Int): Unit = {}
         override protected def fireValueChange(values: (Int, Int)): Unit = {}
+        override protected def fireEvents(oldValue: Int, newValue:Int): Unit = {}
       }
       ok
     }
@@ -69,17 +70,22 @@ class ReadOnlyPropertyTest extends Specification {
       val ReadOnlyProperty(value) = prop1
       value === 1
     }
-    
+
     "be able to be created from a ReadOnlyEvent" in {
-      val prop:ReadOnlyProperty[Option[String]] = ReadOnlyEvent[String]
+      val prop: ReadOnlyProperty[Option[String]] = ReadOnlyEvent[String]
       ok
     }
-    
+
+    "be able to be created from a ReadOnlyEvent of a sub type" in {
+      val prop: ReadOnlyProperty[Option[AnyRef]] = ReadOnlyEvent[String]
+      ok
+    }
+
     "be able to convert to a bindingsource" in {
-      val b:BindingSource[Int] = prop1
+      val b: BindingSource[Int] = prop1
       ok
     }
-    
+
     "have an implicit conversion to TupleCombinator" >> {
 
       "for properties that contain tuples" in {

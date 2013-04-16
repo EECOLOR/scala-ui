@@ -5,6 +5,7 @@ import ee.ui.members.Property
 import ee.ui.members.Event
 import utils.TypeTest
 import scala.collection.mutable.ListBuffer
+import utils.SubtypeTest
 
 class TupleCombinatorTest extends Specification {
 
@@ -20,6 +21,10 @@ class TupleCombinatorTest extends Specification {
   
   "TupleCombinator" should {
 
+    "extend the correct type" in {
+      SubtypeTest[TupleCombinator[_] <:< ReadOnlyTupleCombinator[_]]
+    }
+    
     "create a CombinedPropertyBase with Property" in {
 
       TypeTest[Property[(Int, Long, String)]].forInstance(combined)

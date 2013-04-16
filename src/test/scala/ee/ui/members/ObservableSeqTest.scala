@@ -3,9 +3,7 @@ package ee.ui.members
 import scala.annotation.implicitNotFound
 import scala.collection.mutable.ListBuffer
 import scala.tools.reflect.ToolBoxError
-
 import org.specs2.mutable.Specification
-
 import ee.ui.events.Add
 import ee.ui.events.Change
 import ee.ui.events.Remove
@@ -13,6 +11,7 @@ import ee.ui.system.RestrictedAccess
 import utils.SignatureTest
 import utils.SubtypeTest
 import utils.TestUtils
+import ee.ui.events.Clear
 
 object ObservableSeqTest extends Specification {
   
@@ -73,15 +72,16 @@ object ObservableSeqTest extends Specification {
       SignatureTest[ObservableSeq.type, ObservableSeq[String]](_.empty[String])
     }
     
-    "be able to add and remove an element using a detour" in {
+    "be able to add and remove and clear elements using a detour" in {
       val changeEvents = ListBuffer.empty[Change[Int]]
       val observableSeq = ObservableSeq.empty[Int]
       observableSeq.change { changeEvents += _ }
       
       ObservableSeq.add(observableSeq, 1)(RestrictedAccess)
       ObservableSeq.remove(observableSeq, 1)(RestrictedAccess)
+      ObservableSeq.clear(observableSeq)(RestrictedAccess)
 
-      changeEvents.toSeq === Seq(Add(0, 1), Remove(0, 1))
+      changeEvents.toSeq === Seq(Add(0, 1), Remove(0, 1), Clear(Seq.empty[Int]))
     }
   }
 }

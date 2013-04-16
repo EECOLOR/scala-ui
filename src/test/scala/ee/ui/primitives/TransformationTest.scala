@@ -4,6 +4,7 @@ import org.specs2.mutable.Specification
 import utils.SubtypeTest
 import utils.SignatureTest
 import ee.ui.primitives.transformation.Affine
+import ee.ui.primitives.transformation.Identity
 
 object TransformationTest extends Specification {
 
@@ -144,6 +145,11 @@ object TransformationTest extends Specification {
     "not convert when it already is affine" in {
       val t2: Transformation = transformation
       t2.toAffine eq transformation
+    }
+    
+    "have a ZERO property that is Identity" in {
+      SignatureTest[Transformation.type, Transformation](_.ZERO)
+      Transformation.ZERO === Identity
     }
   }
 }

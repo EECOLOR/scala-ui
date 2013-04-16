@@ -18,14 +18,19 @@ trait ReadOnlyProperty[T] { self =>
   val defaultValue: T
   def value: T
   protected def value_=(value: T): Unit
-  val change:ReadOnlyEvent[T]
-  val valueChange:ReadOnlyEvent[(T, T)]
+  val change: ReadOnlyEvent[T]
+  val valueChange: ReadOnlyEvent[(T, T)]
 
   protected def fireChange(value: T) =
     ReadOnlyEvent.fire(change, value)(RestrictedAccess)
 
   protected def fireValueChange(change: (T, T)) =
     ReadOnlyEvent.fire(valueChange, change)(RestrictedAccess)
+
+  protected def fireEvents(oldValue: T, newValue: T): Unit = {
+    fireChange(value)
+    fireValueChange(oldValue -> newValue)
+  }
 
   def map[R](f: T => R): ReadOnlyProperty[R] =
     new MappedReadOnlyProperty[T, R](f, this)
@@ -42,8 +47,8 @@ object ReadOnlyProperty {
   def unapply[T](r: ReadOnlyProperty[T]): Option[T] =
     Option(r) map (_.value)
 
-  implicit def fromReadOnlyEvent[T](event: ReadOnlyEvent[T]): ReadOnlyProperty[Option[T]] = {
-    val property = Property[Option[T]](None)
+  implicit def fromReadOnlyEvent[A, B >: A](event: ReadOnlyEvent[A]): ReadOnlyProperty[Option[B]] = {
+    val property = Property[Option[B]](None)
     val mappedEvent = event map Option.apply
     mappedEvent apply property.value_=
 
@@ -57,5 +62,5 @@ object ReadOnlyProperty {
   implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = simpleCombinator(a)
   implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = tupleCombinator(a map Tuple1.apply)
 
-  implicit def tupleCombinator[A <: Product](a: ReadOnlyProperty[A])= new ReadOnlyTupleCombinator(a)
+  implicit def tupleCombinator[A <: Product](a: ReadOnlyProperty[A]) = new ReadOnlyTupleCombinator(a)
 }

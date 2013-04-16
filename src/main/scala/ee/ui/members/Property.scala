@@ -19,11 +19,6 @@ trait Property[A] extends ReadOnlyProperty[A] {
 
   protected def setValue(value: A): Unit
 
-  protected def fireEvents(oldValue: A, newValue: A): Unit = {
-    fireChange(value)
-    fireValueChange(oldValue -> newValue)
-  }
-
   def <==[B <: A](source: BindingSource[B]) = source bindTo this
 
   def <==>(other: Property[A]) = BidirectionalBinding(this, other)

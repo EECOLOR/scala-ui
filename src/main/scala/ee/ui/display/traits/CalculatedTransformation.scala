@@ -8,6 +8,7 @@ import ee.ui.primitives.Point
 import ee.ui.primitives.transformation.Rotate
 import ee.ui.primitives.transformation.Scale
 import ee.ui.primitives.transformation.Translate
+import ee.ui.members.ObservableSeq
 
 trait CalculatedTransformation extends ReadOnlyPosition with ReadOnlySize with ReadOnlyTranslation with ReadOnlyScaling with ReadOnlyRotation with ReadOnlyTransformations {
 
@@ -21,35 +22,34 @@ trait CalculatedTransformation extends ReadOnlyPosition with ReadOnlySize with R
   protected val shapeTransformation = Property[Transformation](Identity)
 
   shapeTransformation <==
-    /*rotation | rotationAxis |*/
+    rotation | rotationAxis |
     scaleX | scaleY | scaleZ |
     width | height map {
       case (
-        /*rotation, rotationAxis,*/
+        rotation, rotationAxis,
         scaleX, scaleY, scaleZ,
         width, height) => {
 
         val pivot = Point(width / 2d, height / 2d)
 
-        Scale(scaleX, scaleY, scaleZ, pivot)/* ++ Rotate(rotation, rotationAxis, pivot)*/
+        Scale(scaleX, scaleY, scaleZ, pivot) ++ Rotate(rotation, rotationAxis, pivot)
       }
     }
 
+  protected val otherTransformation:ReadOnlyProperty[Option[Transformation]] = 
+    transformations.change map { ignored => (Transformation.ZERO /: transformations)(_ ++ _) }
+  
   protected val _totalTransformation = Property[Transformation](Identity)
   val totalTransformation: ReadOnlyProperty[Transformation] = _totalTransformation
 
-  _totalTransformation <== shapeTransformation | positionTransformation map {
-    case (shapeTransformation, positionTransformation) => {
-      val propertyDerivedTransformation: Transformation =
-        shapeTransformation ++ positionTransformation
+  _totalTransformation <== shapeTransformation | positionTransformation | otherTransformation map {
+    case (shapeTransformation, positionTransformation, otherTransformation) => {
+      
+      val propertyDerivedTransformation = shapeTransformation ++ positionTransformation
 
-      //TODO, this should not be done here but in a listener of transformations, that would also solve the problem that shapeTransformation is not updated if the transformations contain a shape related transformation
-        /*
-      val totalTransformation =
-        (transformations foldLeft propertyDerivedTransformation)(_ ++ _)
+      val totalTransformation = (propertyDerivedTransformation /: otherTransformation)(_ ++ _)
+
       totalTransformation
-*/
-        propertyDerivedTransformation
     }
   }
 }
