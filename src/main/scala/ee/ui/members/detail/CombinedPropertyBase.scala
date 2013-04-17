@@ -10,10 +10,12 @@ import shapeless.HNil
 
 import ee.util.Tuples._
 
-abstract class CombinedPropertyBase[A <: Product, B, L <: HList, P <: HList, R <: Product](
+abstract class CombinedPropertyBase[A, B, C](
   a: ReadOnlyProperty[A],
-  b: ReadOnlyProperty[B])(implicit implicits: Implicits[A, B, L, P, R]) extends ReadOnlyProperty[R] {
+  b: ReadOnlyProperty[B])(implicit tupleOps:TupleOps[A, B, C]) extends ReadOnlyProperty[C] {
 
+  import tupleOps._
+  
   val defaultValue = a.defaultValue :+ b.defaultValue
   def value = a.value :+ b.value
 

@@ -19,14 +19,14 @@ class ReadOnlyTupleCombinatorTest extends Specification {
 
       TypeTest[ReadOnlyProperty[(Int, Long, String)]].forInstance(combined)
 
-      combined must beAnInstanceOf[CombinedPropertyBase[_, _, _, _, _]]
+      combined must beAnInstanceOf[CombinedPropertyBase[_, _, _]]
 
       ReadOnlyProperty.setValue(combined, (2, 2l, "2"))(RestrictedAccess) must
         throwAn[UnsupportedOperationException]
     }
 
     "use the correct change and valueChange events" in {
-      val c = combined.asInstanceOf[CombinedPropertyBase[_, _, _, _, _]]
+      val c = combined.asInstanceOf[CombinedPropertyBase[_, _, _]]
       c.change === c.changeEvent
       c.valueChange === c.valueChangeEvent
     }

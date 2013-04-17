@@ -7,6 +7,7 @@ import utils.SubtypeTest
 import utils.SignatureTest
 import ee.ui.members.detail.BindingSource
 import ee.ui.members.detail.TupleCombinator
+import ee.ui.primitives.Point
 
 class PropertyTest extends Specification {
 
@@ -130,6 +131,15 @@ class PropertyTest extends Specification {
       "for other properties" in {
         val combinator: TupleCombinator[Tuple1[String]] = Property("")
         ok
+      }
+      
+      "for case classes" in {
+        val combinator: TupleCombinator[Tuple1[Point]] = Property(Point(0, 0))
+            ok
+      }
+      
+      "for all tuples" in {
+        todo
       }
     }
   }

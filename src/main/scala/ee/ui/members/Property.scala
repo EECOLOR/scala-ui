@@ -4,8 +4,9 @@ import ee.ui.members.detail.BidirectionalBinding
 import ee.ui.members.detail.BindingSource
 import ee.ui.members.detail.MappedProperty
 import ee.ui.members.detail.TupleCombinator
-
 import scala.language.implicitConversions
+import ee.ui.primitives.Bounds
+import ee.util.Tuples
 
 trait Property[A] extends ReadOnlyProperty[A] {
 
@@ -24,7 +25,21 @@ trait Property[A] extends ReadOnlyProperty[A] {
   def <==>(other: Property[A]) = BidirectionalBinding(this, other)
 }
 
-object Property {
+trait PropertyLowerPriorityImplicits {
+  implicit def simpleCombinator[A](a: Property[A]): TupleCombinator[Tuple1[A]] = {
+
+    // map
+    val f = Tuple1.apply[A] _
+    // reverse map
+    def r(t: Tuple1[A]) = t._1
+    // wrap the property to become a product
+    val wrapped:Property[Tuple1[A]] = new MappedProperty[A, Tuple1[A]](f, r, a)
+    
+    new TupleCombinator(wrapped)
+  }
+}
+
+object Property extends PropertyLowerPriorityImplicits {
 
   case class DefaultProperty[T](defaultValue: T) extends Property[T] {
     private var _value: T = defaultValue
@@ -39,19 +54,15 @@ object Property {
   def unapply[T](p: Property[T]) = Option(p) map (_.value)
 
   // Option extends Product so provide a shortcut to the SimpleCombinator
-  implicit def optionCombinator[A <: Option[_]](a: Property[A]) = simpleCombinator(a)
-  
-  implicit def simpleCombinator[A](a: Property[A]): TupleCombinator[Tuple1[A]] = {
+  //implicit def optionCombinator[A <: Option[_]](a: Property[A]) = simpleCombinator(a)
+  //implicit def optionCombinator2[A <: ](a: Property[A]) = simpleCombinator(a)
 
-    // map
-    val f = Tuple1.apply[A] _
-    // reverse map
-    def r(t: Tuple1[A]) = t._1
-    // wrap the property to become a product
-    val wrapped = new MappedProperty[A, Tuple1[A]](f, r, a)
-    
-    tupleCombinator(wrapped)
-  }
   
-  implicit def tupleCombinator[A <: Product](a:Property[A]) = new TupleCombinator(a)
+  
+  implicit def tupleCombinator[A ](a:Property[A])(implicit ev:Tuples.TupleOps[A, _, _]) = new TupleCombinator(a)
+  
+  // create a solution using other tuple combinators
+  //implicit def tupleCombinator1[A <: Tuple1[_]](a:Property[A]) = tupleCombinator(a)
+  //implicit def tupleCombinator2[A <: (_, _)](a:Property[A]) = tupleCombinator(a)
+  //implicit def tupleCombinator3[A <: (_, _, _)](a:Property[A]) = tupleCombinator(a)
 }

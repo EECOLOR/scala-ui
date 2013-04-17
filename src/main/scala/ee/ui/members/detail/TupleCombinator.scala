@@ -7,30 +7,26 @@ import shapeless.LastAux
 import shapeless.InitAux
 import ee.ui.members.Property
 import ee.ui.members.Event
+import ee.util.Tuples
 
-class TupleCombinator[A <: Product](a: Property[A]) extends ReadOnlyTupleCombinator(a) {
+class TupleCombinator[A](a: Property[A]) extends ReadOnlyTupleCombinator(a) {
 
-  import ee.util.Tuples._
+  def |[B, C](b: Property[B])(
+    implicit tupleOps: Tuples.TupleOps[A, B, C]): Property[C] =
 
-  def |[B, L <: HList, P <: HList, R <: Product](b: Property[B])(
-    implicit implicits: Implicits[A, B, L, P, R],
-    reverseHLister: HListerAux[R, P], reverseTupler: TuplerAux[L, A],
-    init: InitAux[P, L], last: LastAux[P, B]): Property[R] =
-
-    new CombinedPropertyBase(a, b) with Property[R] {
+    new CombinedPropertyBase(a, b) with Property[C] {
 
       val changeSubscription = changeEvent apply change.fire
       val valueChangeSubscription = valueChangeEvent apply valueChange.fire
 
-      val change = Event[R]
-      val valueChange = Event[(R, R)]
+      val change = Event[C]
+      val valueChange = Event[(C, C)]
 
-      def setValue(value: R): Unit = {
-        val valueAsHList = reverseHLister(value)
+      def setValue(value: C): Unit = {
         changeSubscription.disable()
         valueChangeSubscription.disable()
-        a.value = reverseTupler(init(valueAsHList))
-        b.value = last(valueAsHList)
+        a.value = tupleOps.init(value)
+        b.value = tupleOps.last(value)
         changeSubscription.enable()
         valueChangeSubscription.enable()
       }

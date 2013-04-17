@@ -1,6 +1,7 @@
 package ee.ui.primitives
 
 import org.specs2.mutable.Specification
+import utils.SignatureTest
 
 object BoundsTest extends Specification {
 
@@ -62,6 +63,7 @@ object BoundsTest extends Specification {
     }
     
     "have a ZERO instance" in {
+      SignatureTest[Bounds.type, Bounds](_.ZERO)
       Bounds.ZERO === Bounds(0, 0, 0, 0)
     }
   }

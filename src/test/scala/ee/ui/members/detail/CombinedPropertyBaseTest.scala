@@ -34,7 +34,7 @@ class CombinedPropertyBaseTest extends Specification {
   "CombinedPropertyBase" should {
 
     "extend ReadOnlyProperty" in {
-      SubtypeTest[CombinedPropertyBase[(Int, Long), String, _, _, (Int, Long, String)] <:< ReadOnlyProperty[(Int, Long, String)]]
+      SubtypeTest[CombinedPropertyBase[(Int, Long), String, (Int, Long, String)] <:< ReadOnlyProperty[(Int, Long, String)]]
     }
 
     "have the correct default value" in {

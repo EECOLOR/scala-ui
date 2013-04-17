@@ -92,6 +92,11 @@ class ReadOnlyPropertyTest extends Specification {
         val combinator: ReadOnlyTupleCombinator[(String, Int)] = ReadOnlyProperty("1" -> 1)
         ok
       }
+      
+      "for properties that contain larger tuples" in {
+        val combinator: ReadOnlyTupleCombinator[(String, Int, Long)] = ReadOnlyProperty(("1", 1, 1l))
+            ok
+      }
 
       "for properties that contain options" in {
         val combinator: ReadOnlyTupleCombinator[Tuple1[Option[String]]] = ReadOnlyProperty[Option[String]](None)

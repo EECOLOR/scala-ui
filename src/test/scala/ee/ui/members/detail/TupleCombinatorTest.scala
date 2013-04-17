@@ -29,7 +29,7 @@ class TupleCombinatorTest extends Specification {
 
       TypeTest[Property[(Int, Long, String)]].forInstance(combined)
 
-      combined must beAnInstanceOf[CombinedPropertyBase[_, _, _, _, _]]
+      combined must beAnInstanceOf[CombinedPropertyBase[_, _, _]]
     }
     
     "set the correct values" in {

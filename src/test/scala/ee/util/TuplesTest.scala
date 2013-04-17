@@ -8,10 +8,8 @@ object TuplesTest extends Specification {
   
   "Tuples" should {
     
-    "Allow adding values to a tuple" in {
-      import Tuples._
-      
-      ((1, 1l) :+ "1") === (1, 1l, "1") 
+    "have valid tests" in {
+      todo
     }
     
   }

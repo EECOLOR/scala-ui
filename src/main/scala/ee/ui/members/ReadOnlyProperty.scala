@@ -13,6 +13,7 @@ import shapeless.HNil
 import ee.ui.members.detail.CombinedPropertyBase
 import ee.ui.members.detail.MappedReadOnlyProperty
 import ee.ui.members.detail.ReadOnlyTupleCombinator
+import ee.util.Tuples
 
 trait ReadOnlyProperty[T] { self =>
   val defaultValue: T
@@ -36,7 +37,11 @@ trait ReadOnlyProperty[T] { self =>
     new MappedReadOnlyProperty[T, R](f, this)
 }
 
-object ReadOnlyProperty {
+trait ReadOnlyPropertyLowerPriorityImplicits {
+  implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = new ReadOnlyTupleCombinator(a map Tuple1.apply)
+}
+
+object ReadOnlyProperty extends ReadOnlyPropertyLowerPriorityImplicits {
   def apply[T](defaultValue: T): ReadOnlyProperty[T] = Property(defaultValue)
 
   def setValue[T](readOnlyProperty: ReadOnlyProperty[T], value: T)(implicit ev: AccessRestriction) =
@@ -59,8 +64,9 @@ object ReadOnlyProperty {
     new BindingSource(source)
 
   // Option extends Product so provide a shortcut to the SimpleCombinator
-  implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = simpleCombinator(a)
-  implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = tupleCombinator(a map Tuple1.apply)
+  //implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = simpleCombinator(a)
+  
 
-  implicit def tupleCombinator[A <: Product](a: ReadOnlyProperty[A]) = new ReadOnlyTupleCombinator(a)
+  //implicit def tupleCombinator[A <: Product](a: ReadOnlyProperty[A]) = new ReadOnlyTupleCombinator(a)
+  implicit def tupleCombinator[A](a: ReadOnlyProperty[A])(implicit ev:Tuples.TupleOps[A, _, _]) = new ReadOnlyTupleCombinator(a)
 }

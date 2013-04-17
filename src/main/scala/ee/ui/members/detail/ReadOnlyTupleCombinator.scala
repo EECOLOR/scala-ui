@@ -1,21 +1,19 @@
 package ee.ui.members.detail
 
 import ee.ui.members.ReadOnlyProperty
-import ee.util.Tuples.Implicits
 import shapeless.HList
+import ee.util.Tuples
 
-class ReadOnlyTupleCombinator[A <: Product](a: ReadOnlyProperty[A]) {
+class ReadOnlyTupleCombinator[A](a: ReadOnlyProperty[A]) {
 
-  import ee.util.Tuples._
-
-  def |[B, L <: HList, P <: HList, R <: Product](b: ReadOnlyProperty[B])(
-    implicit implicits: Implicits[A, B, L, P, R]): ReadOnlyProperty[R] = {
+  def |[B, C](b: ReadOnlyProperty[B])(
+    implicit tupleOps: Tuples.TupleOps[A, B, C]): ReadOnlyProperty[C] = {
 
     new CombinedPropertyBase(a, b) {
       val change = changeEvent
       val valueChange = valueChangeEvent
 
-      protected def value_=(value: R): Unit =
+      protected def value_=(value: C): Unit =
         throw new UnsupportedOperationException("The value_= method is not supported on a combined instance")
     }
   }
