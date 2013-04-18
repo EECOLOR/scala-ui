@@ -1,14 +1,12 @@
 package ee.ui.members
 
 import org.specs2.mutable.Specification
-import utils.TestUtils
-import scala.tools.reflect.ToolBoxError
-import ee.ui.system.RestrictedAccess
-import utils.TypeTest
-import utils.SignatureTest
-import ee.ui.members.detail.MappedReadOnlyProperty
+
 import ee.ui.members.detail.BindingSource
+import ee.ui.members.detail.MappedReadOnlyProperty
 import ee.ui.members.detail.ReadOnlyTupleCombinator
+import ee.ui.system.RestrictedAccess
+import utils.SignatureTest
 
 class ReadOnlyPropertyTest extends Specification {
 

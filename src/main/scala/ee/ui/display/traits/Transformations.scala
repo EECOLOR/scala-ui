@@ -1,8 +1,8 @@
 package ee.ui.display.traits
 
 import ee.ui.members.ObservableArrayBuffer
-import ee.ui.primitives.Transformation
 import ee.ui.members.ObservableSeq
+import ee.ui.primitives.Transformation
 
 trait ReadOnlyTransformations {
 

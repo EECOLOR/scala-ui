@@ -1,10 +1,10 @@
 package ee.ui.primitives
 
 import org.specs2.mutable.Specification
-import utils.SubtypeTest
-import utils.SignatureTest
+
 import ee.ui.primitives.transformation.Affine
 import ee.ui.primitives.transformation.Identity
+import utils.SignatureTest
 
 object TransformationTest extends Specification {
 

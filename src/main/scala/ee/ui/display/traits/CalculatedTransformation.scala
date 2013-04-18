@@ -1,14 +1,13 @@
 package ee.ui.display.traits
 
 import ee.ui.members.Property
-import ee.ui.primitives.transformation.Identity
-import ee.ui.primitives.Transformation
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.primitives.Point
+import ee.ui.primitives.Transformation
+import ee.ui.primitives.transformation.Identity
 import ee.ui.primitives.transformation.Rotate
 import ee.ui.primitives.transformation.Scale
 import ee.ui.primitives.transformation.Translate
-import ee.ui.members.ObservableSeq
 
 trait CalculatedTransformation extends ReadOnlyPosition with ReadOnlySize with ReadOnlyTranslation with ReadOnlyScaling with ReadOnlyRotation with ReadOnlyTransformations {
 

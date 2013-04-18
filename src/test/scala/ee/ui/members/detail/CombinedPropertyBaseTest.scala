@@ -1,13 +1,13 @@
 package ee.ui.members.detail
 
 import scala.collection.mutable.ListBuffer
+
 import org.specs2.mutable.Specification
-import ee.ui.members.Event
-import ee.ui.members.ReadOnlyEvent
-import utils.SubtypeTest
+
 import ee.ui.members.Property
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.RestrictedAccess
+import utils.SubtypeTest
 
 class CombinedPropertyBaseTest extends Specification {
 

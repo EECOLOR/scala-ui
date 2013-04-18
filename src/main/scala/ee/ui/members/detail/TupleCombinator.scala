@@ -1,18 +1,12 @@
 package ee.ui.members.detail
 
-import shapeless.TuplerAux
-import shapeless.HListerAux
-import shapeless.HList
-import shapeless.LastAux
-import shapeless.InitAux
 import ee.ui.members.Property
 import ee.ui.members.Event
-import ee.util.Tuples
+import ee.util.TupleAppendOps
 
 class TupleCombinator[A](a: Property[A]) extends ReadOnlyTupleCombinator(a) {
 
-  def |[B, C](b: Property[B])(
-    implicit tupleOps: Tuples.TupleOps[A, B, C]): Property[C] =
+  def |[B, C](b: Property[B])(implicit tupleOps: TupleAppendOps[A, B, C]): Property[C] =
 
     new CombinedPropertyBase(a, b) with Property[C] {
 
@@ -22,11 +16,13 @@ class TupleCombinator[A](a: Property[A]) extends ReadOnlyTupleCombinator(a) {
       val change = Event[C]
       val valueChange = Event[(C, C)]
 
+      import tupleOps._
+
       def setValue(value: C): Unit = {
         changeSubscription.disable()
         valueChangeSubscription.disable()
-        a.value = tupleOps.init(value)
-        b.value = tupleOps.last(value)
+        a.value = value.init
+        b.value = value.last
         changeSubscription.enable()
         valueChangeSubscription.enable()
       }

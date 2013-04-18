@@ -1,11 +1,9 @@
 package ee.ui.members
 
-import ee.ui.members.ReadOnlyProperty.fromReadOnlyEvent
 import ee.ui.members.detail.BindingSource
 import ee.ui.members.detail.CombinedEventBase
 import ee.ui.members.detail.Subscription
 import ee.ui.system.AccessRestriction
-
 import scala.language.implicitConversions
 
 trait ReadOnlyEvent[A] { self =>

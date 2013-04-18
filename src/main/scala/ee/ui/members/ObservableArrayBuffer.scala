@@ -1,11 +1,12 @@
 package ee.ui.members
 
 import scala.collection.mutable.ArrayBuffer
+
 import ee.ui.events.Add
 import ee.ui.events.Change
-import ee.ui.system.RestrictedAccess
-import ee.ui.events.Remove
 import ee.ui.events.Clear
+import ee.ui.events.Remove
+import ee.ui.system.RestrictedAccess
 
 class ObservableArrayBuffer[T] extends ArrayBuffer[T] with ObservableSeq[T] {
   

@@ -1,10 +1,7 @@
 package ee.ui.members
 
-import scala.annotation.implicitNotFound
-
 import ee.ui.events.Change
 import ee.ui.system.AccessRestriction
-import scala.language.implicitConversions
 
 trait ObservableSeq[T] extends Seq[T] {
   val change = ReadOnlyEvent[Change[T]]

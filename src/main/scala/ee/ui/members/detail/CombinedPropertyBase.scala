@@ -1,18 +1,11 @@
 package ee.ui.members.detail
 
 import ee.ui.members.ReadOnlyProperty
-import shapeless.TuplerAux
-import shapeless.HListerAux
-import shapeless.HList
-import shapeless.PrependAux
-import shapeless.::
-import shapeless.HNil
-
-import ee.util.Tuples._
+import ee.util.TupleAppendOps
 
 abstract class CombinedPropertyBase[A, B, C](
   a: ReadOnlyProperty[A],
-  b: ReadOnlyProperty[B])(implicit tupleOps:TupleOps[A, B, C]) extends ReadOnlyProperty[C] {
+  b: ReadOnlyProperty[B])(implicit tupleOps:TupleAppendOps[A, B, C]) extends ReadOnlyProperty[C] {
 
   import tupleOps._
   

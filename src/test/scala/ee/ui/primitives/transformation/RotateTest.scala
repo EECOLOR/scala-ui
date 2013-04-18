@@ -1,9 +1,10 @@
 package ee.ui.primitives.transformation
 
 import org.specs2.mutable.Specification
-import utils.SubtypeTest
-import ee.ui.primitives.Transformation
+
 import ee.ui.primitives.Point
+import ee.ui.primitives.Transformation
+import utils.SubtypeTest
 
 object RotateTest extends Specification {
 

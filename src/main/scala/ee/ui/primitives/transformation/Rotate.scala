@@ -1,7 +1,7 @@
 package ee.ui.primitives.transformation
 
-import ee.ui.primitives.Transformation
 import ee.ui.primitives.Point
+import ee.ui.primitives.Transformation
 
 case class Rotate(
   angle: Double = 0,

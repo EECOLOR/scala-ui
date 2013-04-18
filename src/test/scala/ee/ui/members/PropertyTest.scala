@@ -1,13 +1,12 @@
 package ee.ui.members
 
 import org.specs2.mutable.Specification
-import org.specs2.mutable.Before
-import scala.collection.mutable.ListBuffer
-import utils.SubtypeTest
-import utils.SignatureTest
+
 import ee.ui.members.detail.BindingSource
 import ee.ui.members.detail.TupleCombinator
 import ee.ui.primitives.Point
+import utils.SignatureTest
+import utils.SubtypeTest
 
 class PropertyTest extends Specification {
 

@@ -4,16 +4,10 @@ import ee.ui.system.AccessRestriction
 import scala.language.implicitConversions
 import ee.ui.members.detail.BindingSource
 import ee.ui.system.RestrictedAccess
-import shapeless.HList
-import shapeless.HListerAux
-import shapeless.TuplerAux
-import shapeless.PrependAux
-import shapeless.::
-import shapeless.HNil
 import ee.ui.members.detail.CombinedPropertyBase
 import ee.ui.members.detail.MappedReadOnlyProperty
 import ee.ui.members.detail.ReadOnlyTupleCombinator
-import ee.util.Tuples
+import ee.util.TupleAppendOps
 
 trait ReadOnlyProperty[T] { self =>
   val defaultValue: T
@@ -63,10 +57,6 @@ object ReadOnlyProperty extends ReadOnlyPropertyLowerPriorityImplicits {
   implicit def toBindingSource[A](source: ReadOnlyProperty[A]): BindingSource[A] =
     new BindingSource(source)
 
-  // Option extends Product so provide a shortcut to the SimpleCombinator
-  //implicit def optionCombinator[A <: Option[_]](a: ReadOnlyProperty[A]) = simpleCombinator(a)
-  
-
-  //implicit def tupleCombinator[A <: Product](a: ReadOnlyProperty[A]) = new ReadOnlyTupleCombinator(a)
-  implicit def tupleCombinator[A](a: ReadOnlyProperty[A])(implicit ev:Tuples.TupleOps[A, _, _]) = new ReadOnlyTupleCombinator(a)
+  implicit def tupleCombinator[A](a: ReadOnlyProperty[A])(implicit ev: TupleAppendOps[A, _, _]) =
+    new ReadOnlyTupleCombinator(a)
 }

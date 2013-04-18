@@ -1,15 +1,13 @@
 package ee.ui.members
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ListBuffer
-
 import org.specs2.mutable.Specification
-
 import ee.ui.events.Add
 import ee.ui.events.Change
 import ee.ui.events.Clear
 import ee.ui.events.Remove
 import utils.SubtypeTest
+import scala.collection.mutable.ArrayBuffer
 
 class ObservableArrayBufferTest extends Specification {
   

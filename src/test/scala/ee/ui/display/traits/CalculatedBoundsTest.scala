@@ -1,10 +1,11 @@
 package ee.ui.display.traits
 
 import org.specs2.mutable.Specification
-import utils.SubtypeTest
-import utils.SignatureTest
+
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.primitives.Bounds
+import utils.SignatureTest
+import utils.SubtypeTest
 
 class CalculatedBoundsTest extends Specification {
 

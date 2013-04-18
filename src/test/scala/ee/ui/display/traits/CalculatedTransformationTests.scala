@@ -1,17 +1,18 @@
 package ee.ui.display.traits
 
+import scala.annotation.implicitNotFound
+
 import org.specs2.mutable.Specification
-import utils.TestUtils
-import scala.tools.reflect.ToolBoxError
-import utils.SignatureTest
+
 import ee.ui.members.ReadOnlyProperty
+import ee.ui.primitives.Bounds
+import ee.ui.primitives.Point
 import ee.ui.primitives.Transformation
 import ee.ui.primitives.transformation.Affine
-import utils.SubtypeTest
-import ee.ui.primitives.Point
-import ee.ui.primitives.transformation.Rotate
-import ee.ui.primitives.Bounds
 import ee.ui.primitives.transformation.Identity
+import ee.ui.primitives.transformation.Rotate
+import utils.SignatureTest
+import utils.SubtypeTest
 
 class CalculatedTransformationTests extends Specification {
 

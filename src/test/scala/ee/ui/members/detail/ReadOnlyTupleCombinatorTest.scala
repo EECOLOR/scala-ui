@@ -1,6 +1,7 @@
 package ee.ui.members.detail
 
 import org.specs2.mutable.Specification
+
 import ee.ui.members.ReadOnlyProperty
 import ee.ui.system.RestrictedAccess
 import utils.TypeTest

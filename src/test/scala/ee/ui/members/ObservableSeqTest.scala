@@ -1,17 +1,18 @@
 package ee.ui.members
 
-import scala.annotation.implicitNotFound
 import scala.collection.mutable.ListBuffer
 import scala.tools.reflect.ToolBoxError
+
 import org.specs2.mutable.Specification
+
 import ee.ui.events.Add
 import ee.ui.events.Change
+import ee.ui.events.Clear
 import ee.ui.events.Remove
 import ee.ui.system.RestrictedAccess
 import utils.SignatureTest
 import utils.SubtypeTest
 import utils.TestUtils
-import ee.ui.events.Clear
 
 object ObservableSeqTest extends Specification {
   

@@ -6,7 +6,7 @@ import ee.ui.members.detail.MappedProperty
 import ee.ui.members.detail.TupleCombinator
 import scala.language.implicitConversions
 import ee.ui.primitives.Bounds
-import ee.util.Tuples
+import ee.util.TupleAppendOps
 
 trait Property[A] extends ReadOnlyProperty[A] {
 
@@ -33,8 +33,8 @@ trait PropertyLowerPriorityImplicits {
     // reverse map
     def r(t: Tuple1[A]) = t._1
     // wrap the property to become a product
-    val wrapped:Property[Tuple1[A]] = new MappedProperty[A, Tuple1[A]](f, r, a)
-    
+    val wrapped: Property[Tuple1[A]] = new MappedProperty[A, Tuple1[A]](f, r, a)
+
     new TupleCombinator(wrapped)
   }
 }
@@ -53,16 +53,5 @@ object Property extends PropertyLowerPriorityImplicits {
 
   def unapply[T](p: Property[T]) = Option(p) map (_.value)
 
-  // Option extends Product so provide a shortcut to the SimpleCombinator
-  //implicit def optionCombinator[A <: Option[_]](a: Property[A]) = simpleCombinator(a)
-  //implicit def optionCombinator2[A <: ](a: Property[A]) = simpleCombinator(a)
-
-  
-  
-  implicit def tupleCombinator[A ](a:Property[A])(implicit ev:Tuples.TupleOps[A, _, _]) = new TupleCombinator(a)
-  
-  // create a solution using other tuple combinators
-  //implicit def tupleCombinator1[A <: Tuple1[_]](a:Property[A]) = tupleCombinator(a)
-  //implicit def tupleCombinator2[A <: (_, _)](a:Property[A]) = tupleCombinator(a)
-  //implicit def tupleCombinator3[A <: (_, _, _)](a:Property[A]) = tupleCombinator(a)
+  implicit def tupleCombinator[A](a: Property[A])(implicit ev: TupleAppendOps[A, _, _]) = new TupleCombinator(a)
 }
