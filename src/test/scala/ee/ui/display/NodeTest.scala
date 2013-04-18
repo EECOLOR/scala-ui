@@ -5,6 +5,11 @@ import ee.ui.display.detail.ReadOnlyNode
 import utils.SubtypeTest
 import utils.TestUtils
 import scala.tools.reflect.ToolBoxError
+import ee.ui.display.traits.CalculatedBounds
+import ee.ui.display.traits.Translation
+import ee.ui.display.traits.Scaling
+import ee.ui.display.traits.Rotation
+import ee.ui.display.traits.Transformations
 
 object NodeTest extends Specification {
 
@@ -19,7 +24,7 @@ object NodeTest extends Specification {
     }
     
     "extends the correct traits" in {
-      SubtypeTest[Node <:< ReadOnlyNode]
+      SubtypeTest[Node <:< ReadOnlyNode with Translation with Scaling with Rotation with Transformations]
     }
   }
 }

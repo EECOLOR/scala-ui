@@ -26,7 +26,7 @@ trait Property[A] extends ReadOnlyProperty[A] {
 }
 
 trait PropertyLowerPriorityImplicits {
-  implicit def simpleCombinator[A](a: Property[A]): TupleCombinator[Tuple1[A]] = {
+  implicit def tupleCombinator[A](a: Property[A]): TupleCombinator[Tuple1[A]] = {
 
     // map
     val f = Tuple1.apply[A] _
@@ -53,5 +53,5 @@ object Property extends PropertyLowerPriorityImplicits {
 
   def unapply[T](p: Property[T]) = Option(p) map (_.value)
 
-  implicit def tupleCombinator[A](a: Property[A])(implicit ev: TupleAppendOps[A, _, _]) = new TupleCombinator(a)
+  implicit def tupleCombinatorForTuple[A](a: Property[A])(implicit ev: TupleAppendOps[A, _, _]) = new TupleCombinator(a)
 }

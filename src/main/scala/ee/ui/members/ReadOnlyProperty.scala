@@ -32,7 +32,7 @@ trait ReadOnlyProperty[T] { self =>
 }
 
 trait ReadOnlyPropertyLowerPriorityImplicits {
-  implicit def simpleCombinator[A](a: ReadOnlyProperty[A]) = new ReadOnlyTupleCombinator(a map Tuple1.apply)
+  implicit def readOnlyTupleCombinator[A](a: ReadOnlyProperty[A]) = new ReadOnlyTupleCombinator(a map Tuple1.apply)
 }
 
 object ReadOnlyProperty extends ReadOnlyPropertyLowerPriorityImplicits {
@@ -57,6 +57,6 @@ object ReadOnlyProperty extends ReadOnlyPropertyLowerPriorityImplicits {
   implicit def toBindingSource[A](source: ReadOnlyProperty[A]): BindingSource[A] =
     new BindingSource(source)
 
-  implicit def tupleCombinator[A](a: ReadOnlyProperty[A])(implicit ev: TupleAppendOps[A, _, _]) =
+  implicit def readOnlyTupleCombinatorForTuple[A](a: ReadOnlyProperty[A])(implicit ev: TupleAppendOps[A, _, _]) =
     new ReadOnlyTupleCombinator(a)
 }

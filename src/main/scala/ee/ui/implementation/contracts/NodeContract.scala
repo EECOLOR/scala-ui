@@ -4,7 +4,7 @@ import ee.ui.display.detail.ReadOnlyNode
 import ee.ui.display.shapes.detail.ReadOnlyRectangle
 import ee.ui.display.detail.ReadOnlyShape
 
-sealed trait NodeContract { self: ReadOnlyNode => }
+sealed trait NodeContract extends ReadOnlyNode
 
 sealed trait ShapeContract extends ReadOnlyShape { self: NodeContract => 
 

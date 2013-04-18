@@ -1,10 +1,7 @@
 package ee.ui.display.detail
 
-import scala.annotation.implicitNotFound
-
 import org.specs2.mutable.Specification
-
-import ee.ui.display.traits.ReadOnlySize
+import ee.ui.display.traits.CalculatedBounds
 import utils.SubtypeTest
 
 object ReadOnlyNodeTest extends Specification {
@@ -13,7 +10,7 @@ object ReadOnlyNodeTest extends Specification {
   
   "ReadOnlyNode" should {
     "have the correct type" in {
-      SubtypeTest[ReadOnlyNode <:< ReadOnlySize]
+      SubtypeTest[ReadOnlyNode <:< CalculatedBounds]
     }
   }
 }
