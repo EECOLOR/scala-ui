@@ -7,6 +7,7 @@ import ee.ui.display.detail.ReadOnlyShape
 import ee.ui.display.traits.Fill
 import utils.TestUtils
 import scala.tools.reflect.ToolBoxError
+import ee.ui.display.traits.Stroke
 
 object ShapeTest extends Specification {
 
@@ -15,7 +16,7 @@ object ShapeTest extends Specification {
   "Shape" should {
 
     "extends the correct traits" in {
-      SubtypeTest[Shape <:< Node with ReadOnlyShape with Fill]
+      SubtypeTest[Shape <:< Node with ReadOnlyShape with Fill with Stroke]
     }
     
     "be abstract" in {

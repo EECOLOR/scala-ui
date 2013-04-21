@@ -42,9 +42,8 @@ class CalculatedBoundsTest extends Specification {
       calculatedBounds.rotation = 90
       calculatedBounds.x = 10
       calculatedBounds.y = 20
-      
+
       bounds.value === Bounds(20, 10, 40, 50)
     }
   }
-
 }
