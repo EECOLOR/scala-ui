@@ -10,6 +10,7 @@ import ee.ui.display.traits.ReadOnlyFill
 import ee.ui.display.shapes.detail.ReadOnlyRectangle
 import utils.SignatureTest
 import ee.ui.display.detail.ReadOnlyShape
+import ee.ui.display.detail.ReadOnlyText
 
 object NodeContractTest extends Specification {
 
@@ -26,6 +27,7 @@ object NodeContractTest extends Specification {
     
     "have sub traits with the correct types" in {
       SubtypeTest[RectangleContract <:< NodeContract with ShapeContract with ReadOnlyRectangle]
+          SubtypeTest[TextContract <:< NodeContract with ReadOnlyText]
     }
   }
   
