@@ -45,6 +45,15 @@ object TextTest extends Specification {
       text.textOrigin.value = VerticalPosition.CENTER
       text.textOrigin.value === VerticalPosition.CENTER
     }
+    
+    "have a wrappingWidth property" in {
+      SignatureTest[Text, Property[Double]](_.wrappingWidth)
+      val text = new Text
+      text.wrappingWidth = 1
+      text.wrappingWidth.value === 1
+      text.wrappingWidth.value = 2
+      text.wrappingWidth.value === 2
+    }
   }
 
 }

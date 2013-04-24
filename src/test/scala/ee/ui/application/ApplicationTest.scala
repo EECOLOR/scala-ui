@@ -2,9 +2,7 @@
 package ee.ui.application
 
 import scala.collection.mutable.ListBuffer
-
 import org.specs2.mutable.Specification
-
 import ee.ui.display.Window
 import ee.ui.events.Add
 import ee.ui.events.Change
@@ -15,6 +13,7 @@ import ee.ui.implementation.contracts.WindowContract
 import ee.ui.members.ObservableSeq
 import ee.ui.system.RestrictedAccess
 import utils.SignatureTest
+import ee.ui.implementation.TextHelper
 
 class ApplicationTest extends Specification {
 
@@ -173,9 +172,14 @@ class ApplicationTest extends Specification {
         Remove(0, window1),
         Remove(0, window2))
     }
+    
+    "have a stop method" in {
+      SignatureTest[Application, Unit](_.stop())
+    }
+    
+    "have a text helper" in {
+      SignatureTest[Application, TextHelper](_.textHelper)
+    }
   }
   
-  "have a stop method" in {
-    SignatureTest[Application, Unit](_.stop())
-  }
 }

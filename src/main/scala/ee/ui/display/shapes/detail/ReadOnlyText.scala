@@ -14,4 +14,7 @@ trait ReadOnlyText extends ReadOnlyShape {
   
   protected val _textOrigin = Property[VerticalPosition](VerticalPosition.TOP)
   def textOrigin: ReadOnlyProperty[VerticalPosition] = _textOrigin
+  
+  protected val _wrappingWidth = Property[Double](0)
+  def wrappingWidth: ReadOnlyProperty[Double] = _wrappingWidth
 }

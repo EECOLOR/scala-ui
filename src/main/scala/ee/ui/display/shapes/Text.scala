@@ -16,4 +16,7 @@ class Text extends Node with TextContract {
   override def textOrigin = _textOrigin
   def textOrigin_=(value: VerticalPosition) = _textOrigin.value = value
   
+  override def wrappingWidth = _wrappingWidth
+  def wrappingWidth_=(value: Double) = _wrappingWidth.value = value
+  
 }

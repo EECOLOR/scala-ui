@@ -12,4 +12,7 @@ trait EmptyEngineImplementationContract extends EngineImplementationContract {
 
   override val settings: ApplicationSettings =
     new ApplicationSettings
+    
+  override val textHelper:TextHelper = 
+    EmptyTextHelper
 }

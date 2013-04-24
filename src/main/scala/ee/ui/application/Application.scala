@@ -7,12 +7,14 @@ import ee.ui.implementation.contracts.WindowContract
 import ee.ui.members.ObservableSeq
 import ee.ui.members.ReadOnlyProperty.propertyToValue
 import ee.ui.system.RestrictedAccess
+import ee.ui.implementation.TextHelper
 
 abstract class Application {
   val windowImplementationHandler: WindowImplementationHandler
   val exitHandler:ExitHandler
   val settings:ApplicationSettings
-
+  val textHelper:TextHelper
+  
   val windows = ObservableSeq.empty[Window]
   
   def start():Unit = start(new Window())

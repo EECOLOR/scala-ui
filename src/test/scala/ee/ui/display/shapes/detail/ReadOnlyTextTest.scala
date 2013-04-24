@@ -34,6 +34,12 @@ object ReadOnlyTextTest extends Specification {
       val text = new ReadOnlyText {}
       text.textOrigin.value === VerticalPosition.TOP
     }
+    
+    "have a wrappingWidth property with a default value of 0" in {
+      SignatureTest[ReadOnlyText, ReadOnlyProperty[Double]](_.wrappingWidth)
+      val text = new ReadOnlyText {}
+      text.wrappingWidth.value === 0d
+    }
   }
   
 }

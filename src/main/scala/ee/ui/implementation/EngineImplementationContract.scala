@@ -6,4 +6,5 @@ trait EngineImplementationContract {
   val windowImplementationHandler: WindowImplementationHandler
   val exitHandler: ExitHandler
   val settings: ApplicationSettings
+  val textHelper:TextHelper
 }
